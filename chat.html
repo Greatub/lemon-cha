@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>llmon cha</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app">
+      <aside class="sidebar" aria-label="对话历史">
+        <div class="brand">
+          <div class="brand-lockup">
+            <img class="brand-mark" src="assets/logo.png" alt="" aria-hidden="true">
+            <div class="brand-text">
+              <h1>llmon cha</h1>
+            </div>
+          </div>
+          <button id="sidebarToggle" class="icon-button" type="button" aria-label="隐藏侧栏">
+            <span class="icon-slot" data-icon="panelLeft" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <div class="sidebar-primary">
+          <button id="newChat" type="button" class="sidebar-text-button new-chat-button">
+            <span class="icon-slot" data-icon="plus" aria-hidden="true"></span>
+            <span class="menu-label">新建对话</span>
+          </button>
+        </div>
+
+        <nav class="conversation-list" aria-label="对话列表">
+          <div class="sidebar-actions conversation-tools" aria-label="对话管理">
+            <div class="conversation-tools-label" data-i18n="foldersLabel">文件夹</div>
+            <button id="newFolder" type="button" class="sidebar-text-button menu-item">
+              <span class="menu-icon icon-slot" data-icon="folderPlus" aria-hidden="true"></span>
+              <span class="menu-label">新建文件夹</span>
+            </button>
+          </div>
+          <div id="conversationList" class="conversation-list-body"></div>
+        </nav>
+
+        <div class="sidebar-footer">
+          <button id="themeToggle" class="icon-button" type="button" aria-label="夜间模式" aria-pressed="false">
+            <span class="icon-slot" data-icon="moon" aria-hidden="true"></span>
+          </button>
+          <button id="settingsToggle" class="icon-button" type="button" aria-label="设置" aria-expanded="false">
+            <span class="icon-slot" data-icon="settings" aria-hidden="true"></span>
+          </button>
+        </div>
+      </aside>
+
+      <section class="workspace">
+        <header class="chat-toolbar"></header>
+
+        <section id="settingsPanel" class="settings hidden" aria-label="模型设置">
+          <div class="settings-surface" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+            <div class="settings-page-header">
+              <div>
+                <h2 id="settingsTitle" data-i18n="settingsTitle">设置</h2>
+              </div>
+            </div>
+            <div class="settings-tabs" role="tablist" aria-label="设置分类">
+              <button id="generalSettingsTab" class="settings-tab active" type="button" role="tab" aria-selected="true" aria-controls="generalSettingsPanel" data-tab="general" data-i18n="generalSettingsTab">通用设置</button>
+              <button id="modelSettingsTab" class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="modelSettingsPanel" data-tab="model" data-i18n="modelSettingsTab">模型</button>
+              <button id="promptSettingsTab" class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="promptSettingsPanel" data-tab="prompt" data-i18n="promptSettingsTab">提示词模板</button>
+            </div>
+            <form id="settingsForm" class="settings-form">
+              <div id="generalSettingsPanel" class="settings-tab-panel active" role="tabpanel" aria-labelledby="generalSettingsTab">
+                <label>
+                  <span data-i18n="interfaceLanguage">界面语言</span>
+                  <select id="languageInput">
+                    <option value="zh-CN" data-i18n="languageChinese">简体中文</option>
+                    <option value="en-US" data-i18n="languageEnglish">English</option>
+                  </select>
+                </label>
+                <label>
+                  <span data-i18n="colorSchemeLabel">配色方案</span>
+                  <select id="colorSchemeInput">
+                    <option value="llmon" data-i18n="colorSchemeLlmon">llmon cha 默认（日间 / 夜间）</option>
+                    <option value="leaf" data-i18n="colorSchemeLeaf">叶绿清新（日间 / 夜间）</option>
+                    <option value="citrus" data-i18n="colorSchemeCitrus">柑橘暖阳（日间 / 夜间）</option>
+                    <option value="blue" data-i18n="colorSchemeBlue">湖蓝清爽（日间 / 夜间）</option>
+                    <option value="gray" data-i18n="colorSchemeGray">暖灰简洁（日间 / 夜间）</option>
+                  </select>
+                </label>
+              </div>
+              <div id="modelSettingsPanel" class="settings-tab-panel hidden" role="tabpanel" aria-labelledby="modelSettingsTab">
+                <label id="presetField">
+                  <span data-i18n="modelPreset">模型服务预设</span>
+                  <select id="presetInput">
+                    <option value="custom" data-i18n="presetCustom">自定义</option>
+                    <option value="deepseek">DeepSeek</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="qwen">通义千问 / DashScope</option>
+                    <option value="kimi">Kimi / Moonshot</option>
+                    <option value="siliconflow">SiliconFlow</option>
+                    <option value="openrouter">OpenRouter</option>
+                    <option value="groq">Groq</option>
+                    <option value="ollama-proxy" data-i18n="presetOllamaProxy">Ollama 本地模型</option>
+                  </select>
+                </label>
+                <label>
+                  <span data-i18n="endpoint">接口地址</span>
+                  <input id="endpointInput" type="url" placeholder="https://api.example.com/v1/chat/completions">
+                </label>
+                <label>
+                  <span data-i18n="model">模型</span>
+                  <input id="modelInput" type="text" placeholder="deepseek-v4-flash / gpt-4o-mini / llama3.1">
+                </label>
+                <label id="ollamaModelField" class="hidden">
+                  <span data-i18n="localModelList">本地模型列表</span>
+                  <select id="ollamaModelSelect">
+                    <option value="" data-i18n="testFirst">先测试连接</option>
+                  </select>
+                </label>
+                <label id="customFormatField">
+                  <span data-i18n="apiFormat">接口格式</span>
+                  <select id="customFormatInput">
+                    <option value="openai">OpenAI Chat Completions</option>
+                    <option value="ollama">Ollama /api/chat</option>
+                  </select>
+                </label>
+                <label id="apiKeyField">
+                  <span>API Key</span>
+                  <input id="apiKeyInput" type="password" placeholder="可留空" data-i18n-placeholder="optional">
+                </label>
+                <div class="form-row">
+                  <label>
+                    <span>Temperature</span>
+                    <input id="temperatureInput" type="number" min="0" max="2" step="0.1" value="0.7">
+                  </label>
+                  <label>
+                    <span data-i18n="historyLimit">最大上下文轮数</span>
+                    <input id="historyLimitInput" type="number" min="1" max="30" step="1" value="12">
+                  </label>
+                </div>
+              </div>
+              <div id="promptSettingsPanel" class="settings-tab-panel hidden prompt-settings-panel" role="tabpanel" aria-labelledby="promptSettingsTab">
+                <label>
+                  <span data-i18n="promptTemplateManage">模板</span>
+                  <select id="promptTemplateManageSelect">
+                    <option value="" data-i18n="newPromptTemplate">新建模板</option>
+                  </select>
+                </label>
+                <label>
+                  <span data-i18n="promptTemplateNameLabel">模板名称</span>
+                  <input id="promptTemplateNameInput" type="text" maxlength="40">
+                </label>
+                <label class="wide-field">
+                  <span data-i18n="promptTemplateContentLabel">模板内容</span>
+                  <textarea id="promptTemplateContentInput" rows="8"></textarea>
+                </label>
+                <div class="settings-actions wide-field">
+                  <button id="savePromptTemplate" type="button">保存模板</button>
+                  <button id="deletePromptTemplate" class="secondary danger" type="button">删除模板</button>
+                </div>
+              </div>
+              <div class="settings-actions">
+                <button id="saveSettings" type="submit">保存</button>
+                <button id="resetSettings" type="button" class="secondary">恢复默认</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section id="messages" class="messages" aria-live="polite"></section>
+
+        <form id="chatForm" class="composer">
+          <div class="composer-box">
+            <textarea id="promptInput" rows="3" placeholder="输入问题，Enter 发送，Shift+Enter 换行"></textarea>
+            <div class="composer-actions">
+              <select id="toolbarModelSelect" aria-label="当前模型">
+                <option value="">未配置</option>
+              </select>
+              <select id="promptTemplateSelect" aria-label="Prompt 预设">
+                <option value="">选择 Prompt 预设</option>
+              </select>
+              <div class="composer-send-actions">
+                <button id="thinkingToggle" class="secondary" type="button" aria-pressed="false">思考</button>
+                <button id="sendButton" type="submit">发送</button>
+                <button id="stopButton" class="danger hidden" type="button">停止</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </section>
+    </main>
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+    <script src="src/components/AppIcon.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
