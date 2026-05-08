@@ -146,6 +146,7 @@ const UI_TEXT = {
     earlierSection: "更早",
     darkMode: "夜间模式",
     lightMode: "日间模式",
+    systemMode: "跟随系统",
     generating: "正在生成",
     responding: "模型正在回复",
     settingsTitle: "设置",
@@ -269,6 +270,7 @@ const UI_TEXT = {
     earlierSection: "Earlier",
     darkMode: "Dark Mode",
     lightMode: "Light Mode",
+    systemMode: "Follow System",
     generating: "Generating",
     responding: "Model is replying",
     settingsTitle: "Settings",
@@ -435,6 +437,8 @@ const els = {
 let toastTimer = null;
 let promptInputComposing = false;
 const customSelects = new Map();
+const systemThemeQuery = window.matchMedia?.("(prefers-color-scheme: dark)");
+const THEME_MODES = ["light", "dark", "system"];
 
 const ACTION_ICON_MAP = {
   copy: "copy",
@@ -801,21 +805,43 @@ function applySidebarState(persist = true) {
 }
 
 function applyTheme() {
-  const isDark = state.settings.theme === "dark";
+  const isDark = getResolvedThemeMode() === "dark";
   const colorScheme = COLOR_SCHEMES.includes(state.settings.colorScheme)
     ? state.settings.colorScheme
     : DEFAULT_SETTINGS.colorScheme;
   document.body.classList.toggle("dark-mode", isDark);
+  document.body.dataset.themeMode = getThemeMode();
   document.body.dataset.colorScheme = colorScheme;
   updateThemeButton();
 }
 
 function updateThemeButton() {
   if (!els.themeToggle) return;
-  const isDark = state.settings.theme === "dark";
-  setTooltip(els.themeToggle, isDark ? t("lightMode") : t("darkMode"));
-  els.themeToggle.setAttribute("aria-pressed", String(isDark));
-  setIconOnly(els.themeToggle, isDark ? "sun" : "moon");
+  const mode = getThemeMode();
+  const label = mode === "system"
+    ? t("systemMode")
+    : mode === "dark"
+      ? t("darkMode")
+      : t("lightMode");
+  const icon = mode === "system" ? "monitor" : mode === "dark" ? "moon" : "sun";
+  setTooltip(els.themeToggle, label);
+  els.themeToggle.setAttribute("aria-pressed", mode === "system" ? "mixed" : String(mode === "dark"));
+  setIconOnly(els.themeToggle, icon);
+}
+
+function getThemeMode() {
+  return THEME_MODES.includes(state.settings.theme) ? state.settings.theme : DEFAULT_SETTINGS.theme;
+}
+
+function getResolvedThemeMode() {
+  const mode = getThemeMode();
+  if (mode !== "system") return mode;
+  return systemThemeQuery?.matches ? "dark" : "light";
+}
+
+function getNextThemeMode() {
+  const index = THEME_MODES.indexOf(getThemeMode());
+  return THEME_MODES[(index + 1) % THEME_MODES.length];
 }
 
 function closeSettingsMenu() {
@@ -2076,7 +2102,7 @@ els.settingsToggle.addEventListener("click", () => {
 });
 
 els.themeToggle.addEventListener("click", async () => {
-  state.settings.theme = state.settings.theme === "dark" ? "light" : "dark";
+  state.settings.theme = getNextThemeMode();
   applyTheme();
   await saveSettings();
 });
@@ -2566,6 +2592,12 @@ els.thinkingToggle.addEventListener("click", async () => {
 
 els.stopButton.addEventListener("click", () => {
   state.activePort?.postMessage({ type: "llm:chat:stop" });
+});
+
+systemThemeQuery?.addEventListener("change", () => {
+  if (getThemeMode() === "system") {
+    applyTheme();
+  }
 });
 
 loadState();
