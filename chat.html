@@ -61,8 +61,9 @@
             </div>
             <div class="settings-tabs" role="tablist" aria-label="设置分类">
               <button id="generalSettingsTab" class="settings-tab active" type="button" role="tab" aria-selected="true" aria-controls="generalSettingsPanel" data-tab="general" data-i18n="generalSettingsTab">通用设置</button>
-              <button id="modelSettingsTab" class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="modelSettingsPanel" data-tab="model" data-i18n="modelSettingsTab">模型</button>
-              <button id="promptSettingsTab" class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="promptSettingsPanel" data-tab="prompt" data-i18n="promptSettingsTab">提示词模板</button>
+              <button id="modelSettingsTab" class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="modelSettingsPanel" data-tab="model" data-i18n="modelSettingsTab">模型设置</button>
+              <button id="promptSettingsTab" class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="promptSettingsPanel" data-tab="prompt" data-i18n="promptSettingsTab">提示词预设</button>
+              <button id="dataSettingsTab" class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="dataSettingsPanel" data-tab="data" data-i18n="dataSettingsTab">数据与重置</button>
             </div>
             <form id="settingsForm" class="settings-form">
               <div id="generalSettingsPanel" class="settings-tab-panel active" role="tabpanel" aria-labelledby="generalSettingsTab">
@@ -71,6 +72,35 @@
                   <select id="languageInput">
                     <option value="zh-CN" data-i18n="languageChinese">简体中文</option>
                     <option value="en-US" data-i18n="languageEnglish">English</option>
+                    <option value="ja-JP" data-i18n="languageJapanese">日本語</option>
+                    <option value="ko-KR" data-i18n="languageKorean">한국어</option>
+                    <option value="fr-FR" data-i18n="languageFrench">Français</option>
+                    <option value="es-ES" data-i18n="languageSpanish">Español</option>
+                    <option value="de-DE" data-i18n="languageGerman">Deutsch</option>
+                  </select>
+                </label>
+                <label>
+                  <span data-i18n="answerLanguage">默认回答语言</span>
+                  <select id="answerLanguageInput">
+                    <option value="zh-CN" data-i18n="languageChinese">简体中文</option>
+                    <option value="en-US" data-i18n="languageEnglish">English</option>
+                    <option value="ja-JP" data-i18n="languageJapanese">日本語</option>
+                    <option value="ko-KR" data-i18n="languageKorean">한국어</option>
+                    <option value="fr-FR" data-i18n="languageFrench">Français</option>
+                    <option value="es-ES" data-i18n="languageSpanish">Español</option>
+                    <option value="de-DE" data-i18n="languageGerman">Deutsch</option>
+                  </select>
+                </label>
+                <label>
+                  <span data-i18n="translationLanguage">默认翻译目标语言</span>
+                  <select id="translationLanguageInput">
+                    <option value="zh-CN" data-i18n="languageChinese">简体中文</option>
+                    <option value="en-US" data-i18n="languageEnglish">English</option>
+                    <option value="ja-JP" data-i18n="languageJapanese">日本語</option>
+                    <option value="ko-KR" data-i18n="languageKorean">한국어</option>
+                    <option value="fr-FR" data-i18n="languageFrench">Français</option>
+                    <option value="es-ES" data-i18n="languageSpanish">Español</option>
+                    <option value="de-DE" data-i18n="languageGerman">Deutsch</option>
                   </select>
                 </label>
                 <label>
@@ -100,11 +130,11 @@
                   </select>
                 </label>
                 <label>
-                  <span data-i18n="endpoint">接口地址</span>
+                  <span data-i18n="baseUrl">接口地址</span>
                   <input id="endpointInput" type="url" placeholder="https://api.example.com/v1/chat/completions">
                 </label>
                 <label>
-                  <span data-i18n="model">模型</span>
+                  <span data-i18n="modelName">模型名称</span>
                   <input id="modelInput" type="text" placeholder="deepseek-v4-flash / gpt-4o-mini / llama3.1">
                 </label>
                 <label id="ollamaModelField" class="hidden">
@@ -130,10 +160,30 @@
                     <input id="temperatureInput" type="number" min="0" max="2" step="0.1" value="0.7">
                   </label>
                   <label>
+                    <span data-i18n="maxTokens">最大输出 Token</span>
+                    <input id="maxTokensInput" type="number" min="128" max="128000" step="128" value="2048">
+                  </label>
+                </div>
+                <div class="form-row">
+                  <label>
                     <span data-i18n="historyLimit">最大上下文轮数</span>
                     <input id="historyLimitInput" type="number" min="1" max="30" step="1" value="12">
                   </label>
+                  <label class="checkbox-label">
+                    <span data-i18n="memoryEnabled">启用对话记忆</span>
+                    <input id="memoryEnabledInput" type="checkbox" checked>
+                  </label>
                 </div>
+                <label>
+                  <span data-i18n="defaultPromptPreset">默认提示词预设</span>
+                  <select id="defaultPresetInput">
+                    <option value="" data-i18n="noDefaultPreset">不绑定</option>
+                  </select>
+                </label>
+                <label class="wide-field">
+                  <span data-i18n="systemPrompt">系统提示词</span>
+                  <textarea id="systemPromptInput" rows="5"></textarea>
+                </label>
               </div>
               <div id="promptSettingsPanel" class="settings-tab-panel hidden prompt-settings-panel" role="tabpanel" aria-labelledby="promptSettingsTab">
                 <label>
@@ -151,13 +201,32 @@
                   <textarea id="promptTemplateContentInput" rows="8"></textarea>
                 </label>
                 <div class="settings-actions wide-field">
+                  <button id="newPromptTemplate" class="secondary" type="button">新建模板</button>
+                  <button id="duplicatePromptTemplate" class="secondary" type="button">复制模板</button>
                   <button id="savePromptTemplate" type="button">保存模板</button>
+                  <button id="savePromptTemplateAs" class="secondary" type="button">另存为新模板</button>
                   <button id="deletePromptTemplate" class="secondary danger" type="button">删除模板</button>
+                </div>
+              </div>
+              <div id="dataSettingsPanel" class="settings-tab-panel hidden" role="tabpanel" aria-labelledby="dataSettingsTab">
+                <div class="settings-section wide-field">
+                  <h3 data-i18n="resetSectionTitle">分区重置</h3>
+                  <p data-i18n="resetSectionHint">每个重置操作只影响对应区域。</p>
+                  <div class="settings-actions settings-actions-grid">
+                    <button id="resetGeneralSettings" type="button" class="secondary">重置通用设置</button>
+                    <button id="resetCurrentModelSettings" type="button" class="secondary">重置当前模型设置</button>
+                    <button id="resetCurrentPromptTemplate" type="button" class="secondary">重置当前提示词预设</button>
+                    <button id="clearHistorySettings" type="button" class="secondary danger">清空对话历史</button>
+                  </div>
+                </div>
+                <div class="settings-section danger-section wide-field">
+                  <h3 data-i18n="factoryResetTitle">恢复出厂设置</h3>
+                  <p data-i18n="factoryResetHint">会清空设置、模型配置、提示词预设和对话历史。</p>
+                  <button id="factoryResetSettings" type="button" class="danger">恢复出厂设置</button>
                 </div>
               </div>
               <div class="settings-actions">
                 <button id="saveSettings" type="submit">保存</button>
-                <button id="resetSettings" type="button" class="secondary">恢复默认</button>
               </div>
             </form>
           </div>

@@ -20,6 +20,7 @@ const BG_TEXT = {
     custom404: "自定义 API 返回 404，当前地址不是聊天接口：{url}。OpenAI 兼容服务通常需要 /v1/chat/completions；如果你的服务是 Ollama 格式，请在设置里把接口格式改为 Ollama /api/chat。",
     ollama403: "Ollama 拒绝了扩展来源。请设置 OLLAMA_ORIGINS=\"chrome-extension://*\" 后完全重启 Ollama。",
     ollamaFetchFailed: "无法连接 Ollama：{message}。请确认 Ollama 已启动，接口地址为 http://127.0.0.1:11434/api/chat，并允许扩展来源。",
+    answerLanguagePrompt: "除非用户明确要求其他语言，请默认使用{language}回答。",
     statusFailed: "请求失败 {status}：{message}"
   },
   "en-US": {
@@ -39,6 +40,7 @@ const BG_TEXT = {
     custom404: "Custom API returned 404. The current URL is not a chat endpoint: {url}. OpenAI-compatible services usually need /v1/chat/completions. If this is an Ollama-format service, change API Format to Ollama /api/chat in settings.",
     ollama403: "Ollama rejected the extension origin. Set OLLAMA_ORIGINS=\"chrome-extension://*\" and fully restart Ollama.",
     ollamaFetchFailed: "Could not connect to Ollama: {message}. Make sure Ollama is running, the endpoint is http://127.0.0.1:11434/api/chat, and the extension origin is allowed.",
+    answerLanguagePrompt: "Unless the user explicitly asks for another language, answer in {language} by default.",
     statusFailed: "Request failed {status}: {message}"
   }
 };
@@ -264,8 +266,12 @@ function normalizeConfig(config) {
     apiKey: String(config.apiKey || "").trim(),
     apiFormat: config.apiFormat === "ollama" ? "ollama" : "openai",
     temperature: clamp(Number(config.temperature), 0, 2, 0.7),
+    maxTokens: Math.max(1, Math.floor(Number(config.maxTokens) || 2048)),
+    systemPrompt: String(config.systemPrompt || "").trim(),
     thinkingEnabled: Boolean(config.thinkingEnabled),
-    language: config.language === "en-US" ? "en-US" : "zh-CN"
+    language: config.language === "en-US" ? "en-US" : "zh-CN",
+    answerLanguage: String(config.answerLanguage || "").trim(),
+    translationLanguage: String(config.translationLanguage || "").trim()
   };
 }
 
@@ -293,7 +299,8 @@ async function callCustomApi(config, messages) {
     body: JSON.stringify({
       model: config.model,
       messages: prepareMessages(config, messages),
-      temperature: config.temperature
+      temperature: config.temperature,
+      max_tokens: config.maxTokens
     })
   });
 
@@ -321,6 +328,7 @@ async function streamCustomApi(config, messages, port, signal, meta) {
       model: config.model,
       messages: prepareMessages(config, messages),
       temperature: config.temperature,
+      max_tokens: config.maxTokens,
       stream: true
     }),
     signal
@@ -484,7 +492,8 @@ function createOllamaChatBody(config, messages, stream) {
     messages,
     stream,
     options: {
-      temperature: config.temperature
+      temperature: config.temperature,
+      num_predict: config.maxTokens
     }
   };
 
@@ -508,8 +517,25 @@ function nanosToMs(value) {
 }
 
 function prepareMessages(config, messages) {
+  const prepared = [...messages];
+
+  if (config.systemPrompt) {
+    prepared.unshift({
+      role: "system",
+      content: config.systemPrompt
+    });
+  }
+
+  const answerLanguage = languageName(config.answerLanguage);
+  if (answerLanguage) {
+    prepared.unshift({
+      role: "system",
+      content: bt(config, "answerLanguagePrompt", { language: answerLanguage })
+    });
+  }
+
   if (!config.thinkingEnabled || config.apiFormat === "ollama") {
-    return messages;
+    return prepared;
   }
 
   return [
@@ -517,8 +543,21 @@ function prepareMessages(config, messages) {
       role: "system",
       content: bt(config, "thinkingPrompt")
     },
-    ...messages
+    ...prepared
   ];
+}
+
+function languageName(language) {
+  const names = {
+    "zh-CN": "简体中文",
+    "en-US": "English",
+    "ja-JP": "日本語",
+    "ko-KR": "한국어",
+    "fr-FR": "Français",
+    "es-ES": "Español",
+    "de-DE": "Deutsch"
+  };
+  return names[language] || "";
 }
 
 async function readJsonResponse(response, provider = "custom", config = {}) {

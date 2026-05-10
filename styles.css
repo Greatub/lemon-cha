@@ -1296,10 +1296,12 @@ button:disabled {
   margin-inline: auto;
   overflow-y: auto;
   align-content: start;
+  padding-right: var(--space-xs);
 }
 
 .settings-tabs {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: var(--space-xs);
   width: min(100%, var(--content-width));
   margin: 0 auto var(--space-md);
@@ -1310,6 +1312,7 @@ button:disabled {
 }
 
 .settings-tab {
+  justify-content: flex-start;
   min-height: 32px;
   border-color: transparent;
   color: var(--color-secondary);
@@ -1331,7 +1334,7 @@ button:disabled {
 
 .settings-tab-panel {
   display: grid;
-  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  grid-template-columns: 1fr;
   gap: var(--space-md);
 }
 
@@ -1393,10 +1396,6 @@ button:disabled {
   display: none;
 }
 
-.settings[data-active-tab="prompt"] .settings-form > .settings-actions {
-  display: none;
-}
-
 .settings-page-header {
   display: flex;
   align-items: flex-start;
@@ -1426,6 +1425,50 @@ label {
   font-family: var(--font-label);
   font-size: 0.75rem;
   font-weight: 700;
+}
+
+.settings-section {
+  display: grid;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+  background: var(--scheme-input-surface);
+}
+
+.settings-section h3 {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.settings-section p {
+  margin: 0;
+  color: var(--color-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.settings-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: stretch;
+}
+
+.settings-actions-grid button,
+.danger-section > button {
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.danger-section {
+  background: color-mix(in srgb, var(--color-danger-bg) 52%, var(--scheme-input-surface));
+}
+
+input.dirty,
+textarea.dirty {
+  border-color: var(--color-tertiary);
+  box-shadow: 0 0 0 3px var(--color-focus);
 }
 
 .checkbox-label {
@@ -1621,6 +1664,10 @@ select:focus {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-sm);
+}
+
+.settings .form-row {
+  grid-template-columns: 1fr;
 }
 
 .settings-actions,

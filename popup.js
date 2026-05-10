@@ -43,7 +43,7 @@ const MODEL_PRESETS = {
     apiFormat: "openai"
   },
   "ollama-proxy": {
-    provider: "custom",
+    provider: "ollama",
     endpoint: "http://127.0.0.1:11434/api/chat",
     model: "llama3.1",
     apiFormat: "ollama"
@@ -109,14 +109,28 @@ const DEFAULT_SETTINGS = {
   ollamaEndpoint: DIRECT_OLLAMA_ENDPOINT,
   ollamaModel: "llama3.1",
   temperature: 0.7,
+  maxTokens: 2048,
   historyLimit: 12,
+  systemPrompt: "",
+  defaultPresetId: "",
+  memoryEnabled: true,
   thinkingEnabled: false,
   language: "zh-CN",
+  answerLanguage: "zh-CN",
+  translationLanguage: "en-US",
   colorScheme: "llmon",
   theme: "light"
 };
 
 const COLOR_SCHEMES = ["llmon", "leaf", "citrus", "blue", "gray"];
+const SUPPORTED_LANGUAGES = ["zh-CN", "en-US", "ja-JP", "ko-KR", "fr-FR", "es-ES", "de-DE"];
+const LANGUAGE_UI_FALLBACK = {
+  "ja-JP": "en-US",
+  "ko-KR": "en-US",
+  "fr-FR": "en-US",
+  "es-ES": "en-US",
+  "de-DE": "en-US"
+};
 
 const UI_TEXT = {
   "zh-CN": {
@@ -158,17 +172,35 @@ const UI_TEXT = {
     testing: "测试中",
     saveSettings: "保存",
     resetSettings: "恢复默认",
+    resetGeneralSettings: "重置通用设置",
+    resetCurrentModelSettings: "重置当前模型设置",
+    resetCurrentPromptTemplate: "重置当前提示词预设",
+    clearHistorySettings: "清空对话历史",
+    factoryResetSettings: "恢复出厂设置",
     send: "发送",
     stop: "停止",
     promptPlaceholder: "输入问题，Enter 发送，Shift+Enter 换行",
     promptTemplatePlaceholder: "选择 Prompt 预设",
-    savePromptTemplate: "保存模板",
+    savePromptTemplate: "保存",
+    savePromptTemplateAs: "另存为新预设",
+    duplicatePromptTemplate: "复制当前预设",
     deletePromptTemplate: "删除模板",
+    resetSectionTitle: "分区重置",
+    resetSectionHint: "每个重置操作只影响对应区域。",
+    factoryResetTitle: "恢复出厂设置",
+    factoryResetHint: "会清空设置、模型配置、提示词预设和对话历史。",
     modelPreset: "模型服务预设",
     presetCustom: "自定义",
     presetOllamaProxy: "Ollama 本地模型",
     endpoint: "接口地址",
+    baseUrl: "接口地址",
     model: "模型",
+    modelName: "模型名称",
+    maxTokens: "最大输出 Token",
+    systemPrompt: "系统提示词",
+    defaultPromptPreset: "默认提示词预设",
+    noDefaultPreset: "不绑定",
+    memoryEnabled: "启用对话记忆",
     localModelList: "本地模型列表",
     testFirst: "先测试连接",
     apiFormat: "接口格式",
@@ -176,14 +208,22 @@ const UI_TEXT = {
     historyLimit: "最大上下文轮数",
     thinkingMode: "思考",
     interfaceLanguage: "界面语言",
+    answerLanguage: "默认回答语言",
+    translationLanguage: "默认翻译目标语言",
     languageChinese: "简体中文",
     languageEnglish: "English",
+    languageJapanese: "日本語",
+    languageKorean: "한국어",
+    languageFrench: "Français",
+    languageSpanish: "Español",
+    languageGerman: "Deutsch",
     sidebarHistory: "对话历史",
     conversationList: "对话列表",
     modelSettings: "模型设置",
-    modelSettingsTab: "模型",
+    modelSettingsTab: "模型设置",
     generalSettingsTab: "通用设置",
-    promptSettingsTab: "提示词模板",
+    promptSettingsTab: "提示词预设",
+    dataSettingsTab: "数据与重置",
     settingsTabs: "设置分类",
     colorSchemeLabel: "配色方案",
     colorSchemeLlmon: "llmon cha 默认（日间 / 夜间）",
@@ -194,7 +234,7 @@ const UI_TEXT = {
     promptPresetAria: "Prompt 预设",
     currentModelAria: "当前模型",
     promptTemplateManage: "模板",
-    newPromptTemplate: "新建模板",
+    newPromptTemplate: "新建预设",
     promptTemplateNameLabel: "模板名称",
     promptTemplateContentLabel: "模板内容",
     emptyState: "开始一个新对话，或在设置中选择 DeepSeek、OpenAI、通义千问、Kimi 等预设接口。",
@@ -224,11 +264,23 @@ const UI_TEXT = {
     promptTemplateEmpty: "请先在输入框里写好 Prompt，再保存为模板。",
     promptTemplateName: "模板名称",
     promptTemplateSaved: "Prompt 模板已保存。",
+    promptTemplateSavedAs: "已另存为新 Prompt 预设。",
+    promptTemplateDuplicated: "已复制当前 Prompt 预设。",
+    promptTemplateUnsaved: "当前提示词预设有未保存修改，离开后会丢失。继续吗？",
+    promptTemplateReset: "当前提示词预设已恢复到已保存内容。",
     customTemplateOnly: "只能删除自定义 Prompt 模板。",
     confirmDeletePromptTemplate: "删除 Prompt 模板“{name}”？",
     promptTemplateDeleted: "Prompt 模板已删除。",
     settingsSaved: "设置已保存。",
     settingsReset: "设置已恢复默认。",
+    generalSettingsReset: "通用设置已重置。",
+    modelSettingsReset: "当前模型设置已重置。",
+    factoryResetDone: "已恢复出厂设置。",
+    confirmResetGeneralSettings: "重置通用设置？模型配置、API Key、提示词和对话历史不会受到影响。",
+    confirmResetCurrentModelSettings: "重置当前模型设置？只会影响当前模型配置。",
+    confirmResetPromptTemplate: "重置当前提示词预设编辑内容？",
+    confirmFactoryResetFirst: "恢复出厂设置会清空所有设置、API Key、提示词预设和对话历史。确定继续吗？",
+    confirmFactoryResetSecond: "请再次确认：此操作无法撤销。继续恢复出厂设置吗？",
     confirmClearHistory: "确定清空所有对话历史吗？",
     folderName: "文件夹名称",
     renameFolder: "输入新的文件夹名称",
@@ -282,17 +334,35 @@ const UI_TEXT = {
     testing: "Testing",
     saveSettings: "Save",
     resetSettings: "Reset",
+    resetGeneralSettings: "Reset General Settings",
+    resetCurrentModelSettings: "Reset Current Model",
+    resetCurrentPromptTemplate: "Reset Current Prompt Preset",
+    clearHistorySettings: "Clear Chat History",
+    factoryResetSettings: "Factory Reset",
     send: "Send",
     stop: "Stop",
     promptPlaceholder: "Ask a question. Enter to send, Shift+Enter for a new line",
     promptTemplatePlaceholder: "Choose a prompt preset",
-    savePromptTemplate: "Save Template",
+    savePromptTemplate: "Save",
+    savePromptTemplateAs: "Save as New Preset",
+    duplicatePromptTemplate: "Duplicate Current Preset",
     deletePromptTemplate: "Delete Template",
+    resetSectionTitle: "Scoped Reset",
+    resetSectionHint: "Each reset action only affects its own area.",
+    factoryResetTitle: "Factory Reset",
+    factoryResetHint: "This clears settings, model configs, prompt presets, and chat history.",
     modelPreset: "Model Preset",
     presetCustom: "Custom",
     presetOllamaProxy: "Ollama Local",
     endpoint: "Endpoint",
+    baseUrl: "Base URL",
     model: "Model",
+    modelName: "Model Name",
+    maxTokens: "Max Output Tokens",
+    systemPrompt: "System Prompt",
+    defaultPromptPreset: "Default Prompt Preset",
+    noDefaultPreset: "No Binding",
+    memoryEnabled: "Enable Conversation Memory",
     localModelList: "Local Models",
     testFirst: "Test connection first",
     apiFormat: "API Format",
@@ -300,14 +370,22 @@ const UI_TEXT = {
     historyLimit: "Context Turns",
     thinkingMode: "Think",
     interfaceLanguage: "Interface Language",
+    answerLanguage: "Default Answer Language",
+    translationLanguage: "Default Translation Target",
     languageChinese: "Simplified Chinese",
     languageEnglish: "English",
+    languageJapanese: "Japanese",
+    languageKorean: "Korean",
+    languageFrench: "French",
+    languageSpanish: "Spanish",
+    languageGerman: "German",
     sidebarHistory: "Conversation History",
     conversationList: "Conversation List",
     modelSettings: "Model Settings",
-    modelSettingsTab: "Model",
+    modelSettingsTab: "Model Settings",
     generalSettingsTab: "General",
-    promptSettingsTab: "Prompt Templates",
+    promptSettingsTab: "Prompt Presets",
+    dataSettingsTab: "Data & Reset",
     settingsTabs: "Settings Categories",
     colorSchemeLabel: "Color Scheme",
     colorSchemeLlmon: "llmon cha Default (Light / Dark)",
@@ -318,7 +396,7 @@ const UI_TEXT = {
     promptPresetAria: "Prompt Presets",
     currentModelAria: "Current Model",
     promptTemplateManage: "Template",
-    newPromptTemplate: "New Template",
+    newPromptTemplate: "New Preset",
     promptTemplateNameLabel: "Template Name",
     promptTemplateContentLabel: "Template Content",
     emptyState: "Start a new chat, or choose a preset such as DeepSeek, OpenAI, Qwen, or Kimi in settings.",
@@ -348,11 +426,23 @@ const UI_TEXT = {
     promptTemplateEmpty: "Write a prompt in the input box before saving it as a template.",
     promptTemplateName: "Template name",
     promptTemplateSaved: "Prompt template saved.",
+    promptTemplateSavedAs: "Saved as a new prompt preset.",
+    promptTemplateDuplicated: "Current prompt preset duplicated.",
+    promptTemplateUnsaved: "This prompt preset has unsaved changes. Leave and discard them?",
+    promptTemplateReset: "Current prompt preset restored to the saved content.",
     customTemplateOnly: "Only custom prompt templates can be deleted.",
     confirmDeletePromptTemplate: "Delete prompt template \"{name}\"?",
     promptTemplateDeleted: "Prompt template deleted.",
     settingsSaved: "Settings saved.",
     settingsReset: "Settings reset to defaults.",
+    generalSettingsReset: "General settings reset.",
+    modelSettingsReset: "Current model settings reset.",
+    factoryResetDone: "Factory reset complete.",
+    confirmResetGeneralSettings: "Reset general settings? Model configs, API keys, prompts, and chat history will not be affected.",
+    confirmResetCurrentModelSettings: "Reset the current model settings? Only the selected model config will be affected.",
+    confirmResetPromptTemplate: "Reset the current prompt preset editor content?",
+    confirmFactoryResetFirst: "Factory reset will clear all settings, API keys, prompt presets, and chat history. Continue?",
+    confirmFactoryResetSecond: "Please confirm again: this cannot be undone. Continue factory reset?",
     confirmClearHistory: "Clear all conversation history?",
     folderName: "Folder name",
     renameFolder: "Enter a new folder name",
@@ -378,7 +468,9 @@ const state = {
   sending: false,
   activePort: null,
   sidebarCollapsed: false,
-  settingsPageOpen: false
+  settingsPageOpen: false,
+  promptTemplateDirty: false,
+  lastPromptTemplateManageValue: ""
 };
 
 const els = {
@@ -407,11 +499,21 @@ const els = {
   apiKeyField: document.querySelector("#apiKeyField"),
   apiKeyInput: document.querySelector("#apiKeyInput"),
   temperatureInput: document.querySelector("#temperatureInput"),
+  maxTokensInput: document.querySelector("#maxTokensInput"),
   historyLimitInput: document.querySelector("#historyLimitInput"),
+  systemPromptInput: document.querySelector("#systemPromptInput"),
+  defaultPresetInput: document.querySelector("#defaultPresetInput"),
+  memoryEnabledInput: document.querySelector("#memoryEnabledInput"),
   thinkingToggle: document.querySelector("#thinkingToggle"),
   languageInput: document.querySelector("#languageInput"),
+  answerLanguageInput: document.querySelector("#answerLanguageInput"),
+  translationLanguageInput: document.querySelector("#translationLanguageInput"),
   colorSchemeInput: document.querySelector("#colorSchemeInput"),
-  resetSettings: document.querySelector("#resetSettings"),
+  resetGeneralSettings: document.querySelector("#resetGeneralSettings"),
+  resetCurrentModelSettings: document.querySelector("#resetCurrentModelSettings"),
+  resetCurrentPromptTemplate: document.querySelector("#resetCurrentPromptTemplate"),
+  clearHistorySettings: document.querySelector("#clearHistorySettings"),
+  factoryResetSettings: document.querySelector("#factoryResetSettings"),
   testOllama: document.querySelector("#testOllama"),
   conversationList: document.querySelector("#conversationList"),
   newChat: document.querySelector("#newChat"),
@@ -427,7 +529,10 @@ const els = {
   promptTemplateManageSelect: document.querySelector("#promptTemplateManageSelect"),
   promptTemplateNameInput: document.querySelector("#promptTemplateNameInput"),
   promptTemplateContentInput: document.querySelector("#promptTemplateContentInput"),
+  newPromptTemplate: document.querySelector("#newPromptTemplate"),
+  duplicatePromptTemplate: document.querySelector("#duplicatePromptTemplate"),
   savePromptTemplate: document.querySelector("#savePromptTemplate"),
+  savePromptTemplateAs: document.querySelector("#savePromptTemplateAs"),
   deletePromptTemplate: document.querySelector("#deletePromptTemplate"),
   promptInput: document.querySelector("#promptInput"),
   sendButton: document.querySelector("#sendButton"),
@@ -628,16 +733,25 @@ function getActiveMessages() {
 }
 
 function getActiveConfig() {
+  const config = getModelConfigForPreset(state.settings.preset || "custom");
   return {
-    provider: "custom",
-    endpoint: state.settings.customEndpoint,
-    model: state.settings.customModel,
-    apiKey: state.settings.customApiKey,
-    apiFormat: state.settings.customFormat,
-    temperature: Number(state.settings.temperature) || DEFAULT_SETTINGS.temperature,
+    provider: config.provider || "custom",
+    endpoint: config.baseUrl || config.endpoint || state.settings.customEndpoint,
+    baseUrl: config.baseUrl || config.endpoint || state.settings.customEndpoint,
+    model: config.modelName || config.model || state.settings.customModel,
+    modelName: config.modelName || config.model || state.settings.customModel,
+    apiKey: config.apiKey || "",
+    apiFormat: config.apiFormat === "ollama" ? "ollama" : "openai",
+    temperature: clamp(Number(config.temperature), 0, 2, DEFAULT_SETTINGS.temperature),
+    maxTokens: Math.max(1, Math.floor(Number(config.maxTokens) || DEFAULT_SETTINGS.maxTokens)),
     historyLimit: Number(state.settings.historyLimit) || DEFAULT_SETTINGS.historyLimit,
+    systemPrompt: config.systemPrompt || "",
+    defaultPresetId: config.defaultPresetId || "",
+    memoryEnabled: config.memoryEnabled !== false,
     thinkingEnabled: Boolean(state.settings.thinkingEnabled),
-    language: state.settings.language || DEFAULT_SETTINGS.language
+    language: normalizeLanguage(state.settings.language),
+    answerLanguage: normalizeLanguage(state.settings.answerLanguage),
+    translationLanguage: normalizeLanguage(state.settings.translationLanguage)
   };
 }
 
@@ -648,22 +762,45 @@ function ensureModelConfigs() {
   return state.settings.modelConfigs;
 }
 
-function defaultModelConfigForPreset(presetKey) {
+function defaultModelConfigForPreset(presetKey, useStateFallback = true) {
   const preset = MODEL_PRESETS[presetKey];
+  const base = {
+    provider: "custom",
+    apiKey: "",
+    temperature: DEFAULT_SETTINGS.temperature,
+    maxTokens: DEFAULT_SETTINGS.maxTokens,
+    systemPrompt: "",
+    defaultPresetId: "",
+    memoryEnabled: true,
+    apiFormat: DEFAULT_SETTINGS.customFormat
+  };
+
   if (preset) {
     return {
+      ...base,
+      provider: preset.provider,
+      baseUrl: preset.endpoint,
       endpoint: preset.endpoint,
+      modelName: preset.model,
       model: preset.model,
-      apiKey: "",
       apiFormat: preset.apiFormat
     };
   }
 
   return {
-    endpoint: state.settings.customEndpoint || DEFAULT_SETTINGS.customEndpoint,
-    model: state.settings.customModel || DEFAULT_SETTINGS.customModel,
-    apiKey: state.settings.customApiKey || "",
-    apiFormat: state.settings.customFormat || DEFAULT_SETTINGS.customFormat
+    ...base,
+    provider: state.settings.provider || "custom",
+    baseUrl: useStateFallback ? state.settings.customEndpoint || DEFAULT_SETTINGS.customEndpoint : DEFAULT_SETTINGS.customEndpoint,
+    endpoint: useStateFallback ? state.settings.customEndpoint || DEFAULT_SETTINGS.customEndpoint : DEFAULT_SETTINGS.customEndpoint,
+    modelName: useStateFallback ? state.settings.customModel || DEFAULT_SETTINGS.customModel : DEFAULT_SETTINGS.customModel,
+    model: useStateFallback ? state.settings.customModel || DEFAULT_SETTINGS.customModel : DEFAULT_SETTINGS.customModel,
+    apiKey: useStateFallback ? state.settings.customApiKey || "" : "",
+    apiFormat: useStateFallback ? state.settings.customFormat || DEFAULT_SETTINGS.customFormat : DEFAULT_SETTINGS.customFormat,
+    temperature: useStateFallback ? Number(state.settings.temperature) || DEFAULT_SETTINGS.temperature : DEFAULT_SETTINGS.temperature,
+    maxTokens: useStateFallback ? Number(state.settings.maxTokens) || DEFAULT_SETTINGS.maxTokens : DEFAULT_SETTINGS.maxTokens,
+    systemPrompt: useStateFallback ? state.settings.systemPrompt || "" : "",
+    defaultPresetId: useStateFallback ? state.settings.defaultPresetId || "" : "",
+    memoryEnabled: useStateFallback ? state.settings.memoryEnabled !== false : true
   };
 }
 
@@ -677,19 +814,37 @@ function getModelConfigForPreset(presetKey) {
 
 function saveCurrentModelConfig(presetKey = state.settings.preset || "custom") {
   const configs = ensureModelConfigs();
+  const apiFormat = els.customFormatInput.value === "ollama" ? "ollama" : "openai";
+  const baseUrl = apiFormat === "ollama"
+    ? normalizeOllamaEndpoint(els.endpointInput.value.trim() || DEFAULT_SETTINGS.ollamaEndpoint)
+    : normalizeOpenAiEndpoint(els.endpointInput.value.trim() || DEFAULT_SETTINGS.customEndpoint);
+  const modelName = els.modelInput.value.trim();
   configs[presetKey] = {
-    endpoint: els.endpointInput.value.trim(),
-    model: els.modelInput.value.trim(),
+    provider: apiFormat === "ollama" ? "ollama" : "custom",
+    baseUrl,
+    endpoint: baseUrl,
+    modelName,
+    model: modelName,
     apiKey: els.apiKeyInput.value.trim(),
-    apiFormat: els.customFormatInput.value === "ollama" ? "ollama" : "openai"
+    apiFormat,
+    temperature: clamp(Number(els.temperatureInput.value), 0, 2, DEFAULT_SETTINGS.temperature),
+    maxTokens: Math.max(1, Math.floor(Number(els.maxTokensInput.value) || DEFAULT_SETTINGS.maxTokens)),
+    systemPrompt: els.systemPromptInput.value.trim(),
+    defaultPresetId: els.defaultPresetInput.value || "",
+    memoryEnabled: Boolean(els.memoryEnabledInput.checked)
   };
 }
 
 function applyModelConfigToSettings(config) {
-  state.settings.customEndpoint = config.endpoint;
-  state.settings.customModel = config.model;
+  state.settings.customEndpoint = config.baseUrl || config.endpoint;
+  state.settings.customModel = config.modelName || config.model;
   state.settings.customApiKey = config.apiKey;
   state.settings.customFormat = config.apiFormat;
+  state.settings.temperature = config.temperature;
+  state.settings.maxTokens = config.maxTokens;
+  state.settings.systemPrompt = config.systemPrompt || "";
+  state.settings.defaultPresetId = config.defaultPresetId || "";
+  state.settings.memoryEnabled = config.memoryEnabled !== false;
 }
 
 function syncSettingsToForm() {
@@ -697,13 +852,19 @@ function syncSettingsToForm() {
   els.endpointInput.value = config.endpoint;
   els.modelInput.value = config.model;
   els.presetInput.value = state.settings.preset || "custom";
-  els.customFormatInput.value = state.settings.customFormat;
-  els.apiKeyInput.value = state.settings.customApiKey;
+  els.customFormatInput.value = config.apiFormat;
+  els.apiKeyInput.value = config.apiKey;
   els.temperatureInput.value = config.temperature;
+  els.maxTokensInput.value = config.maxTokens;
   els.historyLimitInput.value = config.historyLimit;
+  els.systemPromptInput.value = config.systemPrompt;
+  els.defaultPresetInput.value = config.defaultPresetId || "";
+  els.memoryEnabledInput.checked = config.memoryEnabled;
   els.thinkingToggle.classList.toggle("active", Boolean(state.settings.thinkingEnabled));
   els.thinkingToggle.setAttribute("aria-pressed", String(Boolean(state.settings.thinkingEnabled)));
-  els.languageInput.value = state.settings.language || DEFAULT_SETTINGS.language;
+  els.languageInput.value = normalizeLanguage(state.settings.language);
+  els.answerLanguageInput.value = normalizeLanguage(state.settings.answerLanguage);
+  els.translationLanguageInput.value = normalizeLanguage(state.settings.translationLanguage);
   els.colorSchemeInput.value = state.settings.colorScheme || DEFAULT_SETTINGS.colorScheme;
   els.ollamaModelField.classList.toggle("hidden", config.apiFormat !== "ollama");
   els.testOllama?.classList.toggle("hidden", true);
@@ -715,8 +876,17 @@ function presetLabel(preset) {
   return selected?.textContent || t("customApi");
 }
 
+function normalizeLanguage(language, fallback = DEFAULT_SETTINGS.language) {
+  return SUPPORTED_LANGUAGES.includes(language) ? language : fallback;
+}
+
+function uiLanguage(language = state.settings.language) {
+  const normalized = normalizeLanguage(language);
+  return UI_TEXT[normalized] ? normalized : LANGUAGE_UI_FALLBACK[normalized] || DEFAULT_SETTINGS.language;
+}
+
 function t(key, replacements = {}) {
-  const lang = state.settings.language || DEFAULT_SETTINGS.language;
+  const lang = uiLanguage();
   const template = UI_TEXT[lang]?.[key] || UI_TEXT["zh-CN"][key] || key;
   return Object.entries(replacements).reduce(
     (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
@@ -757,14 +927,21 @@ function applyLanguage() {
     setButtonContent(els.testOllama, els.testOllama.disabled ? t("testing") : t("testOllama"), "bot");
   }
   setButtonContent(document.querySelector("#saveSettings"), t("saveSettings"), "settings");
-  setButtonContent(els.resetSettings, t("resetSettings"), "refreshCw");
+  setButtonContent(els.resetGeneralSettings, t("resetGeneralSettings"), "refreshCw");
+  setButtonContent(els.resetCurrentModelSettings, t("resetCurrentModelSettings"), "refreshCw");
+  setButtonContent(els.resetCurrentPromptTemplate, t("resetCurrentPromptTemplate"), "refreshCw");
+  setButtonContent(els.clearHistorySettings, t("clearHistorySettings"), "trash");
+  setButtonContent(els.factoryResetSettings, t("factoryResetSettings"), "alertTriangle");
   setButtonContent(els.thinkingToggle, t("thinkingMode"), "brain");
   setButtonContent(els.sendButton, t("send"), "send");
   setButtonContent(els.stopButton, t("stop"), "square");
   els.promptInput.placeholder = t("promptPlaceholder");
   els.promptTemplateSelect.setAttribute("aria-label", t("promptPresetAria"));
   els.toolbarModelSelect.setAttribute("aria-label", t("currentModelAria"));
+  setButtonContent(els.newPromptTemplate, t("newPromptTemplate"), "plus");
+  setButtonContent(els.duplicatePromptTemplate, t("duplicatePromptTemplate"), "copy");
   setButtonContent(els.savePromptTemplate, t("savePromptTemplate"), "fileText");
+  setButtonContent(els.savePromptTemplateAs, t("savePromptTemplateAs"), "copyPlus");
   setButtonContent(els.deletePromptTemplate, t("deletePromptTemplate"), "trash");
   document.querySelector(".sidebar")?.setAttribute("aria-label", t("sidebarHistory"));
   els.conversationList.setAttribute("aria-label", t("conversationList"));
@@ -903,9 +1080,9 @@ function maybeAutoCheckLocalModel() {
 function render() {
   applyTheme();
   applyLanguage();
-  syncSettingsToForm();
   showSettingsPage(state.settingsPageOpen);
   renderPromptTemplates();
+  syncSettingsToForm();
   renderConversations();
   renderMessages();
   syncCustomSelects();
@@ -1011,13 +1188,13 @@ function iconForSelectOption(select, option) {
   if (select.id === "customFormatInput") {
     return option.value === "ollama" ? "bot" : "messageCircle";
   }
-  if (select.id === "languageInput") {
+  if (select.id === "languageInput" || select.id === "answerLanguageInput" || select.id === "translationLanguageInput") {
     return "languages";
   }
   if (select.id === "colorSchemeInput") {
     return "sun";
   }
-  if (select.id === "promptTemplateSelect" || select.id === "promptTemplateManageSelect") {
+  if (select.id === "promptTemplateSelect" || select.id === "promptTemplateManageSelect" || select.id === "defaultPresetInput") {
     const promptIcons = {
       summarize: "fileText",
       "translate-polish": "languages",
@@ -1063,8 +1240,12 @@ function appendCustomSelectItems(select, menu, node) {
 function renderPromptTemplates() {
   const currentValue = els.promptTemplateSelect.value;
   const currentManageValue = els.promptTemplateManageSelect.value;
+  const currentDefaultValue = els.defaultPresetInput?.value || "";
   els.promptTemplateSelect.innerHTML = "";
   els.promptTemplateManageSelect.innerHTML = "";
+  if (els.defaultPresetInput) {
+    els.defaultPresetInput.innerHTML = "";
+  }
 
   const placeholder = document.createElement("option");
   placeholder.value = "";
@@ -1076,10 +1257,21 @@ function renderPromptTemplates() {
   managePlaceholder.textContent = t("newPromptTemplate");
   els.promptTemplateManageSelect.append(managePlaceholder);
 
+  if (els.defaultPresetInput) {
+    const defaultPlaceholder = document.createElement("option");
+    defaultPlaceholder.value = "";
+    defaultPlaceholder.textContent = t("noDefaultPreset");
+    els.defaultPresetInput.append(defaultPlaceholder);
+  }
+
   appendPromptTemplateGroup(t("builtInTemplates"), BUILT_IN_PROMPT_TEMPLATES);
   appendPromptTemplateGroup(t("customTemplates"), state.promptTemplates);
   appendPromptTemplateGroup(t("builtInTemplates"), BUILT_IN_PROMPT_TEMPLATES, els.promptTemplateManageSelect);
   appendPromptTemplateGroup(t("customTemplates"), state.promptTemplates, els.promptTemplateManageSelect);
+  if (els.defaultPresetInput) {
+    appendPromptTemplateGroup(t("builtInTemplates"), BUILT_IN_PROMPT_TEMPLATES, els.defaultPresetInput);
+    appendPromptTemplateGroup(t("customTemplates"), state.promptTemplates, els.defaultPresetInput);
+  }
 
   els.promptTemplateSelect.value = currentValue;
   if (!els.promptTemplateSelect.value) {
@@ -1088,6 +1280,12 @@ function renderPromptTemplates() {
   els.promptTemplateManageSelect.value = currentManageValue;
   if (!els.promptTemplateManageSelect.value) {
     els.promptTemplateManageSelect.value = "";
+  }
+  if (els.defaultPresetInput) {
+    els.defaultPresetInput.value = currentDefaultValue;
+    if (!els.defaultPresetInput.value) {
+      els.defaultPresetInput.value = "";
+    }
   }
 }
 
@@ -1129,6 +1327,66 @@ function localizedTemplateContent(template) {
 function fillPromptTemplateEditor(template = null) {
   els.promptTemplateNameInput.value = template ? localizedTemplateName(template) : "";
   els.promptTemplateContentInput.value = template ? localizedTemplateContent(template) : "";
+  state.lastPromptTemplateManageValue = template?.id || "";
+  setPromptTemplateDirty(false);
+}
+
+function setPromptTemplateDirty(dirty) {
+  state.promptTemplateDirty = Boolean(dirty);
+  els.promptTemplateContentInput?.classList.toggle("dirty", state.promptTemplateDirty);
+  els.promptTemplateNameInput?.classList.toggle("dirty", state.promptTemplateDirty);
+}
+
+function confirmDiscardPromptTemplateChanges() {
+  return !state.promptTemplateDirty || confirm(t("promptTemplateUnsaved"));
+}
+
+function currentPromptTemplateDraft() {
+  return {
+    name: els.promptTemplateNameInput.value.trim(),
+    content: els.promptTemplateContentInput.value.trim()
+  };
+}
+
+function makePromptTemplateId() {
+  return `custom-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+async function savePromptTemplateDraft({ forceNew = false } = {}) {
+  const { name, content } = currentPromptTemplateDraft();
+  if (!content) {
+    pushSystemMessage(t("promptTemplateEmpty"));
+    return "";
+  }
+
+  if (!name) {
+    pushSystemMessage(t("promptTemplateName"));
+    return "";
+  }
+
+  const selected = !forceNew
+    ? state.promptTemplates.find((item) => item.id === els.promptTemplateManageSelect.value)
+    : null;
+  let savedId = selected?.id || makePromptTemplateId();
+  if (selected) {
+    selected.name = name.slice(0, 40);
+    selected.content = content;
+  } else {
+    state.promptTemplates.push({
+      id: savedId,
+      name: name.slice(0, 40),
+      content,
+      custom: true
+    });
+  }
+
+  await savePromptTemplates();
+  renderPromptTemplates();
+  els.promptTemplateManageSelect.value = savedId;
+  state.lastPromptTemplateManageValue = savedId;
+  setPromptTemplateDirty(false);
+  syncCustomSelects();
+  return savedId;
 }
 
 function renderConversations() {
@@ -1557,14 +1815,22 @@ function applyPreset(presetKey) {
   state.settings.preset = presetKey;
   const config = getModelConfigForPreset(presetKey);
   applyModelConfigToSettings(config);
+  applyDefaultPromptSelection(config);
 
   if (!preset) {
     syncSettingsToForm();
     return;
   }
 
-  state.settings.provider = "custom";
+  state.settings.provider = config.provider || "custom";
   syncSettingsToForm();
+}
+
+function applyDefaultPromptSelection(config) {
+  const presetId = config.defaultPresetId || "";
+  if (presetId && getPromptTemplate(presetId)) {
+    els.promptTemplateSelect.value = presetId;
+  }
 }
 
 async function loadOllamaModels() {
@@ -1702,11 +1968,11 @@ function toolbarModelValueFor(config) {
 }
 
 function persistCurrentProviderFields() {
-  state.settings.provider = "custom";
   state.settings.customEndpoint = els.endpointInput.value.trim() || DEFAULT_SETTINGS.customEndpoint;
   state.settings.customModel = els.modelInput.value.trim();
   state.settings.customApiKey = els.apiKeyInput.value.trim();
   state.settings.customFormat = els.customFormatInput.value === "ollama" ? "ollama" : "openai";
+  state.settings.provider = state.settings.customFormat === "ollama" ? "ollama" : "custom";
   if (state.settings.customFormat === "openai") {
     state.settings.customEndpoint = normalizeOpenAiEndpoint(state.settings.customEndpoint);
   }
@@ -1724,9 +1990,15 @@ function persistCurrentProviderFields() {
   els.customFormatInput.value = state.settings.customFormat;
   saveCurrentModelConfig();
   state.settings.temperature = clamp(Number(els.temperatureInput.value), 0, 2, DEFAULT_SETTINGS.temperature);
+  state.settings.maxTokens = Math.max(1, Math.floor(Number(els.maxTokensInput.value) || DEFAULT_SETTINGS.maxTokens));
   state.settings.historyLimit = Math.max(1, Math.floor(Number(els.historyLimitInput.value) || DEFAULT_SETTINGS.historyLimit));
+  state.settings.systemPrompt = els.systemPromptInput.value.trim();
+  state.settings.defaultPresetId = els.defaultPresetInput.value || "";
+  state.settings.memoryEnabled = Boolean(els.memoryEnabledInput.checked);
   state.settings.thinkingEnabled = Boolean(state.settings.thinkingEnabled);
-  state.settings.language = els.languageInput.value === "en-US" ? "en-US" : "zh-CN";
+  state.settings.language = normalizeLanguage(els.languageInput.value);
+  state.settings.answerLanguage = normalizeLanguage(els.answerLanguageInput.value);
+  state.settings.translationLanguage = normalizeLanguage(els.translationLanguageInput.value, "en-US");
   state.settings.colorScheme = COLOR_SCHEMES.includes(els.colorSchemeInput.value) ? els.colorSchemeInput.value : DEFAULT_SETTINGS.colorScheme;
   applyTheme();
 }
@@ -1793,7 +2065,7 @@ async function submitPrompt(prompt) {
   await saveConversations();
   render();
 
-  const requestMessages = getContextMessages(config.historyLimit);
+  const requestMessages = getContextMessages(config);
   await generateAssistantResponse(conversation, config, requestMessages);
   if (shouldGenerateTitle) {
     generateConversationTitle(conversation, config);
@@ -1949,8 +2221,8 @@ async function generateConversationTitle(conversation, config) {
   }
 }
 
-function getContextMessages(limit) {
-  return serializeContextMessages(getActiveMessages(), limit);
+function getContextMessages(config) {
+  return serializeContextMessages(getActiveMessages(), config.memoryEnabled ? config.historyLimit : 1);
 }
 
 function serializeContextMessages(messages, limit) {
@@ -2008,7 +2280,7 @@ async function regenerateFromMessage(index) {
   const requestSource = message.role === "assistant"
     ? conversation.messages.slice(0, index)
     : conversation.messages.slice(0, index + 1);
-  const requestMessages = serializeContextMessages(requestSource, config.historyLimit);
+  const requestMessages = serializeContextMessages(requestSource, config.memoryEnabled ? config.historyLimit : 1);
 
   conversation.messages = message.role === "assistant"
     ? conversation.messages.slice(0, index)
@@ -2031,7 +2303,7 @@ async function continueFromMessage(index) {
   if (message.role === "assistant") {
     conversation.messages.push({ role: "user", content: t("continueFromHere") });
   }
-  const requestMessages = serializeContextMessages(conversation.messages, config.historyLimit);
+  const requestMessages = serializeContextMessages(conversation.messages, config.memoryEnabled ? config.historyLimit : 1);
   conversation.updatedAt = Date.now();
   state.sending = true;
   await saveConversations();
@@ -2097,6 +2369,21 @@ function safeFileName(name) {
     .slice(0, 80) || "chat";
 }
 
+async function clearConversationHistory() {
+  if (!confirm(t("confirmClearHistory"))) {
+    return false;
+  }
+
+  const conversation = createConversation();
+  state.conversations = [conversation];
+  state.conversationFolders = [];
+  state.activeConversationId = conversation.id;
+  await chrome.storage.local.remove("messages");
+  await saveConversations();
+  render();
+  return true;
+}
+
 els.settingsToggle.addEventListener("click", () => {
   showSettingsPage(true);
 });
@@ -2124,12 +2411,18 @@ els.closeSettings?.addEventListener("click", () => {
 
 els.settingsPanel.addEventListener("click", (event) => {
   if (event.target === els.settingsPanel) {
+    if (!confirmDiscardPromptTemplateChanges()) {
+      return;
+    }
     showSettingsPage(false);
   }
 });
 
 for (const button of els.settingsTabButtons) {
   button.addEventListener("click", () => {
+    if (els.settingsPanel.dataset.activeTab === "prompt" && button.dataset.tab !== "prompt" && !confirmDiscardPromptTemplateChanges()) {
+      return;
+    }
     activateSettingsTab(button.dataset.tab);
   });
 }
@@ -2212,9 +2505,21 @@ els.messages.addEventListener("click", async (event) => {
 });
 
 els.languageInput.addEventListener("change", async () => {
-  state.settings.language = els.languageInput.value === "en-US" ? "en-US" : "zh-CN";
+  state.settings.language = normalizeLanguage(els.languageInput.value);
   await saveSettings();
   render();
+});
+
+els.answerLanguageInput.addEventListener("change", async () => {
+  state.settings.answerLanguage = normalizeLanguage(els.answerLanguageInput.value);
+  await saveSettings();
+  syncCustomSelects();
+});
+
+els.translationLanguageInput.addEventListener("change", async () => {
+  state.settings.translationLanguage = normalizeLanguage(els.translationLanguageInput.value, "en-US");
+  await saveSettings();
+  syncCustomSelects();
 });
 
 els.colorSchemeInput.addEventListener("change", async () => {
@@ -2239,40 +2544,55 @@ els.promptTemplateSelect.addEventListener("change", () => {
 });
 
 els.promptTemplateManageSelect.addEventListener("change", () => {
-  fillPromptTemplateEditor(getPromptTemplate(els.promptTemplateManageSelect.value));
+  const nextValue = els.promptTemplateManageSelect.value;
+  if (!confirmDiscardPromptTemplateChanges()) {
+    els.promptTemplateManageSelect.value = state.lastPromptTemplateManageValue || "";
+    syncCustomSelects();
+    return;
+  }
+  fillPromptTemplateEditor(getPromptTemplate(nextValue));
 });
 
-els.savePromptTemplate.addEventListener("click", async () => {
-  const content = els.promptTemplateContentInput.value.trim();
-  if (!content) {
+els.promptTemplateNameInput.addEventListener("input", () => setPromptTemplateDirty(true));
+els.promptTemplateContentInput.addEventListener("input", () => setPromptTemplateDirty(true));
+
+els.newPromptTemplate.addEventListener("click", () => {
+  if (!confirmDiscardPromptTemplateChanges()) {
+    return;
+  }
+  els.promptTemplateManageSelect.value = "";
+  fillPromptTemplateEditor();
+  syncCustomSelects();
+});
+
+els.duplicatePromptTemplate.addEventListener("click", () => {
+  const template = getPromptTemplate(els.promptTemplateManageSelect.value);
+  if (!template && !els.promptTemplateContentInput.value.trim()) {
     pushSystemMessage(t("promptTemplateEmpty"));
     return;
   }
+  const name = template ? localizedTemplateName(template) : els.promptTemplateNameInput.value.trim();
+  const content = template ? localizedTemplateContent(template) : els.promptTemplateContentInput.value.trim();
+  els.promptTemplateManageSelect.value = "";
+  els.promptTemplateNameInput.value = `${name || t("newPromptTemplate")} Copy`.slice(0, 40);
+  els.promptTemplateContentInput.value = content;
+  setPromptTemplateDirty(true);
+  syncCustomSelects();
+  pushSystemMessage(t("promptTemplateDuplicated"));
+});
 
-  const name = els.promptTemplateNameInput.value.trim();
-  if (!name) {
-    pushSystemMessage(t("promptTemplateName"));
-    return;
+els.savePromptTemplate.addEventListener("click", async () => {
+  const savedId = await savePromptTemplateDraft();
+  if (savedId) {
+    pushSystemMessage(t("promptTemplateSaved"));
   }
+});
 
-  const selected = state.promptTemplates.find((item) => item.id === els.promptTemplateManageSelect.value);
-  let savedId = selected?.id || "";
-  if (selected) {
-    selected.name = name.slice(0, 40);
-    selected.content = content;
-  } else {
-    savedId = `custom-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    state.promptTemplates.push({
-      id: savedId,
-      name: name.slice(0, 40),
-      content,
-      custom: true
-    });
+els.savePromptTemplateAs.addEventListener("click", async () => {
+  const savedId = await savePromptTemplateDraft({ forceNew: true });
+  if (savedId) {
+    pushSystemMessage(t("promptTemplateSavedAs"));
   }
-  await savePromptTemplates();
-  renderPromptTemplates();
-  els.promptTemplateManageSelect.value = savedId;
-  pushSystemMessage(t("promptTemplateSaved"));
 });
 
 els.deletePromptTemplate.addEventListener("click", async () => {
@@ -2287,8 +2607,14 @@ els.deletePromptTemplate.addEventListener("click", async () => {
   }
 
   state.promptTemplates = state.promptTemplates.filter((item) => item.id !== template.id);
+  for (const config of Object.values(ensureModelConfigs())) {
+    if (config.defaultPresetId === template.id) {
+      config.defaultPresetId = "";
+    }
+  }
   els.promptTemplateManageSelect.value = "";
   await savePromptTemplates();
+  await saveSettings();
   renderPromptTemplates();
   fillPromptTemplateEditor();
   pushSystemMessage(t("promptTemplateDeleted"));
@@ -2303,11 +2629,63 @@ els.settingsForm.addEventListener("submit", async (event) => {
   maybeAutoCheckLocalModel();
 });
 
-els.resetSettings.addEventListener("click", async () => {
-  state.settings = { ...DEFAULT_SETTINGS, modelConfigs: {} };
+els.resetGeneralSettings.addEventListener("click", async () => {
+  if (!confirm(t("confirmResetGeneralSettings"))) {
+    return;
+  }
+  state.settings.language = DEFAULT_SETTINGS.language;
+  state.settings.answerLanguage = DEFAULT_SETTINGS.answerLanguage;
+  state.settings.translationLanguage = DEFAULT_SETTINGS.translationLanguage;
+  state.settings.colorScheme = DEFAULT_SETTINGS.colorScheme;
+  state.settings.theme = DEFAULT_SETTINGS.theme;
   await saveSettings();
   render();
-  pushSystemMessage(t("settingsReset"));
+  pushSystemMessage(t("generalSettingsReset"));
+});
+
+els.resetCurrentModelSettings.addEventListener("click", async () => {
+  if (!confirm(t("confirmResetCurrentModelSettings"))) {
+    return;
+  }
+  const presetKey = state.settings.preset || "custom";
+  const configs = ensureModelConfigs();
+  delete configs[presetKey];
+  applyModelConfigToSettings(defaultModelConfigForPreset(presetKey, false));
+  await saveSettings();
+  syncSettingsToForm();
+  syncCustomSelects();
+  pushSystemMessage(t("modelSettingsReset"));
+});
+
+els.resetCurrentPromptTemplate.addEventListener("click", () => {
+  if (!confirm(t("confirmResetPromptTemplate"))) {
+    return;
+  }
+  fillPromptTemplateEditor(getPromptTemplate(els.promptTemplateManageSelect.value));
+  pushSystemMessage(t("promptTemplateReset"));
+});
+
+els.clearHistorySettings.addEventListener("click", async () => {
+  await clearConversationHistory();
+});
+
+els.factoryResetSettings.addEventListener("click", async () => {
+  if (!confirm(t("confirmFactoryResetFirst")) || !confirm(t("confirmFactoryResetSecond"))) {
+    return;
+  }
+  const conversation = createConversation();
+  state.settings = { ...DEFAULT_SETTINGS, modelConfigs: {} };
+  state.conversations = [conversation];
+  state.conversationFolders = [];
+  state.promptTemplates = [];
+  state.activeConversationId = conversation.id;
+  state.promptTemplateDirty = false;
+  await chrome.storage.local.remove(["messages"]);
+  await saveSettings();
+  await saveConversations();
+  await savePromptTemplates();
+  render();
+  pushSystemMessage(t("factoryResetDone"));
 });
 
 els.newChat.addEventListener("click", async () => {
@@ -2336,17 +2714,7 @@ els.newFolder?.addEventListener("click", async () => {
 
 els.clearHistory?.addEventListener("click", async () => {
   closeSettingsMenu();
-  if (!confirm(t("confirmClearHistory"))) {
-    return;
-  }
-
-  const conversation = createConversation();
-  state.conversations = [conversation];
-  state.conversationFolders = [];
-  state.activeConversationId = conversation.id;
-  await chrome.storage.local.remove("messages");
-  await saveConversations();
-  render();
+  await clearConversationHistory();
 });
 
 els.exportChats?.addEventListener("click", () => {
