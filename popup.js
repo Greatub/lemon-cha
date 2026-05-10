@@ -183,7 +183,6 @@ const UI_TEXT = {
     promptTemplatePlaceholder: "选择 Prompt 预设",
     savePromptTemplate: "保存",
     savePromptTemplateAs: "另存为新预设",
-    duplicatePromptTemplate: "复制当前预设",
     deletePromptTemplate: "删除模板",
     resetSectionTitle: "分区重置",
     resetSectionHint: "每个重置操作只影响对应区域。",
@@ -265,7 +264,6 @@ const UI_TEXT = {
     promptTemplateName: "模板名称",
     promptTemplateSaved: "Prompt 模板已保存。",
     promptTemplateSavedAs: "已另存为新 Prompt 预设。",
-    promptTemplateDuplicated: "已复制当前 Prompt 预设。",
     promptTemplateUnsaved: "当前提示词预设有未保存修改，离开后会丢失。继续吗？",
     promptTemplateReset: "当前提示词预设已恢复到已保存内容。",
     customTemplateOnly: "只能删除自定义 Prompt 模板。",
@@ -346,7 +344,6 @@ const UI_TEXT = {
     promptTemplatePlaceholder: "Choose a prompt preset",
     savePromptTemplate: "Save",
     savePromptTemplateAs: "Save as New Preset",
-    duplicatePromptTemplate: "Duplicate Current Preset",
     deletePromptTemplate: "Delete Template",
     resetSectionTitle: "Scoped Reset",
     resetSectionHint: "Each reset action only affects its own area.",
@@ -428,7 +425,6 @@ const UI_TEXT = {
     promptTemplateName: "Template name",
     promptTemplateSaved: "Prompt template saved.",
     promptTemplateSavedAs: "Saved as a new prompt preset.",
-    promptTemplateDuplicated: "Current prompt preset duplicated.",
     promptTemplateUnsaved: "This prompt preset has unsaved changes. Leave and discard them?",
     promptTemplateReset: "Current prompt preset restored to the saved content.",
     customTemplateOnly: "Only custom prompt templates can be deleted.",
@@ -536,8 +532,6 @@ const els = {
   promptTemplateManageSelect: document.querySelector("#promptTemplateManageSelect"),
   promptTemplateNameInput: document.querySelector("#promptTemplateNameInput"),
   promptTemplateContentInput: document.querySelector("#promptTemplateContentInput"),
-  newPromptTemplate: document.querySelector("#newPromptTemplate"),
-  duplicatePromptTemplate: document.querySelector("#duplicatePromptTemplate"),
   savePromptTemplate: document.querySelector("#savePromptTemplate"),
   savePromptTemplateAs: document.querySelector("#savePromptTemplateAs"),
   deletePromptTemplate: document.querySelector("#deletePromptTemplate"),
@@ -963,8 +957,6 @@ function applyLanguage() {
   els.promptInput.placeholder = t("promptPlaceholder");
   els.promptTemplateSelect.setAttribute("aria-label", t("promptPresetAria"));
   els.toolbarModelSelect.setAttribute("aria-label", t("currentModelAria"));
-  setButtonContent(els.newPromptTemplate, t("newPromptTemplate"), "plus");
-  setButtonContent(els.duplicatePromptTemplate, t("duplicatePromptTemplate"), "copy");
   setButtonContent(els.savePromptTemplate, t("savePromptTemplate"), "fileText");
   setButtonContent(els.savePromptTemplateAs, t("savePromptTemplateAs"), "copyPlus");
   setButtonContent(els.deletePromptTemplate, t("deletePromptTemplate"), "trash");
@@ -2691,31 +2683,6 @@ els.promptTemplateManageSelect.addEventListener("change", () => {
 
 els.promptTemplateNameInput.addEventListener("input", () => setPromptTemplateDirty(true));
 els.promptTemplateContentInput.addEventListener("input", () => setPromptTemplateDirty(true));
-
-els.newPromptTemplate.addEventListener("click", () => {
-  if (!confirmDiscardPromptTemplateChanges()) {
-    return;
-  }
-  els.promptTemplateManageSelect.value = "";
-  fillPromptTemplateEditor();
-  syncCustomSelects();
-});
-
-els.duplicatePromptTemplate.addEventListener("click", () => {
-  const template = getPromptTemplate(els.promptTemplateManageSelect.value);
-  if (!template && !els.promptTemplateContentInput.value.trim()) {
-    pushSystemMessage(t("promptTemplateEmpty"));
-    return;
-  }
-  const name = template ? localizedTemplateName(template) : els.promptTemplateNameInput.value.trim();
-  const content = template ? localizedTemplateContent(template) : els.promptTemplateContentInput.value.trim();
-  els.promptTemplateManageSelect.value = "";
-  els.promptTemplateNameInput.value = `${name || t("newPromptTemplate")} Copy`.slice(0, 40);
-  els.promptTemplateContentInput.value = content;
-  setPromptTemplateDirty(true);
-  syncCustomSelects();
-  pushSystemMessage(t("promptTemplateDuplicated"));
-});
 
 els.savePromptTemplate.addEventListener("click", async () => {
   const savedId = await savePromptTemplateDraft();
