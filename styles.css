@@ -68,6 +68,7 @@
   --composer-action-inset: 14px;
   --content-width: 920px;
   --message-width: var(--content-width);
+  --scrollbar-reserve: 17px;
   --sidebar-header-height: 76px;
   --sidebar-footer-height: 69px;
   --shadow-panel: 0 6px 22px rgba(104, 87, 32, 0.10);
@@ -1096,7 +1097,7 @@ button:disabled {
 .workspace {
   position: relative;
   --rail-padding: clamp(var(--space-md), 7vw, 88px);
-  --rail-width: min(var(--content-width), calc(100cqw - var(--rail-padding) - var(--rail-padding)));
+  --rail-width: min(var(--content-width), calc(100cqw - var(--scrollbar-reserve) - var(--rail-padding) - var(--rail-padding)));
   container-type: inline-size;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
@@ -1116,7 +1117,7 @@ button:disabled {
   justify-content: center;
   gap: var(--space-md);
   min-height: 44px;
-  padding: var(--space-xs) 0;
+  padding: var(--space-xs) var(--scrollbar-reserve) var(--space-xs) 0;
   border-bottom: 0;
   background: var(--scheme-chat-surface);
   backdrop-filter: none;
@@ -1650,7 +1651,7 @@ select {
   max-height: 280px;
   clip-path: inset(0 round var(--radius-control));
   overflow-y: auto;
-  padding: var(--space-xs);
+  padding: var(--space-sm) var(--space-xs);
   border: 0;
   border-radius: var(--radius-control);
   background: var(--scheme-panel-surface);
@@ -1665,7 +1666,7 @@ select {
 }
 
 .custom-select-menu::-webkit-scrollbar-track {
-  margin-block: var(--space-xs);
+  margin-block: var(--space-md);
   background: transparent;
 }
 
@@ -1935,6 +1936,7 @@ select:focus {
   padding: var(--space-xl) 0 calc(var(--space-xl) + 148px);
   overflow-x: hidden;
   overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 
 .messages::before,
@@ -2198,7 +2200,7 @@ select:focus {
   left: 0;
   display: grid;
   gap: var(--space-sm);
-  padding: 0 0 var(--space-lg);
+  padding: 0 var(--scrollbar-reserve) var(--space-lg) 0;
   border-top: 0;
   background: transparent;
   z-index: 50;
