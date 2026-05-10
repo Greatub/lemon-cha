@@ -102,11 +102,11 @@ const BUILT_IN_PROMPT_TEMPLATE_LOCALES = {
   summarize: {
     "zh-TW": {
       name: "總結提煉",
-      content: "請總結以下內容，提煉關鍵結論、重要細節和可執行事項。輸出結構：\n\n### 關鍵結論\n- \n\n### 重要細節\n- \n\n### 後續行動\n- \n\n內容：\n"
+      content: "請整理以下內容，提煉重點結論、關鍵細節與可執行的後續事項。請使用以下結構：\n\n### 重點結論\n- \n\n### 關鍵細節\n- \n\n### 後續行動\n- \n\n內容：\n"
     },
     "ja-JP": {
       name: "要約",
-      content: "以下の内容を要約し、重要な結論、重要な詳細、実行可能な次の行動を抽出してください。次の構成で出力してください：\n\n### 重要な結論\n- \n\n### 重要な詳細\n- \n\n### 次の行動\n- \n\n内容：\n"
+      content: "以下の内容を整理し、重要な結論、押さえるべき詳細、実行に移せる次のアクションを抽出してください。次の構成で出力してください。\n\n### 重要な結論\n- \n\n### 押さえるべき詳細\n- \n\n### 次のアクション\n- \n\n内容：\n"
     },
     "ko-KR": {
       name: "요약 정리",
@@ -114,21 +114,21 @@ const BUILT_IN_PROMPT_TEMPLATE_LOCALES = {
     },
     "fr-FR": {
       name: "Résumer",
-      content: "Résume le contenu suivant en extrayant les conclusions clés, les détails importants et les prochaines actions concrètes. Utilise cette structure :\n\n### Conclusions clés\n- \n\n### Détails importants\n- \n\n### Prochaines actions\n- \n\nContenu :\n"
+      content: "Synthétise le contenu suivant en faisant ressortir les conclusions essentielles, les points importants et les actions concrètes à mener. Utilise cette structure :\n\n### Conclusions essentielles\n- \n\n### Points importants\n- \n\n### Actions à mener\n- \n\nContenu :\n"
     },
     "es-ES": {
       name: "Resumir",
-      content: "Resume el siguiente contenido y extrae las conclusiones clave, los detalles importantes y las próximas acciones concretas. Usa esta estructura:\n\n### Conclusiones clave\n- \n\n### Detalles importantes\n- \n\n### Próximas acciones\n- \n\nContenido:\n"
+      content: "Sintetiza el siguiente contenido y destaca las conclusiones esenciales, los puntos importantes y las acciones concretas que conviene realizar. Usa esta estructura:\n\n### Conclusiones esenciales\n- \n\n### Puntos importantes\n- \n\n### Acciones siguientes\n- \n\nContenido:\n"
     },
     "de-DE": {
       name: "Zusammenfassen",
-      content: "Fasse den folgenden Inhalt zusammen und extrahiere zentrale Schlussfolgerungen, wichtige Details und umsetzbare nächste Schritte. Nutze diese Struktur:\n\n### Zentrale Schlussfolgerungen\n- \n\n### Wichtige Details\n- \n\n### Nächste Schritte\n- \n\nInhalt:\n"
+      content: "Fasse den folgenden Inhalt zusammen und arbeite die wichtigsten Schlussfolgerungen, relevanten Details und konkreten nächsten Schritte heraus. Nutze diese Struktur:\n\n### Wichtigste Schlussfolgerungen\n- \n\n### Relevante Details\n- \n\n### Nächste Schritte\n- \n\nInhalt:\n"
     }
   },
   "translate-polish": {
     "zh-TW": {
       name: "翻譯潤飾",
-      content: "請將以下內容翻譯成自然、準確、專業的繁體中文，並在不改變原意的前提下提升表達流暢度。請先給出譯文，再列出 3 條關鍵措辭說明。\n\n內容：\n"
+      content: "請將以下內容翻譯成自然、準確且專業的繁體中文，並在不改變原意的前提下讓表達更流暢。請先提供譯文，再列出 3 點關鍵用詞說明。\n\n內容：\n"
     },
     "ja-JP": {
       name: "翻訳と推敲",
@@ -140,25 +140,25 @@ const BUILT_IN_PROMPT_TEMPLATE_LOCALES = {
     },
     "fr-FR": {
       name: "Traduire et améliorer",
-      content: "Traduis le contenu suivant en français naturel, précis et professionnel, puis améliore la fluidité sans changer le sens. Donne d’abord la traduction, puis liste 3 notes sur les choix de formulation importants.\n\nContenu :\n"
+      content: "Traduis le contenu suivant dans un français naturel, précis et professionnel, puis améliore la fluidité sans altérer le sens. Fournis d’abord la traduction, puis 3 remarques sur les choix de formulation importants.\n\nContenu :\n"
     },
     "es-ES": {
       name: "Traducir y pulir",
-      content: "Traduce el siguiente contenido a un español natural, preciso y profesional, y mejora la fluidez sin cambiar el significado. Primero ofrece la traducción y luego enumera 3 notas sobre decisiones clave de redacción.\n\nContenido:\n"
+      content: "Traduce el siguiente contenido a un español natural, preciso y profesional, y mejora la fluidez sin alterar el significado. Primero ofrece la traducción y después incluye 3 notas sobre decisiones importantes de redacción.\n\nContenido:\n"
     },
     "de-DE": {
-      name: "Übersetzen und glätten",
-      content: "Übersetze den folgenden Inhalt in natürliches, präzises und professionelles Deutsch und verbessere die Lesbarkeit, ohne die Bedeutung zu verändern. Gib zuerst die Übersetzung aus und liste danach 3 Hinweise zu wichtigen Formulierungsentscheidungen.\n\nInhalt:\n"
+      name: "Übersetzen und verbessern",
+      content: "Übersetze den folgenden Inhalt in natürliches, präzises und professionelles Deutsch und verbessere die sprachliche Wirkung, ohne die Bedeutung zu verändern. Gib zuerst die Übersetzung aus und nenne anschließend 3 Hinweise zu wichtigen Formulierungsentscheidungen.\n\nInhalt:\n"
     }
   },
   "code-review": {
     "zh-TW": {
       name: "程式碼審查",
-      content: "請以資深工程師視角審查以下程式碼，優先指出 bug、邊界條件、可維護性和測試缺口。輸出結構：\n\n### 高優先級問題\n- \n\n### 中低優先級建議\n- \n\n### 測試建議\n- \n\n程式碼：\n```語言\n\n```"
+      content: "請以資深工程師的角度審查以下程式碼，優先指出 bug、邊界條件、可維護性問題與測試缺口。請使用以下結構：\n\n### 高優先級問題\n- \n\n### 中低優先級建議\n- \n\n### 測試建議\n- \n\n程式碼：\n```language\n\n```"
     },
     "ja-JP": {
       name: "コードレビュー",
-      content: "シニアエンジニアの視点で以下のコードをレビューしてください。バグ、境界条件、保守性、テスト不足を優先して指摘してください。次の構成で出力してください：\n\n### 高優先度の問題\n- \n\n### 中低優先度の提案\n- \n\n### テスト提案\n- \n\nコード：\n```language\n\n```"
+      content: "シニアエンジニアの視点で以下のコードをレビューしてください。バグ、境界条件、保守性の問題、テスト不足を優先して指摘してください。次の構成で出力してください。\n\n### 優先度の高い問題\n- \n\n### 中〜低優先度の提案\n- \n\n### テストの提案\n- \n\nコード：\n```language\n\n```"
     },
     "ko-KR": {
       name: "코드 리뷰",
@@ -166,7 +166,7 @@ const BUILT_IN_PROMPT_TEMPLATE_LOCALES = {
     },
     "fr-FR": {
       name: "Revue de code",
-      content: "Analyse le code suivant avec le regard d’un ingénieur senior. Priorise les bugs, les cas limites, la maintenabilité et les manques de tests. Utilise cette structure :\n\n### Problèmes prioritaires\n- \n\n### Suggestions moyennes/faibles\n- \n\n### Suggestions de tests\n- \n\nCode :\n```language\n\n```"
+      content: "Relis le code suivant avec le regard d’un ingénieur senior. Priorise les bugs, les cas limites, les problèmes de maintenabilité et les manques de tests. Utilise cette structure :\n\n### Problèmes prioritaires\n- \n\n### Suggestions de priorité moyenne ou faible\n- \n\n### Suggestions de tests\n- \n\nCode :\n```language\n\n```"
     },
     "es-ES": {
       name: "Revisión de código",
@@ -174,17 +174,17 @@ const BUILT_IN_PROMPT_TEMPLATE_LOCALES = {
     },
     "de-DE": {
       name: "Code Review",
-      content: "Überprüfe den folgenden Code aus Sicht eines Senior Engineers. Priorisiere Bugs, Randfälle, Wartbarkeit und Testlücken. Nutze diese Struktur:\n\n### Probleme mit hoher Priorität\n- \n\n### Vorschläge mittlerer/niedriger Priorität\n- \n\n### Testvorschläge\n- \n\nCode:\n```language\n\n```"
+      content: "Prüfe den folgenden Code aus der Perspektive eines Senior Engineers. Priorisiere Bugs, Randfälle, Wartbarkeitsprobleme und Testlücken. Nutze diese Struktur:\n\n### Probleme mit hoher Priorität\n- \n\n### Vorschläge mit mittlerer oder niedriger Priorität\n- \n\n### Testvorschläge\n- \n\nCode:\n```language\n\n```"
     }
   },
   debug: {
     "zh-TW": {
       name: "問題排查",
-      content: "請協助我排查以下問題。請先列出最可能原因，再給出逐步驗證方法和修復建議。\n\n現象：\n\n環境：\n\n已嘗試：\n\n錯誤 / 日誌：\n"
+      content: "請協助我排查以下問題。請先列出最可能的原因，再提供逐步驗證方法與修復建議。\n\n現象：\n\n環境：\n\n已嘗試：\n\n錯誤 / 日誌：\n"
     },
     "ja-JP": {
       name: "トラブルシューティング",
-      content: "以下の問題の切り分けを手伝ってください。まず最も可能性の高い原因を列挙し、その後に段階的な検証方法と修正案を提示してください。\n\n現象：\n\n環境：\n\n試したこと：\n\nエラー / ログ：\n"
+      content: "以下の問題の切り分けを手伝ってください。まず可能性の高い原因を整理し、その後に段階的な確認方法と修正案を提示してください。\n\n現象：\n\n環境：\n\n試したこと：\n\nエラー / ログ：\n"
     },
     "ko-KR": {
       name: "문제 해결",
@@ -192,7 +192,7 @@ const BUILT_IN_PROMPT_TEMPLATE_LOCALES = {
     },
     "fr-FR": {
       name: "Dépannage",
-      content: "Aide-moi à diagnostiquer le problème suivant. Liste d’abord les causes les plus probables, puis propose une méthode de vérification étape par étape et des correctifs.\n\nSymptômes :\n\nEnvironnement :\n\nDéjà essayé :\n\nErreurs / journaux :\n"
+      content: "Aide-moi à diagnostiquer le problème suivant. Commence par lister les causes les plus probables, puis propose une méthode de vérification étape par étape et des pistes de correction.\n\nSymptômes :\n\nEnvironnement :\n\nDéjà essayé :\n\nErreurs / journaux :\n"
     },
     "es-ES": {
       name: "Diagnóstico",
@@ -206,7 +206,7 @@ const BUILT_IN_PROMPT_TEMPLATE_LOCALES = {
   writing: {
     "zh-TW": {
       name: "寫作改稿",
-      content: "請幫我改寫以下內容，使其更清晰、有說服力、語氣自然。請給出：\n\n1. 改寫版本\n2. 主要改動說明\n3. 可選的更精簡版本\n\n原文：\n"
+      content: "請幫我改寫以下內容，讓表達更清晰、更有說服力，語氣也更自然。請提供：\n\n1. 改寫版本\n2. 主要改動說明\n3. 可選的精簡版本\n\n原文：\n"
     },
     "ja-JP": {
       name: "文章の推敲",
@@ -218,25 +218,25 @@ const BUILT_IN_PROMPT_TEMPLATE_LOCALES = {
     },
     "fr-FR": {
       name: "Réécriture",
-      content: "Réécris le contenu suivant pour le rendre plus clair, plus convaincant et naturel. Fournis :\n\n1. Version réécrite\n2. Explication des principaux changements\n3. Version plus courte optionnelle\n\nTexte original :\n"
+      content: "Réécris le contenu suivant pour le rendre plus clair, plus convaincant et plus naturel. Fournis :\n\n1. Une version réécrite\n2. Les principaux changements expliqués\n3. Une version plus courte, si utile\n\nTexte original :\n"
     },
     "es-ES": {
       name: "Reescritura",
-      content: "Reescribe el siguiente contenido para que sea más claro, persuasivo y natural. Proporciona:\n\n1. Versión reescrita\n2. Explicación de los cambios principales\n3. Versión más breve opcional\n\nOriginal:\n"
+      content: "Reescribe el siguiente contenido para que resulte más claro, persuasivo y natural. Proporciona:\n\n1. Una versión reescrita\n2. Una explicación de los cambios principales\n3. Una versión más breve, si aporta valor\n\nOriginal:\n"
     },
     "de-DE": {
       name: "Text überarbeiten",
-      content: "Überarbeite den folgenden Text, damit er klarer, überzeugender und natürlicher klingt. Gib aus:\n\n1. Überarbeitete Version\n2. Erklärung der wichtigsten Änderungen\n3. Optionale kürzere Version\n\nOriginal:\n"
+      content: "Überarbeite den folgenden Text, damit er klarer, überzeugender und natürlicher wirkt. Gib Folgendes aus:\n\n1. Überarbeitete Version\n2. Erklärung der wichtigsten Änderungen\n3. Kürzere Fassung, falls sinnvoll\n\nOriginal:\n"
     }
   },
   plan: {
     "zh-TW": {
       name: "任務規劃",
-      content: "請把以下目標拆解成可執行計畫。輸出結構：\n\n### 目標理解\n\n### 里程碑\n- \n\n### 具體任務\n- \n\n### 風險與依賴\n- \n\n目標：\n"
+      content: "請將以下目標拆解成可執行的計畫。請使用以下結構：\n\n### 目標理解\n\n### 里程碑\n- \n\n### 具體任務\n- \n\n### 風險與依賴\n- \n\n目標：\n"
     },
     "ja-JP": {
       name: "タスク計画",
-      content: "以下の目標を実行可能な計画に分解してください。次の構成で出力してください：\n\n### 目標の理解\n\n### マイルストーン\n- \n\n### 具体的なタスク\n- \n\n### リスクと依存関係\n- \n\n目標：\n"
+      content: "以下の目標を、実行に移せる計画へ分解してください。次の構成で出力してください。\n\n### 目標の理解\n\n### マイルストーン\n- \n\n### 具体的なタスク\n- \n\n### リスクと依存関係\n- \n\n目標：\n"
     },
     "ko-KR": {
       name: "작업 계획",
@@ -244,7 +244,7 @@ const BUILT_IN_PROMPT_TEMPLATE_LOCALES = {
     },
     "fr-FR": {
       name: "Planification",
-      content: "Décompose l’objectif suivant en plan d’action. Utilise cette structure :\n\n### Compréhension de l’objectif\n\n### Jalons\n- \n\n### Tâches concrètes\n- \n\n### Risques et dépendances\n- \n\nObjectif :\n"
+      content: "Décompose l’objectif suivant en un plan d’action concret. Utilise cette structure :\n\n### Compréhension de l’objectif\n\n### Jalons\n- \n\n### Tâches concrètes\n- \n\n### Risques et dépendances\n- \n\nObjectif :\n"
     },
     "es-ES": {
       name: "Planificación",

@@ -1168,8 +1168,8 @@ button:disabled {
   align-items: center;
   justify-content: center;
   gap: var(--space-md);
-  min-height: 44px;
-  padding: var(--space-xs) var(--scrollbar-reserve) var(--space-xs) 0;
+  min-height: 56px;
+  padding: var(--space-control-y) var(--scrollbar-reserve) var(--space-control-y) 0;
   border-bottom: 0;
   background: var(--scheme-chat-surface);
   backdrop-filter: none;
@@ -1185,7 +1185,7 @@ button:disabled {
     linear-gradient(
       to bottom,
       var(--scheme-chat-surface) 0,
-      var(--scheme-chat-surface) 44px,
+      var(--scheme-chat-surface) 56px,
       color-mix(in srgb, var(--scheme-chat-surface) 0%, transparent) 100%
     );
 }
