@@ -98,6 +98,165 @@ const BUILT_IN_PROMPT_TEMPLATES = [
   }
 ];
 
+const BUILT_IN_PROMPT_TEMPLATE_LOCALES = {
+  summarize: {
+    "zh-TW": {
+      name: "總結提煉",
+      content: "請總結以下內容，提煉關鍵結論、重要細節和可執行事項。輸出結構：\n\n### 關鍵結論\n- \n\n### 重要細節\n- \n\n### 後續行動\n- \n\n內容：\n"
+    },
+    "ja-JP": {
+      name: "要約",
+      content: "以下の内容を要約し、重要な結論、重要な詳細、実行可能な次の行動を抽出してください。次の構成で出力してください：\n\n### 重要な結論\n- \n\n### 重要な詳細\n- \n\n### 次の行動\n- \n\n内容：\n"
+    },
+    "ko-KR": {
+      name: "요약 정리",
+      content: "다음 내용을 요약하고 핵심 결론, 중요한 세부 사항, 실행 가능한 다음 단계를 추려 주세요. 다음 구조로 출력하세요:\n\n### 핵심 결론\n- \n\n### 중요한 세부 사항\n- \n\n### 다음 행동\n- \n\n내용:\n"
+    },
+    "fr-FR": {
+      name: "Résumer",
+      content: "Résume le contenu suivant en extrayant les conclusions clés, les détails importants et les prochaines actions concrètes. Utilise cette structure :\n\n### Conclusions clés\n- \n\n### Détails importants\n- \n\n### Prochaines actions\n- \n\nContenu :\n"
+    },
+    "es-ES": {
+      name: "Resumir",
+      content: "Resume el siguiente contenido y extrae las conclusiones clave, los detalles importantes y las próximas acciones concretas. Usa esta estructura:\n\n### Conclusiones clave\n- \n\n### Detalles importantes\n- \n\n### Próximas acciones\n- \n\nContenido:\n"
+    },
+    "de-DE": {
+      name: "Zusammenfassen",
+      content: "Fasse den folgenden Inhalt zusammen und extrahiere zentrale Schlussfolgerungen, wichtige Details und umsetzbare nächste Schritte. Nutze diese Struktur:\n\n### Zentrale Schlussfolgerungen\n- \n\n### Wichtige Details\n- \n\n### Nächste Schritte\n- \n\nInhalt:\n"
+    }
+  },
+  "translate-polish": {
+    "zh-TW": {
+      name: "翻譯潤飾",
+      content: "請將以下內容翻譯成自然、準確、專業的繁體中文，並在不改變原意的前提下提升表達流暢度。請先給出譯文，再列出 3 條關鍵措辭說明。\n\n內容：\n"
+    },
+    "ja-JP": {
+      name: "翻訳と推敲",
+      content: "以下の内容を自然で正確かつ専門的な日本語に翻訳し、意味を変えずに読みやすさを高めてください。まず訳文を示し、その後に重要な表現選びについて 3 点説明してください。\n\n内容：\n"
+    },
+    "ko-KR": {
+      name: "번역 및 다듬기",
+      content: "다음 내용을 자연스럽고 정확하며 전문적인 한국어로 번역하고, 의미를 바꾸지 않는 범위에서 표현을 더 매끄럽게 다듬어 주세요. 먼저 번역문을 제시한 뒤, 핵심 표현 선택에 대한 설명 3가지를 적어 주세요.\n\n내용:\n"
+    },
+    "fr-FR": {
+      name: "Traduire et améliorer",
+      content: "Traduis le contenu suivant en français naturel, précis et professionnel, puis améliore la fluidité sans changer le sens. Donne d’abord la traduction, puis liste 3 notes sur les choix de formulation importants.\n\nContenu :\n"
+    },
+    "es-ES": {
+      name: "Traducir y pulir",
+      content: "Traduce el siguiente contenido a un español natural, preciso y profesional, y mejora la fluidez sin cambiar el significado. Primero ofrece la traducción y luego enumera 3 notas sobre decisiones clave de redacción.\n\nContenido:\n"
+    },
+    "de-DE": {
+      name: "Übersetzen und glätten",
+      content: "Übersetze den folgenden Inhalt in natürliches, präzises und professionelles Deutsch und verbessere die Lesbarkeit, ohne die Bedeutung zu verändern. Gib zuerst die Übersetzung aus und liste danach 3 Hinweise zu wichtigen Formulierungsentscheidungen.\n\nInhalt:\n"
+    }
+  },
+  "code-review": {
+    "zh-TW": {
+      name: "程式碼審查",
+      content: "請以資深工程師視角審查以下程式碼，優先指出 bug、邊界條件、可維護性和測試缺口。輸出結構：\n\n### 高優先級問題\n- \n\n### 中低優先級建議\n- \n\n### 測試建議\n- \n\n程式碼：\n```語言\n\n```"
+    },
+    "ja-JP": {
+      name: "コードレビュー",
+      content: "シニアエンジニアの視点で以下のコードをレビューしてください。バグ、境界条件、保守性、テスト不足を優先して指摘してください。次の構成で出力してください：\n\n### 高優先度の問題\n- \n\n### 中低優先度の提案\n- \n\n### テスト提案\n- \n\nコード：\n```language\n\n```"
+    },
+    "ko-KR": {
+      name: "코드 리뷰",
+      content: "시니어 엔지니어 관점에서 다음 코드를 리뷰해 주세요. 버그, 경계 조건, 유지보수성, 테스트 공백을 우선적으로 지적하세요. 다음 구조로 출력하세요:\n\n### 높은 우선순위 문제\n- \n\n### 중간/낮은 우선순위 제안\n- \n\n### 테스트 제안\n- \n\n코드:\n```language\n\n```"
+    },
+    "fr-FR": {
+      name: "Revue de code",
+      content: "Analyse le code suivant avec le regard d’un ingénieur senior. Priorise les bugs, les cas limites, la maintenabilité et les manques de tests. Utilise cette structure :\n\n### Problèmes prioritaires\n- \n\n### Suggestions moyennes/faibles\n- \n\n### Suggestions de tests\n- \n\nCode :\n```language\n\n```"
+    },
+    "es-ES": {
+      name: "Revisión de código",
+      content: "Revisa el siguiente código desde la perspectiva de un ingeniero senior. Prioriza bugs, casos límite, mantenibilidad y faltas de pruebas. Usa esta estructura:\n\n### Problemas de alta prioridad\n- \n\n### Sugerencias de prioridad media/baja\n- \n\n### Sugerencias de pruebas\n- \n\nCódigo:\n```language\n\n```"
+    },
+    "de-DE": {
+      name: "Code Review",
+      content: "Überprüfe den folgenden Code aus Sicht eines Senior Engineers. Priorisiere Bugs, Randfälle, Wartbarkeit und Testlücken. Nutze diese Struktur:\n\n### Probleme mit hoher Priorität\n- \n\n### Vorschläge mittlerer/niedriger Priorität\n- \n\n### Testvorschläge\n- \n\nCode:\n```language\n\n```"
+    }
+  },
+  debug: {
+    "zh-TW": {
+      name: "問題排查",
+      content: "請協助我排查以下問題。請先列出最可能原因，再給出逐步驗證方法和修復建議。\n\n現象：\n\n環境：\n\n已嘗試：\n\n錯誤 / 日誌：\n"
+    },
+    "ja-JP": {
+      name: "トラブルシューティング",
+      content: "以下の問題の切り分けを手伝ってください。まず最も可能性の高い原因を列挙し、その後に段階的な検証方法と修正案を提示してください。\n\n現象：\n\n環境：\n\n試したこと：\n\nエラー / ログ：\n"
+    },
+    "ko-KR": {
+      name: "문제 해결",
+      content: "다음 문제를 진단할 수 있도록 도와주세요. 먼저 가장 가능성 높은 원인을 나열하고, 단계별 검증 방법과 수정 제안을 제시해 주세요.\n\n현상:\n\n환경:\n\n이미 시도한 것:\n\n오류 / 로그:\n"
+    },
+    "fr-FR": {
+      name: "Dépannage",
+      content: "Aide-moi à diagnostiquer le problème suivant. Liste d’abord les causes les plus probables, puis propose une méthode de vérification étape par étape et des correctifs.\n\nSymptômes :\n\nEnvironnement :\n\nDéjà essayé :\n\nErreurs / journaux :\n"
+    },
+    "es-ES": {
+      name: "Diagnóstico",
+      content: "Ayúdame a diagnosticar el siguiente problema. Primero enumera las causas más probables y luego ofrece métodos de verificación paso a paso y propuestas de solución.\n\nSíntomas:\n\nEntorno:\n\nYa intentado:\n\nErrores / logs:\n"
+    },
+    "de-DE": {
+      name: "Fehlersuche",
+      content: "Hilf mir, das folgende Problem zu untersuchen. Liste zuerst die wahrscheinlichsten Ursachen auf und gib danach schrittweise Prüfmethoden und Lösungsvorschläge.\n\nSymptome:\n\nUmgebung:\n\nBereits versucht:\n\nFehler / Logs:\n"
+    }
+  },
+  writing: {
+    "zh-TW": {
+      name: "寫作改稿",
+      content: "請幫我改寫以下內容，使其更清晰、有說服力、語氣自然。請給出：\n\n1. 改寫版本\n2. 主要改動說明\n3. 可選的更精簡版本\n\n原文：\n"
+    },
+    "ja-JP": {
+      name: "文章の推敲",
+      content: "以下の文章を、より明確で説得力があり、自然な語調になるように書き直してください。次を出力してください：\n\n1. 書き直し版\n2. 主な変更点の説明\n3. 任意のより短い版\n\n原文：\n"
+    },
+    "ko-KR": {
+      name: "글 다듬기",
+      content: "다음 내용을 더 명확하고 설득력 있으며 자연스러운 톤으로 고쳐 써 주세요. 다음을 제공해 주세요:\n\n1. 수정본\n2. 주요 수정 사항 설명\n3. 선택 가능한 더 간결한 버전\n\n원문:\n"
+    },
+    "fr-FR": {
+      name: "Réécriture",
+      content: "Réécris le contenu suivant pour le rendre plus clair, plus convaincant et naturel. Fournis :\n\n1. Version réécrite\n2. Explication des principaux changements\n3. Version plus courte optionnelle\n\nTexte original :\n"
+    },
+    "es-ES": {
+      name: "Reescritura",
+      content: "Reescribe el siguiente contenido para que sea más claro, persuasivo y natural. Proporciona:\n\n1. Versión reescrita\n2. Explicación de los cambios principales\n3. Versión más breve opcional\n\nOriginal:\n"
+    },
+    "de-DE": {
+      name: "Text überarbeiten",
+      content: "Überarbeite den folgenden Text, damit er klarer, überzeugender und natürlicher klingt. Gib aus:\n\n1. Überarbeitete Version\n2. Erklärung der wichtigsten Änderungen\n3. Optionale kürzere Version\n\nOriginal:\n"
+    }
+  },
+  plan: {
+    "zh-TW": {
+      name: "任務規劃",
+      content: "請把以下目標拆解成可執行計畫。輸出結構：\n\n### 目標理解\n\n### 里程碑\n- \n\n### 具體任務\n- \n\n### 風險與依賴\n- \n\n目標：\n"
+    },
+    "ja-JP": {
+      name: "タスク計画",
+      content: "以下の目標を実行可能な計画に分解してください。次の構成で出力してください：\n\n### 目標の理解\n\n### マイルストーン\n- \n\n### 具体的なタスク\n- \n\n### リスクと依存関係\n- \n\n目標：\n"
+    },
+    "ko-KR": {
+      name: "작업 계획",
+      content: "다음 목표를 실행 가능한 계획으로 나누어 주세요. 다음 구조로 출력하세요:\n\n### 목표 이해\n\n### 마일스톤\n- \n\n### 구체적 작업\n- \n\n### 위험 및 의존성\n- \n\n목표:\n"
+    },
+    "fr-FR": {
+      name: "Planification",
+      content: "Décompose l’objectif suivant en plan d’action. Utilise cette structure :\n\n### Compréhension de l’objectif\n\n### Jalons\n- \n\n### Tâches concrètes\n- \n\n### Risques et dépendances\n- \n\nObjectif :\n"
+    },
+    "es-ES": {
+      name: "Planificación",
+      content: "Divide el siguiente objetivo en un plan accionable. Usa esta estructura:\n\n### Comprensión del objetivo\n\n### Hitos\n- \n\n### Tareas concretas\n- \n\n### Riesgos y dependencias\n- \n\nObjetivo:\n"
+    },
+    "de-DE": {
+      name: "Aufgabenplanung",
+      content: "Zerlege das folgende Ziel in einen umsetzbaren Plan. Nutze diese Struktur:\n\n### Zielverständnis\n\n### Meilensteine\n- \n\n### Konkrete Aufgaben\n- \n\n### Risiken und Abhängigkeiten\n- \n\nZiel:\n"
+    }
+  }
+};
+
 const DEFAULT_SETTINGS = {
   provider: "custom",
   preset: "deepseek",
@@ -2335,11 +2494,15 @@ function countVisibleMessages(messages) {
 }
 
 function localizedTemplateName(template) {
-  return state.settings.language === "en-US" && template.nameEn ? template.nameEn : template.name;
+  const language = uiLanguage();
+  return BUILT_IN_PROMPT_TEMPLATE_LOCALES[template.id]?.[language]?.name
+    || (language === "en-US" && template.nameEn ? template.nameEn : template.name);
 }
 
 function localizedTemplateContent(template) {
-  return state.settings.language === "en-US" && template.contentEn ? template.contentEn : template.content;
+  const language = uiLanguage();
+  return BUILT_IN_PROMPT_TEMPLATE_LOCALES[template.id]?.[language]?.content
+    || (language === "en-US" && template.contentEn ? template.contentEn : template.content);
 }
 
 function fillPromptTemplateEditor(template = null) {
