@@ -1377,15 +1377,16 @@ button:disabled {
 
 .settings-form {
   display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
   flex: 1 1 auto;
   gap: var(--space-md);
   width: 100%;
   max-width: none;
   min-width: 0;
   min-height: 0;
-  overflow-y: auto;
+  overflow: hidden;
   align-content: start;
-  padding: 0 var(--space-xs) 0 0;
+  padding: 0;
 }
 
 .settings-body {
@@ -1454,6 +1455,10 @@ button:disabled {
   grid-template-columns: 1fr;
   gap: var(--space-md);
   min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  align-content: start;
+  padding: 0 var(--space-xs) 0 0;
 }
 
 .settings .settings-tabs {
@@ -1508,6 +1513,17 @@ button:disabled {
 
 .settings .settings-actions button {
   min-width: 0;
+}
+
+.settings-footer-actions {
+  justify-content: flex-end;
+  padding: var(--space-md) var(--space-xs) 0 0;
+  border-top: 1px solid var(--color-border);
+  background: var(--scheme-panel-surface);
+}
+
+.settings-footer-actions button {
+  min-width: 112px;
 }
 
 .settings-tab-panel .wide-field {
@@ -1602,7 +1618,7 @@ label {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  justify-content: flex-start;
+  justify-content: flex-end;
   gap: var(--space-sm);
 }
 
@@ -1622,7 +1638,7 @@ label {
 }
 
 .data-settings-panel .danger-section > button {
-  justify-self: start;
+  justify-self: end;
 }
 
 input.dirty,
