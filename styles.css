@@ -1290,21 +1290,32 @@ button:disabled {
   display: grid;
   flex: 1 1 auto;
   gap: var(--space-md);
-  width: min(100%, var(--content-width));
-  max-width: var(--content-width);
+  width: 100%;
+  max-width: none;
   min-height: 0;
-  margin-inline: auto;
   overflow-y: auto;
   align-content: start;
-  padding-right: var(--space-xs);
+  padding: 0 var(--space-xs) 0 0;
+}
+
+.settings-body {
+  display: grid;
+  grid-template-columns: minmax(168px, 0.28fr) minmax(0, 1fr);
+  gap: var(--space-lg);
+  width: min(100%, var(--content-width));
+  min-height: 0;
+  flex: 1 1 auto;
+  margin-inline: auto;
 }
 
 .settings-tabs {
   display: grid;
   grid-template-columns: 1fr;
+  align-content: start;
   gap: var(--space-xs);
-  width: min(100%, var(--content-width));
-  margin: 0 auto var(--space-md);
+  width: 100%;
+  height: fit-content;
+  margin: 0;
   padding: var(--space-xs);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -1313,7 +1324,9 @@ button:disabled {
 
 .settings-tab {
   justify-content: flex-start;
-  min-height: 32px;
+  width: 100%;
+  min-height: 40px;
+  padding-inline: var(--space-sm);
   border-color: transparent;
   color: var(--color-secondary);
   border-radius: var(--radius-md);
@@ -1330,6 +1343,17 @@ button:disabled {
   border-color: var(--color-tertiary);
   color: var(--color-on-dark);
   background: var(--color-tertiary);
+}
+
+@media (max-width: 760px) {
+  .settings-body {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .settings-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .settings-tab-panel {

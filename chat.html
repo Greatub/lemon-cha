@@ -59,13 +59,14 @@
                 <h2 id="settingsTitle" data-i18n="settingsTitle">设置</h2>
               </div>
             </div>
-            <div class="settings-tabs" role="tablist" aria-label="设置分类">
-              <button id="generalSettingsTab" class="settings-tab active" type="button" role="tab" aria-selected="true" aria-controls="generalSettingsPanel" data-tab="general" data-i18n="generalSettingsTab">通用设置</button>
-              <button id="modelSettingsTab" class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="modelSettingsPanel" data-tab="model" data-i18n="modelSettingsTab">模型设置</button>
-              <button id="promptSettingsTab" class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="promptSettingsPanel" data-tab="prompt" data-i18n="promptSettingsTab">提示词预设</button>
-              <button id="dataSettingsTab" class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="dataSettingsPanel" data-tab="data" data-i18n="dataSettingsTab">数据与重置</button>
-            </div>
-            <form id="settingsForm" class="settings-form">
+            <div class="settings-body">
+              <div class="settings-tabs" role="tablist" aria-label="设置分类">
+                <button id="generalSettingsTab" class="settings-tab active" type="button" role="tab" aria-selected="true" aria-controls="generalSettingsPanel" data-tab="general" data-i18n="generalSettingsTab">通用设置</button>
+                <button id="modelSettingsTab" class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="modelSettingsPanel" data-tab="model" data-i18n="modelSettingsTab">模型设置</button>
+                <button id="promptSettingsTab" class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="promptSettingsPanel" data-tab="prompt" data-i18n="promptSettingsTab">提示词预设</button>
+                <button id="dataSettingsTab" class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="dataSettingsPanel" data-tab="data" data-i18n="dataSettingsTab">数据与重置</button>
+              </div>
+              <form id="settingsForm" class="settings-form">
               <div id="generalSettingsPanel" class="settings-tab-panel active" role="tabpanel" aria-labelledby="generalSettingsTab">
                 <label>
                   <span data-i18n="interfaceLanguage">界面语言</span>
@@ -228,7 +229,8 @@
               <div class="settings-actions">
                 <button id="saveSettings" type="submit">保存</button>
               </div>
-            </form>
+              </form>
+            </div>
           </div>
         </section>
 
