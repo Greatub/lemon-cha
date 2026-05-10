@@ -57,14 +57,14 @@
   --space-xl: 32px;
   --control-height: 36px;
   --compact-control-height: 24px;
-  --sidebar-item-height: 48px;
+  --sidebar-item-height: 40px;
   --sidebar-collapsed-width: 48px;
   --icon-button-size: 36px;
   --icon-size-sm: 14px;
   --typing-dot-size: 5px;
   --typing-dot-gap: 3px;
   --select-arrow-size: 5px;
-  --select-scrollbar-inset: 18px;
+  --select-scrollbar-inset: 26px;
   --collapsed-sidebar-inline-padding: 5px;
   --composer-action-inset: 14px;
   --content-width: 920px;
@@ -689,7 +689,7 @@ button:disabled {
   width: 100%;
   min-width: 0;
   min-height: var(--sidebar-item-height);
-  padding: var(--space-sm) var(--space-control-y);
+  padding: 0 var(--space-control-y);
   border-color: transparent;
   border-radius: var(--radius-control);
   color: var(--color-primary);
@@ -715,7 +715,7 @@ button:disabled {
   align-items: center;
   gap: var(--space-sm);
   min-height: var(--sidebar-item-height);
-  padding: var(--space-sm) var(--space-control-y);
+  padding: 0 var(--space-control-y);
   border-radius: var(--radius-control);
   border-color: transparent;
   color: var(--color-primary);
@@ -929,11 +929,10 @@ button:disabled {
   grid-template-columns: 28px minmax(0, 1fr) 28px;
   align-items: center;
   column-gap: var(--space-sm);
-  row-gap: var(--space-2xs);
   width: 100%;
   min-width: 0;
   min-height: var(--sidebar-item-height);
-  padding: var(--space-sm) var(--space-control-y);
+  padding: 0 var(--space-control-y);
   border: 0;
   border-radius: var(--radius-control);
   color: var(--color-primary);
@@ -953,7 +952,7 @@ button:disabled {
 .conversation-icon {
   display: grid;
   grid-column: 1;
-  grid-row: 1 / span 2;
+  grid-row: 1;
   place-items: center;
   justify-self: center;
   width: 28px;
@@ -992,16 +991,14 @@ button:disabled {
 }
 
 .conversation-meta {
-  grid-column: 2;
-  color: var(--color-secondary);
-  font-size: 0.6875rem;
+  display: none;
 }
 
 .conversation-actions {
   display: flex;
   position: relative;
   grid-column: 3;
-  grid-row: 1 / span 2;
+  grid-row: 1;
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
@@ -1014,7 +1011,7 @@ button:disabled {
   display: flex;
   position: relative;
   grid-column: 3;
-  grid-row: 1 / span 2;
+  grid-row: 1;
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
@@ -1870,7 +1867,7 @@ select:focus {
   width: 100%;
   min-width: 0;
   min-height: var(--sidebar-item-height);
-  padding: var(--space-sm) var(--space-control-y);
+  padding: 0 var(--space-control-y);
   border-color: transparent;
   border-radius: var(--radius-control);
   color: var(--color-primary);
