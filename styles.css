@@ -1566,10 +1566,28 @@ label {
   background: var(--scheme-input-surface);
 }
 
+.data-settings-panel {
+  align-content: start;
+  gap: var(--space-lg);
+}
+
+.data-settings-panel .settings-section {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
 .settings-section h3 {
   margin: 0;
   color: var(--color-primary);
   font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.data-settings-panel .settings-section h3 {
+  color: var(--color-secondary);
+  font-family: var(--font-label);
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
@@ -1581,19 +1599,30 @@ label {
 }
 
 .settings-actions-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  align-items: stretch;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: var(--space-sm);
 }
 
 .settings-actions-grid button,
 .danger-section > button {
-  justify-content: flex-start;
-  width: 100%;
+  justify-content: center;
+  width: auto;
+  max-width: 100%;
 }
 
 .danger-section {
   background: color-mix(in srgb, var(--color-danger-bg) 52%, var(--scheme-input-surface));
+}
+
+.data-settings-panel .danger-section {
+  background: transparent;
+}
+
+.data-settings-panel .danger-section > button {
+  justify-self: start;
 }
 
 input.dirty,
