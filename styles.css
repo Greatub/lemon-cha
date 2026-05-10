@@ -64,6 +64,7 @@
   --typing-dot-size: 5px;
   --typing-dot-gap: 3px;
   --select-arrow-size: 5px;
+  --select-scrollbar-inset: 18px;
   --collapsed-sidebar-inline-padding: 5px;
   --composer-action-inset: 14px;
   --content-width: 920px;
@@ -1651,7 +1652,7 @@ select {
   max-height: 280px;
   clip-path: inset(0 round var(--radius-control));
   overflow-y: auto;
-  padding: var(--space-md) var(--space-xs);
+  padding: var(--space-xs);
   border: 0;
   border-radius: var(--radius-control);
   background: var(--scheme-panel-surface);
@@ -1666,13 +1667,13 @@ select {
 }
 
 .custom-select-menu::-webkit-scrollbar-track {
-  margin-block: var(--space-lg);
+  margin-block: var(--select-scrollbar-inset);
   background: transparent;
 }
 
 .custom-select-menu::-webkit-scrollbar-button {
   display: block;
-  height: var(--space-md);
+  height: var(--select-scrollbar-inset);
   background: transparent;
 }
 
