@@ -1338,7 +1338,15 @@ function setPromptTemplateDirty(dirty) {
 }
 
 function confirmDiscardPromptTemplateChanges() {
-  return !state.promptTemplateDirty || confirm(t("promptTemplateUnsaved"));
+  if (!state.promptTemplateDirty) {
+    return true;
+  }
+
+  const shouldDiscard = confirm(t("promptTemplateUnsaved"));
+  if (shouldDiscard) {
+    setPromptTemplateDirty(false);
+  }
+  return shouldDiscard;
 }
 
 function currentPromptTemplateDraft() {
