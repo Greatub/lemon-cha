@@ -281,6 +281,7 @@ const UI_TEXT = {
     confirmResetPromptTemplate: "重置当前提示词预设编辑内容？",
     confirmFactoryResetFirst: "恢复出厂设置会清空所有设置、API Key、提示词预设和对话历史。确定继续吗？",
     confirmFactoryResetSecond: "请再次确认：此操作无法撤销。继续恢复出厂设置吗？",
+    settingsUnsaved: "当前设置有未保存修改，离开后会丢失。继续吗？",
     confirmClearHistory: "确定清空所有对话历史吗？",
     folderName: "文件夹名称",
     renameFolder: "输入新的文件夹名称",
@@ -443,6 +444,7 @@ const UI_TEXT = {
     confirmResetPromptTemplate: "Reset the current prompt preset editor content?",
     confirmFactoryResetFirst: "Factory reset will clear all settings, API keys, prompt presets, and chat history. Continue?",
     confirmFactoryResetSecond: "Please confirm again: this cannot be undone. Continue factory reset?",
+    settingsUnsaved: "Current settings have unsaved changes. Leave and discard them?",
     confirmClearHistory: "Clear all conversation history?",
     folderName: "Folder name",
     renameFolder: "Enter a new folder name",
@@ -469,6 +471,11 @@ const state = {
   activePort: null,
   sidebarCollapsed: false,
   settingsPageOpen: false,
+  settingsSnapshot: null,
+  settingsDirtySections: {
+    general: false,
+    model: false
+  },
   promptTemplateDirty: false,
   lastPromptTemplateManageValue: ""
 };
@@ -544,6 +551,24 @@ let promptInputComposing = false;
 const customSelects = new Map();
 const systemThemeQuery = window.matchMedia?.("(prefers-color-scheme: dark)");
 const THEME_MODES = ["light", "dark", "system"];
+const GENERAL_SETTINGS_KEYS = ["language", "answerLanguage", "translationLanguage", "colorScheme", "theme"];
+const MODEL_SETTINGS_KEYS = [
+  "provider",
+  "preset",
+  "customEndpoint",
+  "customModel",
+  "customApiKey",
+  "customFormat",
+  "modelConfigs",
+  "ollamaEndpoint",
+  "ollamaModel",
+  "temperature",
+  "maxTokens",
+  "historyLimit",
+  "systemPrompt",
+  "defaultPresetId",
+  "memoryEnabled"
+];
 
 const ACTION_ICON_MAP = {
   copy: "copy",
@@ -1026,11 +1051,22 @@ function closeSettingsMenu() {
 }
 
 function showSettingsPage(show) {
+  if (show && !state.settingsPageOpen) {
+    captureSettingsSnapshot();
+  }
   state.settingsPageOpen = show;
   els.settingsPanel.classList.toggle("hidden", !show);
   els.workspace.classList.toggle("settings-open", show);
   document.body.classList.toggle("settings-open", show);
   els.settingsToggle.setAttribute("aria-expanded", String(show));
+}
+
+function requestCloseSettingsPage() {
+  if (!confirmDiscardAllSettingsChanges()) {
+    return false;
+  }
+  showSettingsPage(false);
+  return true;
 }
 
 function activateSettingsTab(tabName) {
@@ -1337,16 +1373,86 @@ function setPromptTemplateDirty(dirty) {
   els.promptTemplateNameInput?.classList.toggle("dirty", state.promptTemplateDirty);
 }
 
-function confirmDiscardPromptTemplateChanges() {
-  if (!state.promptTemplateDirty) {
+function cloneSettings(settings) {
+  if (settings === undefined) {
+    return undefined;
+  }
+  return JSON.parse(JSON.stringify(settings || {}));
+}
+
+function captureSettingsSnapshot({ resetPrompt = true } = {}) {
+  state.settingsSnapshot = cloneSettings(state.settings);
+  setSettingsSectionDirty("general", false);
+  setSettingsSectionDirty("model", false);
+  if (resetPrompt) {
+    setPromptTemplateDirty(false);
+  }
+}
+
+function setSettingsSectionDirty(section, dirty) {
+  if (section === "prompt") {
+    setPromptTemplateDirty(dirty);
+    return;
+  }
+  state.settingsDirtySections[section] = Boolean(dirty);
+  document.querySelector(`#${section}SettingsPanel`)?.classList.toggle("dirty", Boolean(dirty));
+}
+
+function isSettingsSectionDirty(section) {
+  return section === "prompt" ? state.promptTemplateDirty : Boolean(state.settingsDirtySections[section]);
+}
+
+function restoreSettingsKeys(keys) {
+  if (!state.settingsSnapshot) return;
+  for (const key of keys) {
+    if (key === "modelConfigs") {
+      state.settings.modelConfigs = cloneSettings(state.settingsSnapshot.modelConfigs || {});
+    } else {
+      state.settings[key] = cloneSettings(state.settingsSnapshot[key]);
+    }
+  }
+}
+
+function discardSettingsSection(section) {
+  if (section === "general") {
+    restoreSettingsKeys(GENERAL_SETTINGS_KEYS);
+    applyTheme();
+    render();
+  } else if (section === "model") {
+    restoreSettingsKeys(MODEL_SETTINGS_KEYS);
+    syncSettingsToForm();
+    renderToolbarModelOptions(getActiveConfig());
+    maybeAutoCheckLocalModel();
+    syncCustomSelects();
+  } else if (section === "prompt") {
+    fillPromptTemplateEditor(getPromptTemplate(els.promptTemplateManageSelect.value));
+  }
+  setSettingsSectionDirty(section, false);
+}
+
+function confirmDiscardSettingsSection(section) {
+  if (!isSettingsSectionDirty(section)) {
     return true;
   }
 
-  const shouldDiscard = confirm(t("promptTemplateUnsaved"));
+  const shouldDiscard = confirm(section === "prompt" ? t("promptTemplateUnsaved") : t("settingsUnsaved"));
   if (shouldDiscard) {
-    setPromptTemplateDirty(false);
+    discardSettingsSection(section);
   }
   return shouldDiscard;
+}
+
+function confirmDiscardAllSettingsChanges() {
+  for (const section of ["general", "model", "prompt"]) {
+    if (!confirmDiscardSettingsSection(section)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function confirmDiscardPromptTemplateChanges() {
+  return confirmDiscardSettingsSection("prompt");
 }
 
 function currentPromptTemplateDraft() {
@@ -1865,7 +1971,7 @@ async function loadOllamaModels() {
     renderOllamaModelOptions(response.models || []);
     setHealthStatus("ok", t("healthOk"));
     persistCurrentProviderFields();
-    await saveSettings();
+    setSettingsSectionDirty("model", true);
     pushSystemMessage(t("ollamaFoundModels", { count: response.models.length }));
   } catch (error) {
     renderOllamaModelOptions([]);
@@ -2414,21 +2520,19 @@ els.openSettings?.addEventListener("click", () => {
 });
 
 els.closeSettings?.addEventListener("click", () => {
-  showSettingsPage(false);
+  requestCloseSettingsPage();
 });
 
 els.settingsPanel.addEventListener("click", (event) => {
   if (event.target === els.settingsPanel) {
-    if (!confirmDiscardPromptTemplateChanges()) {
-      return;
-    }
-    showSettingsPage(false);
+    requestCloseSettingsPage();
   }
 });
 
 for (const button of els.settingsTabButtons) {
   button.addEventListener("click", () => {
-    if (els.settingsPanel.dataset.activeTab === "prompt" && button.dataset.tab !== "prompt" && !confirmDiscardPromptTemplateChanges()) {
+    const activeTab = els.settingsPanel.dataset.activeTab || "general";
+    if (activeTab !== button.dataset.tab && !confirmDiscardSettingsSection(activeTab)) {
       return;
     }
     activateSettingsTab(button.dataset.tab);
@@ -2442,6 +2546,7 @@ els.sidebarToggle.addEventListener("click", () => {
 
 els.presetInput.addEventListener("change", async () => {
   applyPreset(els.presetInput.value);
+  setSettingsSectionDirty("model", true);
   if (els.presetInput.value === "ollama-proxy") {
     await loadOllamaModels();
   }
@@ -2484,7 +2589,7 @@ els.ollamaModelSelect.addEventListener("change", async () => {
   if (els.ollamaModelSelect.value) {
     els.modelInput.value = els.ollamaModelSelect.value;
     persistCurrentProviderFields();
-    await saveSettings();
+    setSettingsSectionDirty("model", true);
     renderToolbarModelOptions(getActiveConfig());
     syncCustomSelects();
     maybeAutoCheckLocalModel();
@@ -2492,6 +2597,29 @@ els.ollamaModelSelect.addEventListener("change", async () => {
 });
 
 els.testOllama?.addEventListener("click", loadOllamaModels);
+
+for (const control of [
+  els.endpointInput,
+  els.modelInput,
+  els.customFormatInput,
+  els.apiKeyInput,
+  els.temperatureInput,
+  els.maxTokensInput,
+  els.historyLimitInput,
+  els.systemPromptInput,
+  els.defaultPresetInput,
+  els.memoryEnabledInput
+]) {
+  control?.addEventListener("input", () => setSettingsSectionDirty("model", true));
+  control?.addEventListener("change", () => {
+    setSettingsSectionDirty("model", true);
+    if (control === els.customFormatInput) {
+      state.settings.customFormat = els.customFormatInput.value === "ollama" ? "ollama" : "openai";
+      els.ollamaModelField.classList.toggle("hidden", state.settings.customFormat !== "ollama");
+      syncCustomSelects();
+    }
+  });
+}
 
 els.messages.addEventListener("click", async (event) => {
   const button = event.target.closest("[data-action]");
@@ -2512,28 +2640,28 @@ els.messages.addEventListener("click", async (event) => {
   }
 });
 
-els.languageInput.addEventListener("change", async () => {
+els.languageInput.addEventListener("change", () => {
+  setSettingsSectionDirty("general", true);
   state.settings.language = normalizeLanguage(els.languageInput.value);
-  await saveSettings();
   render();
 });
 
-els.answerLanguageInput.addEventListener("change", async () => {
+els.answerLanguageInput.addEventListener("change", () => {
+  setSettingsSectionDirty("general", true);
   state.settings.answerLanguage = normalizeLanguage(els.answerLanguageInput.value);
-  await saveSettings();
   syncCustomSelects();
 });
 
-els.translationLanguageInput.addEventListener("change", async () => {
+els.translationLanguageInput.addEventListener("change", () => {
+  setSettingsSectionDirty("general", true);
   state.settings.translationLanguage = normalizeLanguage(els.translationLanguageInput.value, "en-US");
-  await saveSettings();
   syncCustomSelects();
 });
 
-els.colorSchemeInput.addEventListener("change", async () => {
+els.colorSchemeInput.addEventListener("change", () => {
+  setSettingsSectionDirty("general", true);
   state.settings.colorScheme = COLOR_SCHEMES.includes(els.colorSchemeInput.value) ? els.colorSchemeInput.value : DEFAULT_SETTINGS.colorScheme;
   applyTheme();
-  await saveSettings();
   syncCustomSelects();
 });
 
@@ -2632,6 +2760,7 @@ els.settingsForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   persistCurrentProviderFields();
   await saveSettings();
+  captureSettingsSnapshot({ resetPrompt: false });
   syncSettingsToForm();
   pushSystemMessage(t("settingsSaved"));
   maybeAutoCheckLocalModel();
@@ -2647,6 +2776,7 @@ els.resetGeneralSettings.addEventListener("click", async () => {
   state.settings.colorScheme = DEFAULT_SETTINGS.colorScheme;
   state.settings.theme = DEFAULT_SETTINGS.theme;
   await saveSettings();
+  captureSettingsSnapshot({ resetPrompt: false });
   render();
   pushSystemMessage(t("generalSettingsReset"));
 });
@@ -2660,6 +2790,7 @@ els.resetCurrentModelSettings.addEventListener("click", async () => {
   delete configs[presetKey];
   applyModelConfigToSettings(defaultModelConfigForPreset(presetKey, false));
   await saveSettings();
+  captureSettingsSnapshot({ resetPrompt: false });
   syncSettingsToForm();
   syncCustomSelects();
   pushSystemMessage(t("modelSettingsReset"));
@@ -2692,13 +2823,16 @@ els.factoryResetSettings.addEventListener("click", async () => {
   await saveSettings();
   await saveConversations();
   await savePromptTemplates();
+  captureSettingsSnapshot();
   render();
   pushSystemMessage(t("factoryResetDone"));
 });
 
 els.newChat.addEventListener("click", async () => {
   closeSettingsMenu();
-  showSettingsPage(false);
+  if (!requestCloseSettingsPage()) {
+    return;
+  }
   const conversation = createConversation();
   state.conversations.unshift(conversation);
   state.activeConversationId = conversation.id;
@@ -2709,7 +2843,9 @@ els.newChat.addEventListener("click", async () => {
 
 els.newFolder?.addEventListener("click", async () => {
   closeSettingsMenu();
-  showSettingsPage(false);
+  if (!requestCloseSettingsPage()) {
+    return;
+  }
   const name = prompt(t("folderName"), t("folderName"));
   if (!name?.trim()) {
     return;
@@ -2870,9 +3006,11 @@ els.conversationList.addEventListener("click", async (event) => {
   }
 
   closeConversationMenus();
+  if (!requestCloseSettingsPage()) {
+    return;
+  }
   state.activeConversationId = item.dataset.id;
   await saveConversations();
-  showSettingsPage(false);
   render();
 });
 
