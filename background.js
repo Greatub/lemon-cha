@@ -45,6 +45,71 @@ const BG_TEXT = {
   }
 };
 
+function toTraditionalChineseCopy(text) {
+  const replacements = [
+    ["标题", "標題"],
+    ["生成", "生成"],
+    ["失败", "失敗"],
+    ["连接", "連線"],
+    ["检查", "檢查"],
+    ["无法", "無法"],
+    ["请求", "請求"],
+    ["设置", "設定"],
+    ["接口", "介面"],
+    ["配置", "設定"],
+    ["模型名", "模型名稱"],
+    ["填写", "填寫"],
+    ["可连接", "可連線"],
+    ["未找到", "找不到"],
+    ["请", "請"],
+    ["以上", "以上"],
+    ["对话", "對話"],
+    ["简洁", "簡潔"],
+    ["只输出", "只輸出"],
+    ["不要解释", "不要解釋"],
+    ["中文字符", "中文字元"],
+    ["回答", "回答"],
+    ["充分分析", "充分分析"],
+    ["结论", "結論"],
+    ["推理", "推理"],
+    ["建议", "建議"],
+    ["完整", "完整"],
+    ["隐藏", "隱藏"],
+    ["思维过程", "思維過程"],
+    ["返回", "回傳"],
+    ["不是", "不是"],
+    ["不存在", "不存在"],
+    ["点击", "點選"],
+    ["测试", "測試"],
+    ["列表", "清單"],
+    ["选择", "選擇"],
+    ["保存", "儲存"],
+    ["当前", "目前"],
+    ["地址", "位址"],
+    ["通常", "通常"],
+    ["如果", "如果"],
+    ["格式", "格式"],
+    ["拒绝", "拒絕"],
+    ["来源", "來源"],
+    ["重启", "重新啟動"],
+    ["确认", "確認"],
+    ["启动", "啟動"],
+    ["扩展", "擴充功能"],
+    ["明确", "明確"],
+    ["默认", "預設"],
+    ["语言", "語言"],
+    ["状态", "狀態"],
+    ["消息", "訊息"],
+    ["简体中文", "簡體中文"]
+  ];
+
+  return replacements.reduce((result, [source, target]) => result.replaceAll(source, target), text);
+}
+
+BG_TEXT["zh-TW"] = Object.fromEntries(
+  Object.entries(BG_TEXT["zh-CN"]).map(([key, value]) => [key, toTraditionalChineseCopy(value)])
+);
+
 const OLLAMA_CORS_RULE_ID = 11434;
 let activeOllamaCorsOrigin = "";
 
@@ -269,7 +334,7 @@ function normalizeConfig(config) {
     maxTokens: Math.max(1, Math.floor(Number(config.maxTokens) || 2048)),
     systemPrompt: String(config.systemPrompt || "").trim(),
     thinkingEnabled: Boolean(config.thinkingEnabled),
-    language: config.language === "en-US" ? "en-US" : "zh-CN",
+    language: ["zh-CN", "zh-TW", "en-US"].includes(config.language) ? config.language : "zh-CN",
     answerLanguage: String(config.answerLanguage || "").trim(),
     translationLanguage: String(config.translationLanguage || "").trim()
   };
@@ -550,6 +615,7 @@ function prepareMessages(config, messages) {
 function languageName(language) {
   const names = {
     "zh-CN": "简体中文",
+    "zh-TW": "繁體中文",
     "en-US": "English",
     "ja-JP": "日本語",
     "ko-KR": "한국어",

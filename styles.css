@@ -647,6 +647,7 @@ button:disabled {
   flex-direction: column;
   gap: var(--space-2xs);
   min-height: 0;
+  overflow-x: hidden;
   overflow-y: auto;
 }
 
@@ -907,6 +908,7 @@ button:disabled {
 .conversation-folder-items {
   display: grid;
   gap: var(--space-2xs);
+  min-width: 0;
   padding-left: var(--space-md);
 }
 
@@ -927,6 +929,7 @@ button:disabled {
   column-gap: var(--space-sm);
   row-gap: var(--space-2xs);
   width: 100%;
+  min-width: 0;
   min-height: var(--sidebar-item-height);
   padding: var(--space-sm) var(--space-control-y);
   border: 0;
@@ -1000,6 +1003,7 @@ button:disabled {
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
+  min-width: 0;
   opacity: 0;
   transition: opacity 0.15s ease;
 }
@@ -1012,6 +1016,7 @@ button:disabled {
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
+  min-width: 0;
   opacity: 0;
   transition: opacity 0.15s ease;
 }
