@@ -40,7 +40,7 @@ npm run build
 - API Key，如果服务端不需要鉴权可以留空
 - 接口格式：OpenAI Chat Completions 或 Ollama `/api/chat`
 - 思考模式：Ollama 格式会发送 `think` 参数；OpenAI 兼容格式会追加一个保守 system 提示，引导模型充分分析但不输出完整隐藏思维过程。
-- 界面语言：支持简体中文、繁體中文和 English。
+- 界面语言：支持简体中文、繁體中文、English、日本語、한국어、Français、Español 和 Deutsch。
 
 如果接口格式选择 OpenAI Chat Completions，并且你只填写了域名或 `/v1`，插件会自动补全到 `/v1/chat/completions`。如果服务商使用自己的路径，请填写完整聊天接口地址。
 
