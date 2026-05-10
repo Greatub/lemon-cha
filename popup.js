@@ -606,6 +606,7 @@ const state = {
 
 const els = {
   workspace: document.querySelector(".workspace"),
+  chatTitle: document.querySelector("#chatTitle"),
   toolbarModelSelect: document.querySelector("#toolbarModelSelect"),
   healthStatus: document.querySelector("#healthStatus"),
   sidebarToggle: document.querySelector("#sidebarToggle"),
@@ -1237,6 +1238,7 @@ function render() {
   applyTheme();
   applyLanguage();
   showSettingsPage(state.settingsPageOpen);
+  updateChatTitle();
   renderPromptTemplates();
   syncSettingsToForm();
   renderConversations();
@@ -1246,6 +1248,14 @@ function render() {
   els.promptInput.disabled = state.sending;
   els.sendButton.classList.toggle("hidden", state.sending);
   els.stopButton.classList.toggle("hidden", !state.sending);
+}
+
+function updateChatTitle() {
+  if (!els.chatTitle) return;
+  const conversation = getActiveConversation();
+  const title = conversation?.title || t("newChatTitle");
+  els.chatTitle.textContent = title;
+  els.chatTitle.title = title;
 }
 
 function enhanceSelects() {
@@ -2449,6 +2459,7 @@ async function generateConversationTitle(conversation, config) {
       conversation.updatedAt = Date.now();
       await saveConversations();
       renderConversations();
+      updateChatTitle();
     }
   } catch (error) {
     // Title generation is opportunistic; chat should stay quiet if it fails.
