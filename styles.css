@@ -2077,6 +2077,7 @@ select:focus {
   align-items: flex-start;
   gap: var(--space-sm);
   width: var(--rail-width);
+  min-width: 0;
   margin-inline: auto;
 }
 
@@ -2094,13 +2095,19 @@ select:focus {
   grid-template-columns: 1fr;
   gap: var(--space-sm);
   width: fit-content;
+  min-width: 0;
   max-width: 100%;
   padding: var(--space-control-y) var(--space-md);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-bubble);
   box-shadow: var(--shadow-message);
   line-height: 1.55;
-  word-break: break-word;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.message:has(.markdown-table-wrap) {
+  width: 100%;
 }
 
 .message.user {
@@ -2130,11 +2137,15 @@ select:focus {
 
 .message-content {
   grid-column: 1 / -1;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   font-size: 0.875rem;
 }
 
 .message-meta {
   grid-column: 1 / -1;
+  min-width: 0;
   color: var(--color-secondary);
   font-size: 0.6875rem;
 }
@@ -2142,6 +2153,7 @@ select:focus {
 .message-actions {
   display: flex;
   grid-column: 1 / -1;
+  min-width: 0;
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: var(--space-xs);
@@ -2288,11 +2300,16 @@ select:focus {
 }
 
 .markdown-table-wrap {
+  display: block;
+  width: 100%;
+  min-width: 0;
   max-width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-control);
   background: color-mix(in srgb, var(--color-surface) 72%, transparent);
+  -webkit-overflow-scrolling: touch;
 }
 
 .message-content table {
