@@ -542,6 +542,19 @@ button:disabled {
   transform: translate(0, 0);
 }
 
+.sidebar-collapsed .new-chat-button[data-tooltip]::after {
+  top: 50%;
+  bottom: auto;
+  left: calc(100% + var(--space-md));
+  right: auto;
+  transform: translate(var(--space-xs), -50%);
+}
+
+.sidebar-collapsed .new-chat-button[data-tooltip]:hover::after,
+.sidebar-collapsed .new-chat-button[data-tooltip]:focus-visible::after {
+  transform: translate(0, -50%);
+}
+
 .brand {
   grid-row: 1;
   display: flex;

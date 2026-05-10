@@ -1064,7 +1064,11 @@ function applyLanguage() {
   setTooltip(els.sidebarToggle, state.sidebarCollapsed ? t("showSidebar") : t("hideSidebar"));
   setTooltip(els.settingsToggle, t("settingsTitle"));
   setIconOnly(els.sidebarToggle, "panelLeft");
-  clearTooltip(els.newChat, t("newChat"));
+  if (state.sidebarCollapsed) {
+    setTooltip(els.newChat, t("newChat"));
+  } else {
+    clearTooltip(els.newChat, t("newChat"));
+  }
   clearTooltip(els.newFolder, t("newFolder"));
   setTooltip(els.clearHistory, t("clearHistory"));
   setTooltip(els.exportChats, t("exportChats"));
@@ -1118,6 +1122,11 @@ function applySidebarState(persist = true) {
   document.body.classList.toggle("sidebar-collapsed", state.sidebarCollapsed);
   setTooltip(els.sidebarToggle, state.sidebarCollapsed ? t("showSidebar") : t("hideSidebar"));
   setTooltip(els.settingsToggle, t("settingsTitle"));
+  if (state.sidebarCollapsed) {
+    setTooltip(els.newChat, t("newChat"));
+  } else {
+    clearTooltip(els.newChat, t("newChat"));
+  }
   setIconOnly(els.sidebarToggle, "panelLeft");
   if (state.sidebarCollapsed) {
     closeSettingsMenu();
