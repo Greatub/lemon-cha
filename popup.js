@@ -3010,37 +3010,121 @@ function renderMarkdownText(text) {
   const nodes = [];
   const lines = text.split("\n");
   let list = null;
+  let listType = "";
 
-  for (const line of lines) {
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
     const trimmed = line.trim();
     if (!trimmed) {
       list = null;
+      listType = "";
+      continue;
+    }
+
+    if (isMarkdownTableStart(lines, index)) {
+      list = null;
+      listType = "";
+      const tableLines = [lines[index], lines[index + 1]];
+      index += 2;
+      while (index < lines.length && isMarkdownTableRow(lines[index])) {
+        tableLines.push(lines[index]);
+        index += 1;
+      }
+      index -= 1;
+      nodes.push(createMarkdownTable(tableLines));
       continue;
     }
 
     const bullet = trimmed.match(/^[-*]\s+(.+)$/);
-    if (bullet) {
-      if (!list) {
-        list = document.createElement("ul");
+    const ordered = trimmed.match(/^\d+[.)]\s+(.+)$/);
+    const listMatch = bullet || ordered;
+    const nextListType = ordered ? "ol" : "ul";
+    if (listMatch) {
+      if (!list || listType !== nextListType) {
+        list = document.createElement(nextListType);
+        listType = nextListType;
         nodes.push(list);
       }
       const item = document.createElement("li");
-      appendInlineMarkdown(item, bullet[1]);
+      appendInlineMarkdown(item, listMatch[1]);
       list.append(item);
       continue;
     }
 
     list = null;
-    const paragraph = document.createElement(trimmed.startsWith("### ") ? "h3" : "p");
-    appendInlineMarkdown(paragraph, trimmed.replace(/^###\s+/, ""));
+    listType = "";
+    const heading = trimmed.match(/^(#{1,3})\s+(.+)$/);
+    const paragraph = document.createElement(heading ? `h${heading[1].length}` : "p");
+    appendInlineMarkdown(paragraph, heading ? heading[2] : trimmed);
     nodes.push(paragraph);
   }
 
   return nodes;
 }
 
+function isMarkdownTableStart(lines, index) {
+  return isMarkdownTableRow(lines[index])
+    && isMarkdownTableSeparator(lines[index + 1] || "");
+}
+
+function isMarkdownTableRow(line) {
+  const trimmed = line.trim();
+  return trimmed.includes("|") && splitMarkdownTableRow(trimmed).length > 1;
+}
+
+function isMarkdownTableSeparator(line) {
+  const cells = splitMarkdownTableRow(line.trim());
+  return cells.length > 1 && cells.every((cell) => /^:?-{3,}:?$/.test(cell.trim()));
+}
+
+function splitMarkdownTableRow(line) {
+  const trimmed = line.trim().replace(/^\|/, "").replace(/\|$/, "");
+  return trimmed.split("|").map((cell) => cell.trim());
+}
+
+function createMarkdownTable(lines) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "markdown-table-wrap";
+
+  const table = document.createElement("table");
+  const thead = document.createElement("thead");
+  const tbody = document.createElement("tbody");
+  const headers = splitMarkdownTableRow(lines[0]);
+  const alignments = splitMarkdownTableRow(lines[1]).map((cell) => {
+    const trimmed = cell.trim();
+    if (trimmed.startsWith(":") && trimmed.endsWith(":")) return "center";
+    if (trimmed.endsWith(":")) return "right";
+    return "";
+  });
+
+  const headerRow = document.createElement("tr");
+  headers.forEach((header, cellIndex) => {
+    const th = document.createElement("th");
+    if (alignments[cellIndex]) th.style.textAlign = alignments[cellIndex];
+    appendInlineMarkdown(th, header);
+    headerRow.append(th);
+  });
+  thead.append(headerRow);
+
+  for (const rowLine of lines.slice(2)) {
+    const row = document.createElement("tr");
+    const cells = splitMarkdownTableRow(rowLine);
+    headers.forEach((_, cellIndex) => {
+      const td = document.createElement("td");
+      if (alignments[cellIndex]) td.style.textAlign = alignments[cellIndex];
+      appendInlineMarkdown(td, cells[cellIndex] || "");
+      row.append(td);
+    });
+    tbody.append(row);
+  }
+
+  table.append(thead, tbody);
+  wrapper.append(table);
+  return wrapper;
+}
+
 function appendInlineMarkdown(parent, text) {
-  const pattern = /(`[^`]+`|\*\*[^*]+\*\*)/g;
+  const pattern = /(`[^`]+`|\*\*.+?\*\*|__.+?__|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\))/g;
   let lastIndex = 0;
   let match;
 
@@ -3054,10 +3138,17 @@ function appendInlineMarkdown(parent, text) {
       const code = document.createElement("code");
       code.textContent = token.slice(1, -1);
       parent.append(code);
-    } else {
+    } else if (token.startsWith("**") || token.startsWith("__")) {
       const strong = document.createElement("strong");
-      strong.textContent = token.slice(2, -2);
+      appendInlineMarkdown(strong, token.slice(2, -2));
       parent.append(strong);
+    } else {
+      const link = document.createElement("a");
+      link.href = match[3];
+      link.target = "_blank";
+      link.rel = "noreferrer";
+      appendInlineMarkdown(link, match[2]);
+      parent.append(link);
     }
 
     lastIndex = pattern.lastIndex;
