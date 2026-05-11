@@ -66,6 +66,7 @@
   --select-arrow-size: 5px;
   --select-scrollbar-inset: 26px;
   --rounded-scrollbar-inset: 14px;
+  --textarea-scrollbar-inset: 24px;
   --collapsed-sidebar-inline-padding: 5px;
   --composer-action-inset: 14px;
   --content-width: 920px;
@@ -1893,6 +1894,7 @@ textarea {
   padding: 12px;
   line-height: 1.5;
   resize: vertical;
+  scrollbar-gutter: stable;
   scrollbar-color: color-mix(in srgb, var(--color-secondary) 42%, transparent) transparent;
   scrollbar-width: thin;
 }
@@ -1903,13 +1905,13 @@ textarea::-webkit-scrollbar {
 }
 
 textarea::-webkit-scrollbar-track {
-  margin-block: var(--rounded-scrollbar-inset);
+  margin-block: var(--textarea-scrollbar-inset);
   background: transparent;
 }
 
 textarea::-webkit-scrollbar-button {
   display: block;
-  height: var(--rounded-scrollbar-inset);
+  height: var(--textarea-scrollbar-inset);
   background: transparent;
 }
 
@@ -2416,8 +2418,8 @@ select:focus {
 }
 
 .message-content table {
-  width: 100%;
-  min-width: max-content;
+  width: max-content;
+  min-width: 100%;
   border-collapse: collapse;
   font-size: 0.8125rem;
 }
@@ -2427,8 +2429,12 @@ select:focus {
   padding: var(--space-xs) var(--space-sm);
   border-bottom: 1px solid var(--color-border);
   border-left: 1px solid var(--color-border);
+  max-width: clamp(140px, 28vw, 240px);
   text-align: left;
   vertical-align: top;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  white-space: normal;
 }
 
 .message-content th:first-child,
@@ -2555,7 +2561,7 @@ select:focus {
 .composer textarea {
   min-height: 112px;
   max-height: 220px;
-  padding: var(--space-md) var(--space-md) 64px;
+  padding: var(--space-md) calc(var(--space-md) + var(--space-sm)) 64px var(--space-md);
   border-color: var(--color-border);
   border-radius: var(--radius-bubble);
   background: var(--scheme-input-surface);
