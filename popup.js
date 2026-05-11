@@ -423,6 +423,10 @@ const UI_TEXT = {
     customTemplateOnly: "只能删除自定义 Prompt 模板。",
     confirmDeletePromptTemplate: "删除 Prompt 模板“{name}”？",
     promptTemplateDeleted: "Prompt 模板已删除。",
+    promptReplaceConfirm: "当前输入框已有内容，是否替换为提示词？",
+    cancel: "取消",
+    replace: "替换",
+    promptTemplateApplied: "提示词预设已应用。",
     settingsSaved: "设置已保存。",
     settingsReset: "设置已恢复默认。",
     generalSettingsReset: "通用设置已重置。",
@@ -585,6 +589,10 @@ const UI_TEXT = {
     customTemplateOnly: "Only custom prompt templates can be deleted.",
     confirmDeletePromptTemplate: "Delete prompt template \"{name}\"?",
     promptTemplateDeleted: "Prompt template deleted.",
+    promptReplaceConfirm: "The input box already has content. Replace it with this prompt?",
+    cancel: "Cancel",
+    replace: "Replace",
+    promptTemplateApplied: "Prompt preset applied.",
     settingsSaved: "Settings saved.",
     settingsReset: "Settings reset to defaults.",
     generalSettingsReset: "General settings reset.",
@@ -750,6 +758,10 @@ Object.assign(UI_TEXT, {
     customTemplateOnly: "只能刪除自訂 Prompt 範本。",
     confirmDeletePromptTemplate: "刪除 Prompt 範本「{name}」？",
     promptTemplateDeleted: "Prompt 範本已刪除。",
+    promptReplaceConfirm: "目前輸入框已有內容，是否替換為提示詞？",
+    cancel: "取消",
+    replace: "替換",
+    promptTemplateApplied: "提示詞預設已套用。",
     settingsSaved: "設定已儲存。",
     settingsReset: "設定已恢復預設。",
     generalSettingsReset: "通用設定已重設。",
@@ -912,6 +924,10 @@ Object.assign(UI_TEXT, {
     customTemplateOnly: "削除できるのはカスタム Prompt テンプレートだけです。",
     confirmDeletePromptTemplate: "Prompt テンプレート「{name}」を削除しますか？",
     promptTemplateDeleted: "Prompt テンプレートを削除しました。",
+    promptReplaceConfirm: "入力欄にはすでに内容があります。このプロンプトに置き換えますか？",
+    cancel: "キャンセル",
+    replace: "置き換え",
+    promptTemplateApplied: "プロンプトプリセットを適用しました。",
     settingsSaved: "設定を保存しました。",
     settingsReset: "設定を初期値に戻しました。",
     generalSettingsReset: "一般設定をリセットしました。",
@@ -1074,6 +1090,10 @@ Object.assign(UI_TEXT, {
     customTemplateOnly: "사용자 지정 Prompt 템플릿만 삭제할 수 있습니다.",
     confirmDeletePromptTemplate: "Prompt 템플릿 “{name}”을 삭제할까요?",
     promptTemplateDeleted: "Prompt 템플릿을 삭제했습니다.",
+    promptReplaceConfirm: "입력창에 이미 내용이 있습니다. 이 프롬프트로 바꿀까요?",
+    cancel: "취소",
+    replace: "바꾸기",
+    promptTemplateApplied: "프롬프트 프리셋을 적용했습니다.",
     settingsSaved: "설정을 저장했습니다.",
     settingsReset: "설정을 기본값으로 복원했습니다.",
     generalSettingsReset: "일반 설정을 초기화했습니다.",
@@ -1236,6 +1256,10 @@ Object.assign(UI_TEXT, {
     customTemplateOnly: "Seuls les modèles Prompt personnalisés peuvent être supprimés.",
     confirmDeletePromptTemplate: "Supprimer le modèle Prompt « {name} » ?",
     promptTemplateDeleted: "Modèle Prompt supprimé.",
+    promptReplaceConfirm: "La zone de saisie contient déjà du texte. La remplacer par ce prompt ?",
+    cancel: "Annuler",
+    replace: "Remplacer",
+    promptTemplateApplied: "Preset de prompt appliqué.",
     settingsSaved: "Paramètres enregistrés.",
     settingsReset: "Paramètres réinitialisés.",
     generalSettingsReset: "Paramètres généraux réinitialisés.",
@@ -1398,6 +1422,10 @@ Object.assign(UI_TEXT, {
     customTemplateOnly: "Solo se pueden eliminar plantillas Prompt personalizadas.",
     confirmDeletePromptTemplate: "¿Eliminar la plantilla Prompt “{name}”?",
     promptTemplateDeleted: "Plantilla Prompt eliminada.",
+    promptReplaceConfirm: "El cuadro de entrada ya tiene contenido. ¿Reemplazarlo por este prompt?",
+    cancel: "Cancelar",
+    replace: "Reemplazar",
+    promptTemplateApplied: "Preset de prompt aplicado.",
     settingsSaved: "Ajustes guardados.",
     settingsReset: "Ajustes restablecidos.",
     generalSettingsReset: "Ajustes generales restablecidos.",
@@ -1560,6 +1588,10 @@ Object.assign(UI_TEXT, {
     customTemplateOnly: "Nur benutzerdefinierte Prompt-Vorlagen können gelöscht werden.",
     confirmDeletePromptTemplate: "Prompt-Vorlage „{name}“ löschen?",
     promptTemplateDeleted: "Prompt-Vorlage gelöscht.",
+    promptReplaceConfirm: "Im Eingabefeld steht bereits Inhalt. Durch diesen Prompt ersetzen?",
+    cancel: "Abbrechen",
+    replace: "Ersetzen",
+    promptTemplateApplied: "Prompt-Preset angewendet.",
     settingsSaved: "Einstellungen gespeichert.",
     settingsReset: "Einstellungen zurückgesetzt.",
     generalSettingsReset: "Allgemeine Einstellungen zurückgesetzt.",
@@ -3587,8 +3619,26 @@ function pushSystemMessage(content) {
   showToast(content);
 }
 
+function ensureToastRoot() {
+  let root = document.querySelector("#toastRoot");
+  if (!root) {
+    root = document.createElement("div");
+    root.id = "toastRoot";
+    root.className = "toast-root";
+    root.setAttribute("aria-live", "polite");
+    document.body.append(root);
+  }
+
+  if (els.toast && els.toast.parentElement !== root) {
+    root.append(els.toast);
+  }
+
+  return root;
+}
+
 function showToast(content) {
   if (!content) return;
+  ensureToastRoot();
   clearTimeout(toastTimer);
   els.toast.textContent = content;
   els.toast.classList.remove("hidden", "toast-out");
@@ -3605,6 +3655,85 @@ els.toast?.addEventListener("animationend", () => {
     els.toast.classList.remove("toast-out");
   }
 });
+
+function confirmPromptReplacement() {
+  return new Promise((resolve) => {
+    const overlay = document.createElement("div");
+    overlay.className = "prompt-confirm-overlay";
+    overlay.setAttribute("role", "presentation");
+
+    const dialog = document.createElement("div");
+    dialog.className = "prompt-confirm-dialog";
+    dialog.setAttribute("role", "dialog");
+    dialog.setAttribute("aria-modal", "true");
+
+    const message = document.createElement("p");
+    message.textContent = t("promptReplaceConfirm");
+
+    const actions = document.createElement("div");
+    actions.className = "prompt-confirm-actions";
+
+    const cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.className = "secondary";
+    cancel.textContent = t("cancel");
+
+    const replace = document.createElement("button");
+    replace.type = "button";
+    replace.textContent = t("replace");
+
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      document.removeEventListener("keydown", onKeyDown);
+      overlay.remove();
+      resolve(value);
+    };
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") {
+        finish(false);
+      }
+    };
+
+    cancel.addEventListener("click", () => finish(false));
+    replace.addEventListener("click", () => finish(true));
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) {
+        finish(false);
+      }
+    });
+    document.addEventListener("keydown", onKeyDown);
+
+    actions.append(cancel, replace);
+    dialog.append(message, actions);
+    overlay.append(dialog);
+    document.body.append(overlay);
+    cancel.focus();
+  });
+}
+
+function focusPromptPlaceholder() {
+  const input = els.promptInput;
+  const value = input.value || "";
+  const match = /\{[^{}]+\}/.exec(value);
+  input.focus();
+
+  if (match) {
+    input.setSelectionRange(match.index, match.index + match[0].length);
+    return;
+  }
+
+  input.setSelectionRange(value.length, value.length);
+}
+
+function applyPromptTemplateToInput(content) {
+  els.promptInput.value = content;
+  requestAnimationFrame(() => {
+    focusPromptPlaceholder();
+  });
+}
 
 async function copyMessage(index) {
   const message = getActiveMessages()[index];
@@ -3902,18 +4031,24 @@ els.colorSchemeInput.addEventListener("change", () => {
   syncCustomSelects();
 });
 
-els.promptTemplateSelect.addEventListener("change", () => {
+els.promptTemplateSelect.addEventListener("change", async () => {
   const template = getPromptTemplate(els.promptTemplateSelect.value);
   if (!template) {
     return;
   }
 
-  const existing = els.promptInput.value.trim();
   const content = localizedTemplateContent(template);
-  els.promptInput.value = existing
-    ? `${content}\n\n${existing}`
-    : content;
-  els.promptInput.focus();
+  if (els.promptInput.value.trim()) {
+    const shouldReplace = await confirmPromptReplacement();
+    if (!shouldReplace) {
+      els.promptTemplateSelect.value = "";
+      syncCustomSelects();
+      return;
+    }
+  }
+
+  applyPromptTemplateToInput(content);
+  pushSystemMessage(t("promptTemplateApplied"));
 });
 
 els.promptTemplateManageSelect.addEventListener("change", () => {

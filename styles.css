@@ -1324,11 +1324,17 @@ button:disabled {
   display: none;
 }
 
-.toast {
+.toast-root {
   position: fixed;
+  inset: 0;
+  z-index: 1600;
+  pointer-events: none;
+}
+
+.toast {
+  position: absolute;
   left: 50%;
   top: 48%;
-  z-index: 100;
   max-width: min(520px, calc(100vw - 32px));
   padding: 12px var(--space-md);
   border: 1px solid var(--color-border);
@@ -1341,6 +1347,42 @@ button:disabled {
   text-align: center;
   transform: translate(-50%, -50%);
   pointer-events: none;
+}
+
+.prompt-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  display: grid;
+  place-items: center;
+  padding: var(--space-xl);
+  background: color-mix(in srgb, var(--color-tertiary) 16%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+.prompt-confirm-dialog {
+  display: grid;
+  gap: var(--space-md);
+  width: min(360px, 100%);
+  padding: var(--space-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  color: var(--color-primary);
+  background: var(--scheme-panel-surface);
+  box-shadow: var(--shadow-panel);
+}
+
+.prompt-confirm-dialog p {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.prompt-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
 }
 
 .toast-in {
