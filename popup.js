@@ -65,8 +65,8 @@ const BUILT_IN_PROMPT_TEMPLATES = [
     id: "translate-polish",
     name: "翻译润色",
     nameEn: "Translate & Polish",
-    content: "请将以下内容翻译成自然、准确、专业的中文，并在不改变原意的前提下提升表达流畅度。请先给出译文，再列出 3 条关键措辞说明。\n\n内容：\n",
-    contentEn: "Translate the following content into natural, accurate, professional English, and improve fluency without changing the meaning. First provide the translation, then list 3 notes on key wording choices.\n\nContent:\n"
+    content: "请将以下内容翻译成自然、准确、专业的 {defaultTranslationLanguage}，并在不改变原意的前提下提升表达流畅度。请先给出译文，再列出 3 条关键措辞说明。\n\n内容：\n",
+    contentEn: "Translate the following content into natural, accurate, professional {defaultTranslationLanguage}, and improve fluency without changing the meaning. First provide the translation, then list 3 notes on key wording choices.\n\nContent:\n"
   },
   {
     id: "code-review",
@@ -128,27 +128,27 @@ const BUILT_IN_PROMPT_TEMPLATE_LOCALES = {
   "translate-polish": {
     "zh-TW": {
       name: "翻譯潤飾",
-      content: "請將以下內容翻譯成自然、準確且專業的繁體中文，並在不改變原意的前提下讓表達更流暢。請先提供譯文，再列出 3 點關鍵用詞說明。\n\n內容：\n"
+      content: "請將以下內容翻譯成自然、準確且專業的 {defaultTranslationLanguage}，並在不改變原意的前提下讓表達更流暢。請先提供譯文，再列出 3 點關鍵用詞說明。\n\n內容：\n"
     },
     "ja-JP": {
       name: "翻訳と推敲",
-      content: "以下の内容を自然で正確かつ専門的な日本語に翻訳し、意味を変えずに読みやすさを高めてください。まず訳文を示し、その後に重要な表現選びについて 3 点説明してください。\n\n内容：\n"
+      content: "以下の内容を自然で正確かつ専門的な {defaultTranslationLanguage} に翻訳し、意味を変えずに読みやすさを高めてください。まず訳文を示し、その後に重要な表現選びについて 3 点説明してください。\n\n内容：\n"
     },
     "ko-KR": {
       name: "번역 및 다듬기",
-      content: "다음 내용을 자연스럽고 정확하며 전문적인 한국어로 번역하고, 의미를 바꾸지 않는 범위에서 표현을 더 매끄럽게 다듬어 주세요. 먼저 번역문을 제시한 뒤, 핵심 표현 선택에 대한 설명 3가지를 적어 주세요.\n\n내용:\n"
+      content: "다음 내용을 자연스럽고 정확하며 전문적인 {defaultTranslationLanguage}(으)로 번역하고, 의미를 바꾸지 않는 범위에서 표현을 더 매끄럽게 다듬어 주세요. 먼저 번역문을 제시한 뒤, 핵심 표현 선택에 대한 설명 3가지를 적어 주세요.\n\n내용:\n"
     },
     "fr-FR": {
       name: "Traduire et améliorer",
-      content: "Traduis le contenu suivant dans un français naturel, précis et professionnel, puis améliore la fluidité sans altérer le sens. Fournis d’abord la traduction, puis 3 remarques sur les choix de formulation importants.\n\nContenu :\n"
+      content: "Traduis le contenu suivant dans un {defaultTranslationLanguage} naturel, précis et professionnel, puis améliore la fluidité sans altérer le sens. Fournis d’abord la traduction, puis 3 remarques sur les choix de formulation importants.\n\nContenu :\n"
     },
     "es-ES": {
       name: "Traducir y pulir",
-      content: "Traduce el siguiente contenido a un español natural, preciso y profesional, y mejora la fluidez sin alterar el significado. Primero ofrece la traducción y después incluye 3 notas sobre decisiones importantes de redacción.\n\nContenido:\n"
+      content: "Traduce el siguiente contenido a un {defaultTranslationLanguage} natural, preciso y profesional, y mejora la fluidez sin alterar el significado. Primero ofrece la traducción y después incluye 3 notas sobre decisiones importantes de redacción.\n\nContenido:\n"
     },
     "de-DE": {
       name: "Übersetzen und verbessern",
-      content: "Übersetze den folgenden Inhalt in natürliches, präzises und professionelles Deutsch und verbessere die sprachliche Wirkung, ohne die Bedeutung zu verändern. Gib zuerst die Übersetzung aus und nenne anschließend 3 Hinweise zu wichtigen Formulierungsentscheidungen.\n\nInhalt:\n"
+      content: "Übersetze den folgenden Inhalt in natürliches, präzises und professionelles {defaultTranslationLanguage} und verbessere die sprachliche Wirkung, ohne die Bedeutung zu verändern. Gib zuerst die Übersetzung aus und nenne anschließend 3 Hinweise zu wichtigen Formulierungsentscheidungen.\n\nInhalt:\n"
     }
   },
   "code-review": {
@@ -283,6 +283,21 @@ const DEFAULT_SETTINGS = {
 
 const COLOR_SCHEMES = ["llmon", "leaf", "citrus", "blue", "gray"];
 const SUPPORTED_LANGUAGES = ["zh-CN", "zh-TW", "en-US", "ja-JP", "ko-KR", "fr-FR", "es-ES", "de-DE"];
+const NATIVE_LANGUAGE_NAMES = {
+  "zh-CN": "简体中文",
+  "zh-TW": "繁體中文",
+  "en-US": "English",
+  "ja-JP": "日本語",
+  "ko-KR": "한국어",
+  "fr-FR": "Français",
+  "es-ES": "Español",
+  "de-DE": "Deutsch"
+};
+const DEFAULT_TRANSLATION_LANGUAGE_VARIABLES = [
+  "{defaultTranslationLanguage}",
+  "{targetLanguage}",
+  "{目标语言}"
+];
 const LANGUAGE_UI_FALLBACK = {};
 
 const UI_TEXT = {
@@ -2537,6 +2552,18 @@ function localizedTemplateContent(template) {
     || (language === "en-US" && template.contentEn ? template.contentEn : template.content);
 }
 
+function defaultTranslationLanguageName() {
+  const language = normalizeLanguage(state.settings.translationLanguage, DEFAULT_SETTINGS.translationLanguage);
+  return NATIVE_LANGUAGE_NAMES[language] || NATIVE_LANGUAGE_NAMES[DEFAULT_SETTINGS.translationLanguage];
+}
+
+function resolvePromptTemplateVariables(content) {
+  return DEFAULT_TRANSLATION_LANGUAGE_VARIABLES.reduce(
+    (resolved, variable) => resolved.split(variable).join(defaultTranslationLanguageName()),
+    content
+  );
+}
+
 function fillPromptTemplateEditor(template = null) {
   els.promptTemplateNameInput.value = template ? localizedTemplateName(template) : "";
   els.promptTemplateContentInput.value = template ? localizedTemplateContent(template) : "";
@@ -4055,7 +4082,7 @@ els.promptTemplateSelect.addEventListener("change", async () => {
     return;
   }
 
-  const content = localizedTemplateContent(template);
+  const content = resolvePromptTemplateVariables(localizedTemplateContent(template));
   if (els.promptInput.value.trim()) {
     const shouldReplace = await confirmPromptReplacement();
     if (!shouldReplace) {
