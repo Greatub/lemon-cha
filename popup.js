@@ -3739,6 +3739,19 @@ function applyPromptTemplateToInput(content) {
   });
 }
 
+function clearComposerInput({ focus = false } = {}) {
+  els.promptInput.value = "";
+  els.promptTemplateSelect.value = "";
+  syncCustomSelects();
+
+  if (focus) {
+    requestAnimationFrame(() => {
+      els.promptInput.focus();
+      els.promptInput.setSelectionRange(0, 0);
+    });
+  }
+}
+
 async function copyMessage(index) {
   const message = getActiveMessages()[index];
   if (!message) return;
@@ -3865,6 +3878,7 @@ async function clearConversationHistory() {
   await chrome.storage.local.remove("messages");
   await saveConversations();
   render();
+  clearComposerInput({ focus: true });
   return true;
 }
 
@@ -4176,6 +4190,7 @@ els.factoryResetSettings.addEventListener("click", async () => {
   await savePromptTemplates();
   captureSettingsSnapshot();
   render();
+  clearComposerInput({ focus: true });
   pushSystemMessage(t("factoryResetDone"));
 });
 
@@ -4189,7 +4204,7 @@ els.newChat.addEventListener("click", async () => {
   state.activeConversationId = conversation.id;
   await saveConversations();
   render();
-  els.promptInput.focus();
+  clearComposerInput({ focus: true });
 });
 
 els.newFolder?.addEventListener("click", async () => {
@@ -4360,9 +4375,13 @@ els.conversationList.addEventListener("click", async (event) => {
   if (!requestCloseSettingsPage()) {
     return;
   }
+  const shouldClearComposer = item.dataset.id !== state.activeConversationId;
   state.activeConversationId = item.dataset.id;
   await saveConversations();
   render();
+  if (shouldClearComposer) {
+    clearComposerInput({ focus: true });
+  }
 });
 
 els.conversationList.addEventListener("dragstart", (event) => {
@@ -4567,4 +4586,7 @@ async function deleteConversation(id) {
   ensureActiveConversation();
   await saveConversations();
   render();
+  if (wasActiveConversation) {
+    clearComposerInput({ focus: true });
+  }
 }
