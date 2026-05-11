@@ -65,6 +65,7 @@
   --typing-dot-gap: 3px;
   --select-arrow-size: 5px;
   --select-scrollbar-inset: 26px;
+  --rounded-scrollbar-inset: 14px;
   --collapsed-sidebar-inline-padding: 5px;
   --composer-action-inset: 14px;
   --content-width: 920px;
@@ -1892,6 +1893,31 @@ textarea {
   padding: 12px;
   line-height: 1.5;
   resize: vertical;
+  scrollbar-color: color-mix(in srgb, var(--color-secondary) 42%, transparent) transparent;
+  scrollbar-width: thin;
+}
+
+textarea::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+textarea::-webkit-scrollbar-track {
+  margin-block: var(--rounded-scrollbar-inset);
+  background: transparent;
+}
+
+textarea::-webkit-scrollbar-button {
+  display: block;
+  height: var(--rounded-scrollbar-inset);
+  background: transparent;
+}
+
+textarea::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-secondary) 42%, transparent);
+  background-clip: content-box;
 }
 
 input:focus,
@@ -2346,12 +2372,47 @@ select:focus {
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: hidden;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-control);
   background: color-mix(in srgb, var(--color-surface) 72%, transparent);
+}
+
+.markdown-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: var(--space-2xs);
+  scrollbar-color: color-mix(in srgb, var(--color-secondary) 42%, transparent) transparent;
+  scrollbar-width: thin;
   -webkit-overflow-scrolling: touch;
+}
+
+.markdown-table-scroll::-webkit-scrollbar,
+.code-block pre::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.markdown-table-scroll::-webkit-scrollbar-track,
+.code-block pre::-webkit-scrollbar-track {
+  margin-inline: var(--rounded-scrollbar-inset);
+  background: transparent;
+}
+
+.markdown-table-scroll::-webkit-scrollbar-button,
+.code-block pre::-webkit-scrollbar-button {
+  display: block;
+  width: var(--rounded-scrollbar-inset);
+  background: transparent;
+}
+
+.markdown-table-scroll::-webkit-scrollbar-thumb,
+.code-block pre::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-secondary) 42%, transparent);
+  background-clip: content-box;
 }
 
 .message-content table {
@@ -2436,6 +2497,8 @@ select:focus {
   overflow-x: auto;
   color: var(--color-code-text);
   white-space: pre;
+  scrollbar-color: color-mix(in srgb, var(--color-neutral) 42%, transparent) transparent;
+  scrollbar-width: thin;
 }
 
 .code-block code {

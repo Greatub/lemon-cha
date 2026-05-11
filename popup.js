@@ -3118,6 +3118,9 @@ function createMarkdownTable(lines) {
   const wrapper = document.createElement("div");
   wrapper.className = "markdown-table-wrap";
 
+  const scroller = document.createElement("div");
+  scroller.className = "markdown-table-scroll";
+
   const table = document.createElement("table");
   const thead = document.createElement("thead");
   const tbody = document.createElement("tbody");
@@ -3151,7 +3154,8 @@ function createMarkdownTable(lines) {
   }
 
   table.append(thead, tbody);
-  wrapper.append(table);
+  scroller.append(table);
+  wrapper.append(scroller);
   return wrapper;
 }
 
