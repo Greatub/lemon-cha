@@ -1,23 +1,26 @@
 # lemon cha Chrome Extension
 
-一个零构建步骤的 Chrome 插件，用弹出式聊天窗口连接两类模型服务：
+[简体中文](README.zh-CN.md)
 
-- 自定义 LLM API：默认使用 OpenAI Chat Completions 兼容格式。
-- Ollama 本地模型：默认直连 `http://127.0.0.1:11434/api/chat`。
-- 请求由 Chrome extension background service worker 发出，并对本地 Ollama 请求自动修正 Origin。
-- 支持流式输出、停止生成、Markdown 展示、代码块复制、多会话保存、会话重命名、删除单条对话、导入/导出记录、清空全部历史。
+lemon cha is a lightweight Chrome extension that opens a dedicated AI chat tab for two kinds of model providers:
 
-## 安装
+- Custom LLM APIs that use an OpenAI Chat Completions-compatible format.
+- Local Ollama models, with `http://127.0.0.1:11434/api/chat` as the default endpoint.
+- Requests are sent from the Chrome extension background service worker.
+- Local Ollama requests include a direct-connect fallback that normalizes the local origin path.
+- The interface supports streaming output, stop generation, Markdown rendering, copyable code blocks, multi-session history, folders, rename/delete actions, Markdown export, and JSON import/export.
 
-1. 打开 Chrome，进入 `chrome://extensions/`。
-2. 开启右上角的“开发者模式”。
-3. 点击“加载已解压的扩展程序”。
-4. 选择这个目录：`/Users/georgehuang/Documents/New project`。
-5. 点击浏览器工具栏里的扩展图标，插件会打开一个独立标签页开始使用。
+## Install locally
 
-## 开发验证
+1. Open Chrome and visit `chrome://extensions/`.
+2. Enable Developer mode.
+3. Click "Load unpacked".
+4. Select this repository directory.
+5. Click the extension action to open lemon cha in a dedicated browser tab.
 
-本项目不引入前端框架和打包器，使用轻量 npm 脚本做基础校验和构建：
+## Development checks
+
+lemon cha is a lightweight Manifest V3 extension without a frontend bundler. The repository uses npm scripts for validation and packaging:
 
 ```bash
 npm run lint
@@ -25,160 +28,141 @@ npm run typecheck
 npm run build
 ```
 
-- `npm run lint`：检查扩展必要文件、Manifest V3 配置、HTML 静态资源引用和 JavaScript 语法。
-- `npm run typecheck`：当前项目是原生 JavaScript，没有 TypeScript 类型检查；此命令会执行 JavaScript 语法检查，作为轻量替代。
-- `npm run build`：复制扩展运行所需文件到 `dist/lemon-cha`。
+- `npm run lint`: validates required extension files, Manifest V3 setup, HTML asset references, and JavaScript syntax.
+- `npm run typecheck`: runs a lightweight syntax-oriented validation pass for this vanilla JavaScript project.
+- `npm run build`: copies runtime files into `dist/lemon-cha`.
 
-构建后也可以在 `chrome://extensions/` 中加载 `dist/lemon-cha` 进行验证。
+After building, you can also load `dist/lemon-cha` in `chrome://extensions/`.
 
-## 自定义 API 配置
+## Custom API settings
 
-设置为“自定义 API”后填写：
+Choose the custom API workflow and configure:
 
-- 接口地址，例如 `https://api.openai.com/v1/chat/completions`
-- 模型名，例如 `gpt-4o-mini`
-- API Key，如果服务端不需要鉴权可以留空
-- 接口格式：OpenAI Chat Completions 或 Ollama `/api/chat`
-- 思考模式：Ollama 格式会发送 `think` 参数；OpenAI 兼容格式会追加一个保守 system 提示，引导模型充分分析但不输出完整隐藏思维过程。
-- 界面语言：支持简体中文、繁體中文、English、日本語、한국어、Français、Español 和 Deutsch。
+- Endpoint, for example `https://api.openai.com/v1/chat/completions`
+- Model name, for example `gpt-4o-mini`
+- API key, if the provider requires one
+- API format: OpenAI Chat Completions or Ollama `/api/chat`
+- Thinking mode behavior
+- Interface language, answer language, and default translation target language
 
-如果接口格式选择 OpenAI Chat Completions，并且你只填写了域名或 `/v1`，插件会自动补全到 `/v1/chat/completions`。如果服务商使用自己的路径，请填写完整聊天接口地址。
+If the API format is OpenAI-compatible and the endpoint only contains the domain or `/v1`, lemon cha completes it to `/v1/chat/completions`. Provider-specific paths can still be entered manually.
 
-所有模型服务都在“自定义 API”设置里配置。Ollama 通过“接口格式：Ollama /api/chat”和“Ollama 本地模型”预设接入，不再需要单独的服务商标签。
+Built-in provider presets include DeepSeek, OpenAI, Qwen DashScope, Kimi, SiliconFlow, OpenRouter, Groq, and local Ollama.
 
-内置预设包括 DeepSeek、OpenAI、通义千问 DashScope、Kimi、SiliconFlow、OpenRouter、Groq 和 Ollama 本地模型。DeepSeek 预设使用官方 HTTP 示例路径：
+## Conversation management
 
-```text
-https://api.deepseek.com/chat/completions
-```
+- Create new conversations.
+- Switch between saved chats from the sidebar.
+- Organize chats inside folders.
+- Rename or delete conversations.
+- Export the current chat as Markdown.
+- Import or export JSON records containing conversations, settings, and custom prompt presets.
+- Clear history or restore factory defaults from the data settings area.
 
-## 对话管理
+## Message actions
 
-- 点击“新建对话”创建一个新的会话。
-- 点击左侧对话项切换历史会话。
-- 对话项右侧的 `✎` 可以重命名。
-- 对话项右侧的 `×` 可以删除单条对话。
-- “清空当前”只清空当前会话内容。
-- “清空历史”会删除所有会话并创建一个空白新会话。
-- “导出记录”会下载包含设置和全部对话的 JSON 文件。
-- “导出 Markdown”会把当前对话导出为 `.md` 文件。
-- “导入记录”会用 JSON 文件覆盖当前设置和对话历史。
-- 导出/导入也会包含自定义 Prompt 模板。
+Each assistant or user message can expose compact actions such as:
 
-## 消息操作
+- Copy
+- Regenerate
+- Continue from here
+- Delete
 
-每条消息右上角提供操作：
+## Connection checks
 
-- 复制：复制单条消息内容。
-- 重生成：从该消息对应上下文重新生成后续回复。
-- 继续：截断该消息之后的历史，并从这里继续生成。
-- 删除：删除单条消息。
+The connection checker supports:
 
-## 模型健康状态
+- Ollama `/api/tags` for model discovery and reachability checks
+- OpenAI-compatible lightweight test requests for endpoint, model, and API key verification
 
-顶部状态栏提供“检查连接”：
+## Generation experience
 
-- Ollama 格式会检查 `/api/tags` 并确认当前模型是否存在。
-- OpenAI 兼容格式会发送一次轻量 ping 请求，确认接口、模型和 Key 是否可用。
+- Streaming model responses
+- Stop generation while preserving partial output
+- Dynamic waiting state for slower local models
+- Generation timing and approximate token metrics
+- Automatic first-turn conversation title generation
+- Markdown rendering for paragraphs, lists, emphasis, code blocks, and tables
+- Copy button inside code blocks
+- Persistent bottom composer for long conversations
+- Collapsible sidebar for a cleaner reading surface
 
-## 生成体验
+## Prompt presets
 
-- 发送后会流式显示模型回复。
-- 生成过程中“发送”按钮会切换成“停止”，点击后会中止当前请求并保留已生成内容。
-- 本地模型响应较慢时，会先显示“模型正在思考”的动态反馈，顶部也会显示生成状态。
-- Assistant 消息底部会显示本轮耗时、首 token 时间、近似 token 数；Ollama 会尽量显示本地推理耗时。
-- 第一轮对话完成后，会自动请求模型生成更准确的会话标题；失败时静默保留原标题。
-- Assistant 回复会渲染基础 Markdown，包括段落、列表、加粗、行内代码和代码块。
-- 代码块右上角有“复制”按钮。
-- 输入框固定在页面底部，长对话滚动时不会离开视野。
-- 顶部“隐藏侧栏 / 显示侧栏”可以收起或展开左侧历史面板。
+The composer includes reusable prompt presets:
 
-## Prompt 模板
+- Summarization
+- Translation and polishing
+- Code review
+- Troubleshooting
+- Writing revision
+- Task planning
 
-输入框上方提供 Prompt 预设：
+Built-in templates are localized for Simplified Chinese, Traditional Chinese, English, Japanese, Korean, French, Spanish, and German.
 
-- 内置模板包括总结提炼、翻译润色、代码审查、问题排查、写作改稿、任务规划，并随界面语言提供简体中文、繁體中文、English、日本語、한국어、Français、Español 和 Deutsch 文案。
-- 选择模板会把模板内容填入输入框；如果输入框已有内容，会把模板追加到现有内容前面。
-- “保存为模板”会把当前输入框内容保存为自定义模板。
-- “删除模板”只会删除自定义模板，不会删除内置模板。
+When a preset is applied:
 
-请求体格式：
+- If the composer is empty, lemon cha replaces the input and selects the first `{placeholder}`.
+- If the composer already contains text, lemon cha asks before replacing it.
+- Translation presets can resolve the default translation target language selected in Settings.
 
-```json
-{
-  "model": "模型名",
-  "messages": [
-    {
-      "role": "user",
-      "content": "你好"
-    }
-  ],
-  "temperature": 0.7
-}
-```
+## Ollama setup
 
-## Ollama 配置
-
-先确认 Ollama 已启动，并已下载模型：
+Start Ollama and install a local model:
 
 ```bash
 ollama serve
 ollama pull llama3.1
 ```
 
-插件默认优先直连 Ollama：
+Default lemon cha settings:
 
-- 接口地址：`http://127.0.0.1:11434/api/chat`
-- 模型名：`llama3.1`
+- Endpoint: `http://127.0.0.1:11434/api/chat`
+- Model: `llama3.1`
 
-`11434` 是 Ollama 默认端口。插件不会再依赖额外的 Node 本地代理进程；如果直连失败，需要修正 Ollama 的启动配置或扩展来源权限。
+Connection strategy:
 
-连接策略：
+- `localhost` is normalized to `127.0.0.1`.
+- `/api/tags` is used for model listing and connectivity tests.
+- `/api/chat` is used for multi-turn chat and streaming.
+- Local Ollama requests are handled from the extension background service worker.
 
-- 默认地址为 `http://127.0.0.1:11434/api/chat`。
-- 设置里可以自定义 Ollama URL。
-- 输入 `localhost` 会自动规范为 `127.0.0.1`。
-- 插件使用 `/api/tags` 获取模型列表和检查连接。
-- 插件使用 `/api/chat` 进行多轮对话和流式输出。
-- 对 `127.0.0.1` / `localhost` 的本地 Ollama 请求，background 会自动把请求头 `Origin` 修正为本地 Ollama 的 origin，作为 CORS/Origin 兜底。
+### Ollama 403 / Origin rejection
 
-### Chrome 插件请求 Ollama 返回 403
+If Ollama rejects the Chrome extension origin, restart Ollama with extension-origin allowance.
 
-如果聊天窗口显示 `请求失败 403：Forbidden`，通常是 Ollama 拒绝了 Chrome 扩展的来源。重启 Ollama 时允许扩展来源即可。
-
-处理方式是允许扩展来源。
-
-macOS Ollama App：
+macOS Ollama app:
 
 ```bash
 launchctl setenv OLLAMA_ORIGINS "chrome-extension://*"
 ```
 
-然后从菜单栏完全退出 Ollama，再重新打开 Ollama App。只在终端里运行 `OLLAMA_ORIGINS=... ollama serve` 不会影响已经由 macOS App 启动的 Ollama。
+Quit the Ollama menu bar app completely, then open it again.
 
-macOS/Linux 命令行启动：
+macOS/Linux command line:
 
 ```bash
 OLLAMA_ORIGINS="chrome-extension://*" ollama serve
 ```
 
-调试阶段也可以临时放开所有来源：
+Temporary broad debug option:
 
 ```bash
 OLLAMA_ORIGINS="*" ollama serve
 ```
 
-Windows PowerShell：
+Windows PowerShell:
 
 ```powershell
 $env:OLLAMA_ORIGINS="chrome-extension://*,http://localhost:*,http://127.0.0.1:*"
 ollama serve
 ```
 
-## 文件结构
+## Repository layout
 
-- `manifest.json`：Chrome Manifest V3 配置。
-- `background.js`：后台请求代理，负责调用自定义 API 和 Ollama。
-- `chat.html`：独立标签页聊天界面。
-- `styles.css`：界面样式。
-- `popup.js`：配置保存、对话上下文和请求逻辑。
+- `manifest.json`: Chrome Manifest V3 configuration
+- `background.js`: background networking and provider calls
+- `chat.html`: dedicated chat page
+- `styles.css`: visual system and responsive layout
+- `popup.js`: state, settings, conversations, and UI flows
+- `chrome-store/`: Chrome Web Store listing, privacy, review, and release materials
