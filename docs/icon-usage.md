@@ -1,4 +1,4 @@
-# llmon cha Icon Usage
+# lemon cha Icon Usage
 
 This project uses a small, local SVG icon wrapper in `src/components/AppIcon.js`.
 

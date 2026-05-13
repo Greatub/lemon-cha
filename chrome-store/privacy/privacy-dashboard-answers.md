@@ -4,11 +4,11 @@
 
 ## Single Purpose
 
-llmon cha provides a dedicated browser chat interface for connecting user-configured LLM APIs and local Ollama models.
+lemon cha provides a dedicated browser chat interface for connecting user-configured LLM APIs and local Ollama models.
 
 中文参考：
 
-llmon cha 提供一个独立的浏览器 AI 对话界面，用于连接用户自己配置的 LLM API 和本地 Ollama 模型。
+lemon cha 提供一个独立的浏览器 AI 对话界面，用于连接用户自己配置的 LLM API 和本地 Ollama 模型。
 
 ## Permission Justifications
 
@@ -25,7 +25,7 @@ llmon cha 提供一个独立的浏览器 AI 对话界面，用于连接用户自
 
 说明：
 
-llmon cha stores API keys, model settings, prompt presets, and conversation history locally in Chrome extension storage. Chat messages are sent only to the model endpoint configured by the user.
+lemon cha stores API keys, model settings, prompt presets, and conversation history locally in Chrome extension storage. Chat messages are sent only to the model endpoint configured by the user.
 
 ## Data Handling Notes
 

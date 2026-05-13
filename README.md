@@ -1,4 +1,4 @@
-# llmon cha Chrome Extension
+# lemon cha Chrome Extension
 
 一个零构建步骤的 Chrome 插件，用弹出式聊天窗口连接两类模型服务：
 

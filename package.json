@@ -2,7 +2,7 @@
   "name": "llmon-cha-extension",
   "version": "0.1.0",
   "private": true,
-  "description": "llmon cha browser AI chat extension",
+  "description": "lemon cha browser AI chat extension",
   "scripts": {
     "lint": "node scripts/validate.js",
     "typecheck": "node scripts/validate.js --syntax-only",

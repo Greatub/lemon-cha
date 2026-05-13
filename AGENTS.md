@@ -2,7 +2,7 @@
 
 ## Product Direction
 
-This project is **llmon cha**, a browser AI chat extension.
+This project is **lemon cha**, a browser AI chat extension.
 
 The product should feel fresh, natural, lightweight, lemon-like, low-pressure, and approachable. It should not feel like an oppressive or overly technical AI tool.
 
@@ -18,7 +18,7 @@ The product should feel fresh, natural, lightweight, lemon-like, low-pressure, a
 ## Implementation Notes
 
 - Preserve the existing brand direction unless the user explicitly asks for a redesign.
-- When adding new UI, match the current llmon cha visual language before introducing new patterns.
+- When adding new UI, match the current lemon cha visual language before introducing new patterns.
 - Do not add decorative elements that compete with the lemon/chat identity.
 
 ## UI Design Rules

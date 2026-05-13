@@ -1,8 +1,8 @@
-# llmon cha Chrome Web Store Copy (English)
+# lemon cha Chrome Web Store Copy (English)
 
 ## Name
 
-llmon cha
+lemon cha
 
 ## Short Description
 
@@ -10,7 +10,7 @@ A fresh, lightweight browser AI chat extension for custom LLM APIs and local Oll
 
 ## Detailed Description
 
-llmon cha is a calm and lightweight AI chat extension for browser-based work. It opens as a dedicated chat tab where you can connect your own LLM API or use local models through Ollama.
+lemon cha is a calm and lightweight AI chat extension for browser-based work. It opens as a dedicated chat tab where you can connect your own LLM API or use local models through Ollama.
 
 It is designed for everyday workflows such as writing, translation and polishing, web content summarization, code review, troubleshooting, and task planning. The interface is fresh, natural, and low-pressure, with a lemon-inspired visual style.
 
@@ -23,11 +23,11 @@ Key features:
 - Use built-in prompt presets for summarizing, translation, code review, troubleshooting, rewriting, and planning.
 - Switch interface language across Simplified Chinese, Traditional Chinese, English, Japanese, Korean, French, Spanish, and German.
 - Use light mode, dark mode, or follow your system theme.
-- Keep API keys in browser local storage. llmon cha does not upload your keys to its own server.
+- Keep API keys in browser local storage. lemon cha does not upload your keys to its own server.
 
 Privacy note:
 
-llmon cha does not provide a cloud model service and does not collect your conversations. Your messages are sent only to the model provider or local Ollama endpoint you configure. Please review your chosen provider’s privacy policy before sending sensitive information.
+lemon cha does not provide a cloud model service and does not collect your conversations. Your messages are sent only to the model provider or local Ollama endpoint you configure. Please review your chosen provider’s privacy policy before sending sensitive information.
 
 ## Suggested Keywords
 

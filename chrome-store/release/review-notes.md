@@ -1,10 +1,10 @@
 # Chrome Web Store 审核说明草稿
 
-Product name: llmon cha
+Product name: lemon cha
 
 Single purpose:
 
-llmon cha provides a dedicated AI chat interface for users to connect their own LLM API providers and local Ollama models.
+lemon cha provides a dedicated AI chat interface for users to connect their own LLM API providers and local Ollama models.
 
 Core behavior:
 

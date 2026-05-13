@@ -1,6 +1,6 @@
 # Chrome Web Store 上架资料包
 
-本目录用于整理 **llmon cha** 上架 Chrome Web Store 时需要填写、上传和复核的材料。
+本目录用于整理 **lemon cha** 上架 Chrome Web Store 时需要填写、上传和复核的材料。
 
 ## 目录
 

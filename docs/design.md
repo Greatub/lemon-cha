@@ -1,10 +1,10 @@
-# llmon cha Design System
+# lemon cha Design System
 
-This document defines the local UI rules for **llmon cha**, a browser AI chat extension. It is inspired by Material Design 3 principles, but adapted for this product's own lemon, natural, lightweight brand direction.
+This document defines the local UI rules for **lemon cha**, a browser AI chat extension. It is inspired by Material Design 3 principles, but adapted for this product's own lemon, natural, lightweight brand direction.
 
 ## Design Intent
 
-llmon cha should feel calm, fresh, and easy to approach. The interface should support repeated AI conversations without visual pressure. It should feel more like a natural chat companion than a technical control panel.
+lemon cha should feel calm, fresh, and easy to approach. The interface should support repeated AI conversations without visual pressure. It should feel more like a natural chat companion than a technical control panel.
 
 Core qualities:
 
@@ -33,7 +33,7 @@ Use Material Design 3 ideas as practical guidance:
 - Use rounded shapes with restraint. Rounded corners should feel friendly, not bubbly or toy-like.
 - Design for accessibility first: readable contrast, keyboard focus, semantic HTML, and predictable interaction.
 
-Do not copy Material components blindly. Adapt them to the llmon cha brand.
+Do not copy Material components blindly. Adapt them to the lemon cha brand.
 
 ## Color System
 

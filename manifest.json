@@ -1,10 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "llmon cha",
+  "name": "lemon cha",
   "description": "A Chrome extension chat window for custom LLM APIs and local Ollama models.",
   "version": "0.1.0",
   "action": {
-    "default_title": "llmon cha",
+    "default_title": "lemon cha",
     "default_icon": {
       "16": "assets/icon-16.png",
       "32": "assets/icon-32.png",
