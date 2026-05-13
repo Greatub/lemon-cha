@@ -1,28 +1,31 @@
-# Chrome Web Store 审核说明草稿
+# Chrome Web Store Review Notes
 
-Product name: lemon cha
+## Product
 
-Single purpose:
+- Name: lemon cha
+- Type: Manifest V3 browser extension
+- Primary purpose: Browser AI chat workspace for user-configured LLM APIs and local Ollama models
 
-lemon cha provides a dedicated AI chat interface for users to connect their own LLM API providers and local Ollama models.
+## Reviewer walkthrough
 
-Core behavior:
+1. Open the extension action to launch the lemon cha chat page.
+2. Open Settings.
+3. Configure either:
+   - An OpenAI-compatible provider endpoint and API key, or
+   - A local Ollama endpoint such as `http://127.0.0.1:11434/api/chat`
+4. Save the settings.
+5. Send a chat prompt and observe streaming response rendering.
 
-- The extension opens a dedicated chat tab when the toolbar icon is clicked.
-- Users configure their own model endpoint and API key.
-- Messages are sent only to the configured endpoint when the user sends a chat message.
-- Local Ollama support uses `http://127.0.0.1:11434`.
-- API keys, settings, prompt presets, and conversation history are stored locally in Chrome extension storage.
-- The extension does not inject content scripts into web pages.
-- The extension does not collect data on the developer’s own servers.
-- The extension does not show ads or modify browsing/search behavior.
+## Local Ollama notes
 
-Permission explanation:
+The extension can test `/api/tags` and chat through `/api/chat`. A local Ollama instance may require its own CORS/origin configuration before extension requests are accepted.
 
-- `storage` is required to persist local settings, API keys, prompt presets, and conversation history.
-- `declarativeNetRequestWithHostAccess` is used for local Ollama connection handling.
-- Host permissions are required because users can connect local Ollama and user-configured OpenAI-compatible HTTPS endpoints.
+## Data handling
 
-Privacy note:
+- Settings, API keys, prompt presets, and conversation history are stored locally in extension storage.
+- lemon cha does not operate a backend service.
+- Requests go directly to the user-configured endpoint.
 
-The extension does not operate a backend service. User messages may be transmitted to third-party model providers only when the user configures and uses those providers.
+## Remote code
+
+No remote code is loaded or executed by the extension UI.

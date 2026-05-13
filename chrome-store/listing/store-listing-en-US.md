@@ -4,39 +4,39 @@
 
 lemon cha
 
-## Short Description
+## Short description
 
-A fresh, lightweight browser AI chat extension for custom LLM APIs and local Ollama models.
+A lightweight browser AI chat extension for custom LLM APIs, local Ollama models, prompt presets, and multilingual workflows.
 
-## Detailed Description
+## Full description
 
-lemon cha is a calm and lightweight AI chat extension for browser-based work. It opens as a dedicated chat tab where you can connect your own LLM API or use local models through Ollama.
+lemon cha is a dedicated browser chat workspace for writing, translation, code review, troubleshooting, and everyday AI-assisted work.
 
-It is designed for everyday workflows such as writing, translation and polishing, web content summarization, code review, troubleshooting, and task planning. The interface is fresh, natural, and low-pressure, with a lemon-inspired visual style.
+You can:
 
-Key features:
+- Connect your own OpenAI-compatible API.
+- Use local Ollama models.
+- Save model-specific API, model name, temperature, token limit, and system prompt settings.
+- Launch reusable workflows with prompt presets.
+- Organize conversation history with folders, rename chats, and export Markdown.
+- Configure interface language, default answer language, and default translation target language.
 
-- Connect OpenAI-compatible APIs such as DeepSeek, OpenAI, Qwen, Kimi, SiliconFlow, OpenRouter, and Groq.
-- Use local Ollama models through `http://127.0.0.1:11434`.
-- Stream responses for a more natural chat experience.
-- Manage conversations with renaming, deletion, folders, and Markdown export.
-- Use built-in prompt presets for summarizing, translation, code review, troubleshooting, rewriting, and planning.
-- Switch interface language across Simplified Chinese, Traditional Chinese, English, Japanese, Korean, French, Spanish, and German.
-- Use light mode, dark mode, or follow your system theme.
-- Keep API keys in browser local storage. lemon cha does not upload your keys to its own server.
+lemon cha does not provide its own cloud model service. Your requests are sent only to the model endpoint you configure or to your local Ollama server.
 
-Privacy note:
+## Highlights
 
-lemon cha does not provide a cloud model service and does not collect your conversations. Your messages are sent only to the model provider or local Ollama endpoint you configure. Please review your chosen provider’s privacy policy before sending sensitive information.
+- Dedicated chat tab
+- Streaming responses
+- Local Ollama support
+- Custom API support
+- Multilingual UI
+- Prompt preset workflows
+- Conversation organization
+- Markdown export
 
-## Suggested Keywords
+## Privacy summary
 
-AI chat, LLM, Ollama, DeepSeek, prompt, local AI, browser extension
-
-## Suggested Screenshots
-
-1. Main chat view with sidebar, chat bubbles, composer, and model selector.
-2. Model settings view with provider, base URL, and model name.
-3. Prompt preset management.
-4. Local Ollama model workflow.
-5. Dark mode or theme switching.
+- API keys are stored in local browser extension storage.
+- Conversations, settings, and prompt presets are stored locally.
+- lemon cha does not upload data to its own server.
+- User messages are sent only to the model provider or local endpoint configured by the user.

@@ -1,43 +1,35 @@
-# Chrome Web Store 隐私字段填写建议
+# Chrome Web Store Privacy Practices Draft
 
-以下内容用于填写 Chrome Web Store Developer Dashboard 的 Privacy practices 页面。
+Use this document as a drafting aid while filling in the Chrome Web Store Developer Dashboard.
 
-## Single Purpose
+## Single purpose
 
-lemon cha provides a dedicated browser chat interface for connecting user-configured LLM APIs and local Ollama models.
+Provide a browser-based AI chat workspace that lets users connect their own cloud LLM APIs or local Ollama models.
 
-中文参考：
+## Data collection disclosure
 
-lemon cha 提供一个独立的浏览器 AI 对话界面，用于连接用户自己配置的 LLM API 和本地 Ollama 模型。
+Recommended disclosure:
 
-## Permission Justifications
+- Personally identifiable information: **No**, unless a user voluntarily includes it in a conversation sent to their configured provider.
+- Health information: **No**, unless a user voluntarily includes it in a conversation sent to their configured provider.
+- Financial and payment information: **No**, unless a user voluntarily includes it in a conversation sent to their configured provider.
+- Authentication information: **Yes**, because API keys entered by the user are stored locally for requests to the configured provider.
+- Personal communications / user-generated content: **Yes**, because chat prompts and model responses can be stored locally and prompts are transmitted when the user sends them.
 
-详见 `../release/permission-justifications.md`。
+## Data handling explanation
 
-## Data Usage Disclosure
+- Stored locally: API keys, provider settings, prompts, responses, folders, and prompt presets.
+- Sent externally only on user action: chat requests to the user-selected provider or local Ollama endpoint.
+- lemon cha does not operate a cloud relay and does not receive a copy of user conversations.
 
-建议选择：
+## Limited use certification
 
-- Authentication information: Yes, if API keys are considered authentication information.
-- User content: Yes, because conversation messages are stored locally and sent to the configured model provider when the user sends a chat request.
-- Website content: No, unless later增加网页读取/总结功能并主动读取页面内容。
-- Personally identifiable information: No, unless the user manually enters such information into chat.
+The disclosures in the dashboard should match:
 
-说明：
+- The actual extension behavior
+- The public privacy policy
+- The store listing privacy summary
 
-lemon cha stores API keys, model settings, prompt presets, and conversation history locally in Chrome extension storage. Chat messages are sent only to the model endpoint configured by the user.
+## Privacy policy URL
 
-## Data Handling Notes
-
-- The extension does not sell user data.
-- The extension does not transfer user data to the developer’s own servers.
-- The extension does not use user data for advertising.
-- The extension does not use user data for creditworthiness or lending purposes.
-
-## Privacy Policy URL
-
-Chrome Web Store 通常需要可公开访问的隐私政策 URL。建议将 `privacy-policy.md` 发布到：
-
-- GitHub Pages
-- 产品官网
-- Notion/文档站（确保公开可访问）
+Publish the privacy policy from `privacy/privacy-policy.md` to a stable public URL and paste that URL into the dashboard.

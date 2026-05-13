@@ -21,7 +21,10 @@ for (const entry of entries) {
   const from = path.join(root, entry);
   const to = path.join(outDir, entry);
   const stats = statSync(from);
-  cpSync(from, to, { recursive: stats.isDirectory() });
+  cpSync(from, to, {
+    recursive: stats.isDirectory(),
+    filter: (source) => path.basename(source) !== ".DS_Store"
+  });
 }
 
 console.log(`built extension at ${path.relative(root, outDir)}`);
