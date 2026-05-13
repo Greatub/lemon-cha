@@ -27,9 +27,9 @@ npm run build
 
 - `npm run lint`：检查扩展必要文件、Manifest V3 配置、HTML 静态资源引用和 JavaScript 语法。
 - `npm run typecheck`：当前项目是原生 JavaScript，没有 TypeScript 类型检查；此命令会执行 JavaScript 语法检查，作为轻量替代。
-- `npm run build`：复制扩展运行所需文件到 `dist/llmon-cha`。
+- `npm run build`：复制扩展运行所需文件到 `dist/lemon-cha`。
 
-构建后也可以在 `chrome://extensions/` 中加载 `dist/llmon-cha` 进行验证。
+构建后也可以在 `chrome://extensions/` 中加载 `dist/lemon-cha` 进行验证。
 
 ## 自定义 API 配置
 

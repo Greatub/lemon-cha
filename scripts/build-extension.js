@@ -2,7 +2,7 @@ const { cpSync, mkdirSync, rmSync, statSync } = require("node:fs");
 const path = require("node:path");
 
 const root = path.resolve(__dirname, "..");
-const outDir = path.join(root, "dist", "llmon-cha");
+const outDir = path.join(root, "dist", "lemon-cha");
 
 const entries = [
   "manifest.json",
