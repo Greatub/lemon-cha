@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "lemon cha",
-  "description": "A Chrome extension chat window for custom LLM APIs and local Ollama models.",
+  "description": "A Chrome extension chat window for supported LLM APIs and local Ollama models.",
   "version": "0.2.0",
   "action": {
     "default_title": "lemon cha",
@@ -28,7 +28,12 @@
   "host_permissions": [
     "http://localhost/*",
     "http://127.0.0.1/*",
-    "http://0.0.0.0/*",
-    "https://*/*"
+    "https://api.deepseek.com/*",
+    "https://api.openai.com/*",
+    "https://openrouter.ai/*",
+    "https://dashscope.aliyuncs.com/*",
+    "https://api.moonshot.ai/*",
+    "https://api.siliconflow.cn/*",
+    "https://api.groq.com/*"
   ]
 }

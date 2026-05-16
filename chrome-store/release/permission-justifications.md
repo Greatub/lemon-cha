@@ -18,16 +18,40 @@ Used only for local Ollama direct-connect support. The extension applies a narro
 
 ### `http://localhost/*`
 ### `http://127.0.0.1/*`
-### `http://0.0.0.0/*`
 
-Used for local model providers, especially Ollama installations or local-compatible API services configured by the user.
+Used for local model providers, especially Ollama installations or local-compatible API services configured by the user on the same device.
 
-### `https://*/*`
+### `https://api.deepseek.com/*`
 
-Used because the extension lets users configure their own HTTPS LLM API endpoint rather than being limited to a fixed provider list.
+Used for the built-in DeepSeek provider preset.
+
+### `https://api.openai.com/*`
+
+Used for the built-in OpenAI-compatible provider preset.
+
+### `https://openrouter.ai/*`
+
+Used for the built-in OpenRouter provider preset.
+
+### `https://dashscope.aliyuncs.com/*`
+
+Used for the built-in Qwen / DashScope provider preset.
+
+### `https://api.moonshot.ai/*`
+
+Used for the built-in Kimi / Moonshot provider preset.
+
+### `https://api.siliconflow.cn/*`
+
+Used for the built-in SiliconFlow provider preset.
+
+### `https://api.groq.com/*`
+
+Used for the built-in Groq provider preset.
 
 Reviewers should note that:
 
 - Requests are initiated only when the user tests a configured endpoint or sends a chat message.
 - lemon cha does not inject scripts into arbitrary websites.
-- lemon cha opens its own extension page and communicates only with user-configured model endpoints.
+- lemon cha opens its own extension page and communicates only with local Ollama or the listed model provider endpoints.
+- Broad HTTPS host access and `http://0.0.0.0/*` are intentionally not requested in this stable store build.

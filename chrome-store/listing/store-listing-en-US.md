@@ -6,7 +6,7 @@ lemon cha
 
 ## Short description
 
-A lightweight browser AI chat extension for custom LLM APIs, local Ollama models, prompt presets, and multilingual workflows.
+A lightweight browser AI chat extension for supported LLM APIs, local Ollama models, prompt presets, and multilingual workflows.
 
 ## Full description
 
