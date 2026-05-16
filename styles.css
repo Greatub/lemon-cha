@@ -81,6 +81,10 @@
   --state-selected: color-mix(in srgb, var(--color-tertiary) 18%, var(--color-surface-warm));
 }
 
+html[data-font-size="large"] {
+  font-size: 18px;
+}
+
 body.dark-mode {
   color-scheme: dark;
   --color-primary: #F7F4E8;
@@ -384,7 +388,7 @@ button {
   cursor: pointer;
   font-family: var(--font-label);
   font-size: 0.8125rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1;
   transition: background 0.14s ease, border-color 0.14s ease, color 0.14s ease, transform 0.14s ease;
 }
@@ -408,7 +412,7 @@ button {
   box-shadow: var(--shadow-panel);
   font-family: var(--font-label);
   font-size: 0.6875rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.2;
   opacity: 0;
   pointer-events: none;
@@ -706,7 +710,7 @@ button:disabled {
   color: var(--color-secondary);
   font-family: var(--font-label);
   font-size: 0.6875rem;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0;
 }
 
@@ -737,6 +741,7 @@ button:disabled {
   border-radius: var(--radius-control);
   color: var(--color-primary);
   background: transparent;
+  font-weight: 400;
   text-align: left;
 }
 
@@ -763,6 +768,7 @@ button:disabled {
   border-color: transparent;
   color: var(--color-primary);
   background: transparent;
+  font-weight: 400;
   text-align: left;
 }
 
@@ -841,7 +847,7 @@ button:disabled {
   color: var(--color-secondary);
   font-family: var(--font-label);
   font-size: 0.6875rem;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0;
 }
 
@@ -869,7 +875,7 @@ button:disabled {
   display: grid;
   gap: var(--space-2xs);
   width: 232px;
-  padding: 6px;
+  padding: var(--space-xs);
   border: 0;
   border-radius: var(--radius-panel);
   background: var(--scheme-panel-surface);
@@ -890,6 +896,7 @@ button:disabled {
   border-radius: var(--radius-control);
   color: var(--color-primary);
   background: transparent;
+  font-weight: 400;
   text-align: left;
 }
 
@@ -898,13 +905,13 @@ button:disabled {
   place-items: center;
   width: 24px;
   height: 24px;
-  border: 1px solid var(--color-border);
+  border: 0;
   border-radius: var(--radius-sm);
   color: var(--color-secondary);
-  background: var(--scheme-input-surface);
+  background: transparent;
   font-family: var(--font-label);
   font-size: 0.6875rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1;
 }
 
@@ -920,15 +927,15 @@ button:disabled {
 }
 
 .menu-item:hover {
-  border-color: var(--color-border);
+  border-color: transparent;
   color: var(--color-primary);
-  background: var(--state-hover);
+  background: var(--scheme-sidebar-item-hover);
 }
 
 .menu-item:hover .menu-icon {
-  border-color: var(--color-tertiary);
-  color: var(--color-on-dark);
-  background: var(--color-tertiary);
+  border-color: transparent;
+  color: var(--color-primary);
+  background: transparent;
 }
 
 .menu-item.danger {
@@ -1041,7 +1048,7 @@ button:disabled {
   grid-column: 2;
   overflow: hidden;
   font-size: 0.8125rem;
-  font-weight: 600;
+  font-weight: 400;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1223,7 +1230,7 @@ button:disabled {
   color: var(--color-primary);
   font-family: var(--font-display);
   font-size: 0.9375rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1460,6 +1467,7 @@ button:disabled {
 }
 
 .settings-tab {
+  align-items: center;
   justify-content: flex-start;
   width: 100%;
   min-width: 0;
@@ -1469,6 +1477,9 @@ button:disabled {
   color: var(--color-secondary);
   border-radius: var(--radius-control);
   background: transparent;
+  line-height: 1.25;
+  text-align: left;
+  white-space: normal;
 }
 
 .settings-tab:hover {
@@ -1566,6 +1577,10 @@ button:disabled {
   background: var(--scheme-panel-surface);
 }
 
+.settings-footer-actions.hidden {
+  display: none;
+}
+
 .settings-footer-actions button {
   min-width: 112px;
 }
@@ -1575,8 +1590,11 @@ button:disabled {
 }
 
 .prompt-settings-panel textarea {
-  min-height: 220px;
-  max-height: none;
+  height: 144px;
+  min-height: 144px;
+  max-height: 144px;
+  overflow-y: auto;
+  resize: none;
 }
 
 .settings-tab-panel.hidden {
@@ -1614,7 +1632,7 @@ label {
   color: var(--color-secondary);
   font-family: var(--font-label);
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .settings-section {
@@ -1623,18 +1641,19 @@ label {
   min-width: 0;
   padding: var(--space-md);
   border-radius: var(--radius-panel);
-  background: var(--scheme-input-surface);
+  background: color-mix(in srgb, var(--scheme-input-surface) 84%, transparent);
 }
 
 .data-settings-panel {
   align-content: start;
-  gap: var(--space-lg);
+  gap: var(--space-sm);
 }
 
 .data-settings-panel .settings-section {
-  padding: 0;
-  border-radius: 0;
-  background: transparent;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  border-radius: var(--radius-control);
+  background: color-mix(in srgb, var(--scheme-input-surface) 84%, transparent);
 }
 
 .settings-section h3 {
@@ -1648,7 +1667,7 @@ label {
   color: var(--color-secondary);
   font-family: var(--font-label);
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .settings-section p {
@@ -1656,6 +1675,11 @@ label {
   color: var(--color-secondary);
   font-size: 0.8125rem;
   line-height: 1.5;
+}
+
+.data-settings-panel .settings-section p {
+  font-size: 0.75rem;
+  line-height: 1.4;
 }
 
 .settings-actions-grid {
@@ -1666,11 +1690,58 @@ label {
   gap: var(--space-sm);
 }
 
-.settings-actions-grid button,
-.danger-section > button {
+.reset-action-list {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.reset-action {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+  padding: var(--space-xs) 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+}
+
+.reset-action strong {
+  display: block;
+  margin-bottom: var(--space-2xs);
+  color: var(--color-primary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.reset-action p {
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.reset-action button,
+.data-settings-panel .settings-section > button {
   justify-content: center;
+  justify-self: end;
   width: auto;
   max-width: 100%;
+}
+
+.reset-action button {
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .reset-action {
+    grid-template-columns: 1fr;
+    gap: var(--space-sm);
+  }
+
+  .reset-action button {
+    justify-self: end;
+    white-space: normal;
+  }
 }
 
 .danger-section {
@@ -1678,11 +1749,7 @@ label {
 }
 
 .data-settings-panel .danger-section {
-  background: transparent;
-}
-
-.data-settings-panel .danger-section > button {
-  justify-self: end;
+  background: color-mix(in srgb, var(--color-danger-bg) 34%, var(--scheme-input-surface));
 }
 
 input.dirty,
@@ -1834,7 +1901,7 @@ select {
   color: var(--color-secondary);
   font-family: var(--font-label);
   font-size: 0.6875rem;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0;
 }
 
@@ -1854,7 +1921,7 @@ select {
   box-shadow: none;
   font-family: inherit;
   font-size: 0.8125rem;
-  font-weight: 500;
+  font-weight: 400;
   text-align: left;
 }
 
@@ -1866,14 +1933,14 @@ select {
 
 .custom-select-option:hover,
 .custom-select-option[aria-selected="true"] {
-  border-color: var(--color-border);
-  background: var(--state-hover);
+  border-color: transparent;
+  background: var(--scheme-sidebar-item-hover);
 }
 
 .custom-select-option[aria-selected="true"] {
-  border-color: var(--color-border-strong);
-  background: var(--state-selected);
-  font-weight: 600;
+  border-color: transparent;
+  background: var(--scheme-sidebar-item-active);
+  font-weight: 500;
 }
 
 input,
@@ -1990,15 +2057,15 @@ select:focus {
 }
 
 .settings-menu .menu-item.danger .menu-icon {
-  border-color: var(--color-danger-bg);
+  border-color: transparent;
   color: var(--color-danger);
-  background: color-mix(in srgb, var(--color-danger-bg) 64%, var(--color-surface));
+  background: transparent;
 }
 
 .settings-menu .menu-item.danger:hover .menu-icon {
-  border-color: var(--color-danger);
-  color: var(--color-on-dark);
-  background: var(--color-danger);
+  border-color: transparent;
+  color: var(--color-danger);
+  background: transparent;
 }
 
 .sidebar-primary .new-chat-button,
@@ -2243,7 +2310,7 @@ select:focus {
   color: var(--color-secondary);
   background: transparent;
   font-size: 0.6875rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .message-action .app-icon,
@@ -2264,7 +2331,7 @@ select:focus {
   align-items: center;
   gap: var(--space-sm);
   color: var(--color-secondary);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .typing-dots {
@@ -2612,7 +2679,7 @@ select:focus {
     linear-gradient(135deg, var(--color-secondary) 50%, transparent 50%) calc(100% - 8px) 50% / var(--select-arrow-size) var(--select-arrow-size) no-repeat,
     var(--scheme-input-surface);
   font-size: 0.6875rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .composer-actions .custom-select.open .custom-select-button,
@@ -2652,7 +2719,7 @@ select:focus {
   color: var(--color-secondary);
   background: var(--scheme-input-surface);
   font-size: 0.6875rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 #thinkingToggle.active,

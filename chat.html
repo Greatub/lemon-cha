@@ -75,11 +75,11 @@
                     <option value="zh-CN" data-i18n="languageChinese">简体中文</option>
                     <option value="zh-TW" data-i18n="languageTraditionalChinese">繁體中文</option>
                     <option value="en-US" data-i18n="languageEnglish">English</option>
+                    <option value="fr-FR" data-i18n="languageFrench">Français</option>
+                    <option value="de-DE" data-i18n="languageGerman">Deutsch</option>
                     <option value="ja-JP" data-i18n="languageJapanese">日本語</option>
                     <option value="ko-KR" data-i18n="languageKorean">한국어</option>
-                    <option value="fr-FR" data-i18n="languageFrench">Français</option>
                     <option value="es-ES" data-i18n="languageSpanish">Español</option>
-                    <option value="de-DE" data-i18n="languageGerman">Deutsch</option>
                   </select>
                 </label>
                 <label>
@@ -88,11 +88,11 @@
                     <option value="zh-CN" data-i18n="languageChinese">简体中文</option>
                     <option value="zh-TW" data-i18n="languageTraditionalChinese">繁體中文</option>
                     <option value="en-US" data-i18n="languageEnglish">English</option>
+                    <option value="fr-FR" data-i18n="languageFrench">Français</option>
+                    <option value="de-DE" data-i18n="languageGerman">Deutsch</option>
                     <option value="ja-JP" data-i18n="languageJapanese">日本語</option>
                     <option value="ko-KR" data-i18n="languageKorean">한국어</option>
-                    <option value="fr-FR" data-i18n="languageFrench">Français</option>
                     <option value="es-ES" data-i18n="languageSpanish">Español</option>
-                    <option value="de-DE" data-i18n="languageGerman">Deutsch</option>
                   </select>
                 </label>
                 <label>
@@ -101,11 +101,18 @@
                     <option value="zh-CN" data-i18n="languageChinese">简体中文</option>
                     <option value="zh-TW" data-i18n="languageTraditionalChinese">繁體中文</option>
                     <option value="en-US" data-i18n="languageEnglish">English</option>
+                    <option value="fr-FR" data-i18n="languageFrench">Français</option>
+                    <option value="de-DE" data-i18n="languageGerman">Deutsch</option>
                     <option value="ja-JP" data-i18n="languageJapanese">日本語</option>
                     <option value="ko-KR" data-i18n="languageKorean">한국어</option>
-                    <option value="fr-FR" data-i18n="languageFrench">Français</option>
                     <option value="es-ES" data-i18n="languageSpanish">Español</option>
-                    <option value="de-DE" data-i18n="languageGerman">Deutsch</option>
+                  </select>
+                </label>
+                <label>
+                  <span data-i18n="fontSizeLabel">字体大小</span>
+                  <select id="fontSizeInput">
+                    <option value="small" data-i18n="fontSizeSmall">小（默认）</option>
+                    <option value="large" data-i18n="fontSizeLarge">大</option>
                   </select>
                 </label>
                 <label>
@@ -203,7 +210,7 @@
                 </label>
                 <label class="wide-field">
                   <span data-i18n="promptTemplateContentLabel">模板内容</span>
-                  <textarea id="promptTemplateContentInput" rows="8"></textarea>
+                  <textarea id="promptTemplateContentInput" rows="5"></textarea>
                 </label>
                 <div class="settings-actions wide-field">
                   <button id="savePromptTemplate" type="button">保存模板</button>
@@ -215,12 +222,34 @@
                 <div class="settings-section wide-field">
                   <h3 data-i18n="resetSectionTitle">分区重置</h3>
                   <p data-i18n="resetSectionHint">每个重置操作只影响对应区域。</p>
-                  <div class="settings-actions settings-actions-grid">
-                    <button id="resetGeneralSettings" type="button" class="secondary">重置通用设置</button>
-                    <button id="resetCurrentModelSettings" type="button" class="secondary">重置当前模型设置</button>
-                    <button id="resetCurrentPromptTemplate" type="button" class="secondary">重置当前提示词预设</button>
-                    <button id="clearHistorySettings" type="button" class="secondary danger">清空对话历史</button>
+                  <div class="reset-action-list">
+                    <div class="reset-action">
+                      <div>
+                        <strong data-i18n="resetGeneralSettings">重置通用设置</strong>
+                        <p data-i18n="resetGeneralHelp">仅恢复语言、主题、字体和配色，不影响模型、提示词和对话。</p>
+                      </div>
+                      <button id="resetGeneralSettings" type="button" class="secondary" data-i18n="resetCurrentSettings">重置</button>
+                    </div>
+                    <div class="reset-action">
+                      <div>
+                        <strong data-i18n="resetCurrentModelSettings">重置当前模型设置</strong>
+                        <p data-i18n="resetModelHelp">仅重置当前选中的模型配置，不影响其他模型。</p>
+                      </div>
+                      <button id="resetCurrentModelSettings" type="button" class="secondary" data-i18n="resetCurrentSettings">重置</button>
+                    </div>
+                    <div class="reset-action">
+                      <div>
+                        <strong data-i18n="resetCurrentPromptTemplate">重置当前提示词预设</strong>
+                        <p data-i18n="resetPromptHelp">仅恢复当前提示词预设编辑内容，不影响其他预设。</p>
+                      </div>
+                      <button id="resetCurrentPromptTemplate" type="button" class="secondary" data-i18n="resetCurrentSettings">重置</button>
+                    </div>
                   </div>
+                </div>
+                <div class="settings-section clear-history-section wide-field">
+                  <h3 data-i18n="clearHistoryTitle">对话历史</h3>
+                  <p data-i18n="clearHistoryHelp">清空所有对话历史，并创建一个空白新对话。设置、模型和提示词预设会保留。</p>
+                  <button id="clearHistorySettings" type="button" class="secondary danger" data-i18n="clearHistorySettings">清空对话历史</button>
                 </div>
                 <div class="settings-section danger-section wide-field">
                   <h3 data-i18n="factoryResetTitle">恢复出厂设置</h3>

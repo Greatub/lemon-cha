@@ -277,11 +277,13 @@ const DEFAULT_SETTINGS = {
   language: "zh-CN",
   answerLanguage: "zh-CN",
   translationLanguage: "en-US",
+  fontSize: "small",
   colorScheme: "llmon",
   theme: "light"
 };
 
 const COLOR_SCHEMES = ["llmon", "leaf", "citrus", "blue", "gray"];
+const FONT_SIZES = ["small", "large"];
 const SUPPORTED_LANGUAGES = ["zh-CN", "zh-TW", "en-US", "ja-JP", "ko-KR", "fr-FR", "es-ES", "de-DE"];
 const NATIVE_LANGUAGE_NAMES = {
   "zh-CN": "简体中文",
@@ -340,6 +342,7 @@ const UI_TEXT = {
     testing: "测试中",
     saveSettings: "保存",
     resetSettings: "恢复默认",
+    resetCurrentSettings: "重置",
     resetGeneralSettings: "重置通用设置",
     resetCurrentModelSettings: "重置当前模型设置",
     resetCurrentPromptTemplate: "重置当前提示词预设",
@@ -354,6 +357,11 @@ const UI_TEXT = {
     deletePromptTemplate: "删除模板",
     resetSectionTitle: "分区重置",
     resetSectionHint: "每个重置操作只影响对应区域。",
+    resetGeneralHelp: "仅恢复语言、主题、字体和配色，不影响模型、提示词和对话。",
+    resetModelHelp: "仅重置当前选中的模型配置，不影响其他模型。",
+    resetPromptHelp: "仅恢复当前提示词预设编辑内容，不影响其他预设。",
+    clearHistoryTitle: "对话历史",
+    clearHistoryHelp: "清空所有对话历史，并创建一个空白新对话。设置、模型和提示词预设会保留。",
     factoryResetTitle: "恢复出厂设置",
     factoryResetHint: "会清空设置、模型配置、提示词预设和对话历史。",
     modelPreset: "模型服务预设",
@@ -377,6 +385,9 @@ const UI_TEXT = {
     interfaceLanguage: "界面语言",
     answerLanguage: "默认回答语言",
     translationLanguage: "默认翻译目标语言",
+    fontSizeLabel: "字体大小",
+    fontSizeSmall: "小（默认）",
+    fontSizeLarge: "大",
     languageChinese: "简体中文",
     languageTraditionalChinese: "繁體中文",
     languageEnglish: "English",
@@ -506,6 +517,7 @@ const UI_TEXT = {
     testing: "Testing",
     saveSettings: "Save",
     resetSettings: "Reset",
+    resetCurrentSettings: "Reset",
     resetGeneralSettings: "Reset General Settings",
     resetCurrentModelSettings: "Reset Current Model",
     resetCurrentPromptTemplate: "Reset Current Prompt Preset",
@@ -520,6 +532,11 @@ const UI_TEXT = {
     deletePromptTemplate: "Delete Template",
     resetSectionTitle: "Scoped Reset",
     resetSectionHint: "Each reset action only affects its own area.",
+    resetGeneralHelp: "Only resets language, theme, font size, and color scheme. Models, prompts, and chats are kept.",
+    resetModelHelp: "Only resets the currently selected model configuration. Other models are kept.",
+    resetPromptHelp: "Only restores the currently edited prompt preset. Other presets are kept.",
+    clearHistoryTitle: "Chat History",
+    clearHistoryHelp: "Clears all chat history and creates a blank conversation. Settings, models, and prompt presets are kept.",
     factoryResetTitle: "Factory Reset",
     factoryResetHint: "This clears settings, model configs, prompt presets, and chat history.",
     modelPreset: "Model Preset",
@@ -543,6 +560,9 @@ const UI_TEXT = {
     interfaceLanguage: "Interface Language",
     answerLanguage: "Default Answer Language",
     translationLanguage: "Default Translation Target",
+    fontSizeLabel: "Font Size",
+    fontSizeSmall: "Small (Default)",
+    fontSizeLarge: "Large",
     languageChinese: "简体中文",
     languageTraditionalChinese: "繁體中文",
     languageEnglish: "English",
@@ -675,6 +695,7 @@ Object.assign(UI_TEXT, {
     testing: "測試中",
     saveSettings: "儲存",
     resetSettings: "恢復預設",
+    resetCurrentSettings: "重設",
     resetGeneralSettings: "重設通用設定",
     resetCurrentModelSettings: "重設目前模型設定",
     resetCurrentPromptTemplate: "重設目前提示詞預設",
@@ -689,6 +710,11 @@ Object.assign(UI_TEXT, {
     deletePromptTemplate: "刪除範本",
     resetSectionTitle: "分區重設",
     resetSectionHint: "每個重設操作只會影響對應區域。",
+    resetGeneralHelp: "只恢復語言、主題、字體與配色，不影響模型、提示詞和對話。",
+    resetModelHelp: "只重設目前選取的模型配置，不影響其他模型。",
+    resetPromptHelp: "只還原目前提示詞預設的編輯內容，不影響其他預設。",
+    clearHistoryTitle: "對話歷史",
+    clearHistoryHelp: "清空所有對話歷史，並建立一個空白新對話。設定、模型和提示詞預設會保留。",
     factoryResetTitle: "恢復出廠設定",
     factoryResetHint: "會清空設定、模型配置、提示詞預設和對話歷史。",
     modelPreset: "模型服務預設",
@@ -712,6 +738,9 @@ Object.assign(UI_TEXT, {
     interfaceLanguage: "介面語言",
     answerLanguage: "預設回答語言",
     translationLanguage: "預設翻譯目標語言",
+    fontSizeLabel: "字體大小",
+    fontSizeSmall: "小（預設）",
+    fontSizeLarge: "大",
     languageChinese: "简体中文",
     languageTraditionalChinese: "繁體中文",
     languageEnglish: "English",
@@ -841,6 +870,7 @@ Object.assign(UI_TEXT, {
     testing: "テスト中",
     saveSettings: "保存",
     resetSettings: "初期値に戻す",
+    resetCurrentSettings: "リセット",
     resetGeneralSettings: "一般設定をリセット",
     resetCurrentModelSettings: "現在のモデル設定をリセット",
     resetCurrentPromptTemplate: "現在のプロンプトプリセットをリセット",
@@ -855,6 +885,11 @@ Object.assign(UI_TEXT, {
     deletePromptTemplate: "テンプレートを削除",
     resetSectionTitle: "範囲別リセット",
     resetSectionHint: "各リセット操作は該当する範囲だけに影響します。",
+    resetGeneralHelp: "言語、テーマ、文字サイズ、配色のみをリセットします。モデル、プロンプト、チャットには影響しません。",
+    resetModelHelp: "現在選択中のモデル設定のみをリセットします。他のモデルには影響しません。",
+    resetPromptHelp: "現在編集中のプロンプトプリセットのみを復元します。他のプリセットには影響しません。",
+    clearHistoryTitle: "チャット履歴",
+    clearHistoryHelp: "すべてのチャット履歴を消去し、空の新しい会話を作成します。設定、モデル、プロンプトプリセットは保持されます。",
     factoryResetTitle: "出荷時設定に戻す",
     factoryResetHint: "設定、モデル構成、プロンプトプリセット、チャット履歴を消去します。",
     modelPreset: "モデルサービスプリセット",
@@ -878,6 +913,9 @@ Object.assign(UI_TEXT, {
     interfaceLanguage: "画面言語",
     answerLanguage: "既定の回答言語",
     translationLanguage: "既定の翻訳先言語",
+    fontSizeLabel: "文字サイズ",
+    fontSizeSmall: "小（既定）",
+    fontSizeLarge: "大",
     languageChinese: "简体中文",
     languageTraditionalChinese: "繁體中文",
     languageEnglish: "English",
@@ -1007,6 +1045,7 @@ Object.assign(UI_TEXT, {
     testing: "테스트 중",
     saveSettings: "저장",
     resetSettings: "기본값 복원",
+    resetCurrentSettings: "초기화",
     resetGeneralSettings: "일반 설정 초기화",
     resetCurrentModelSettings: "현재 모델 설정 초기화",
     resetCurrentPromptTemplate: "현재 프롬프트 프리셋 초기화",
@@ -1021,6 +1060,11 @@ Object.assign(UI_TEXT, {
     deletePromptTemplate: "템플릿 삭제",
     resetSectionTitle: "영역별 초기화",
     resetSectionHint: "각 초기화 작업은 해당 영역에만 영향을 줍니다.",
+    resetGeneralHelp: "언어, 테마, 글자 크기, 색상만 초기화합니다. 모델, 프롬프트, 대화는 유지됩니다.",
+    resetModelHelp: "현재 선택한 모델 설정만 초기화합니다. 다른 모델은 유지됩니다.",
+    resetPromptHelp: "현재 편집 중인 프롬프트 프리셋만 복원합니다. 다른 프리셋은 유지됩니다.",
+    clearHistoryTitle: "대화 기록",
+    clearHistoryHelp: "모든 대화 기록을 비우고 빈 새 대화를 만듭니다. 설정, 모델, 프롬프트 프리셋은 유지됩니다.",
     factoryResetTitle: "공장 초기화",
     factoryResetHint: "설정, 모델 구성, 프롬프트 프리셋, 대화 기록을 모두 삭제합니다.",
     modelPreset: "모델 서비스 프리셋",
@@ -1044,6 +1088,9 @@ Object.assign(UI_TEXT, {
     interfaceLanguage: "인터페이스 언어",
     answerLanguage: "기본 답변 언어",
     translationLanguage: "기본 번역 대상 언어",
+    fontSizeLabel: "글자 크기",
+    fontSizeSmall: "작게(기본)",
+    fontSizeLarge: "크게",
     languageChinese: "简体中文",
     languageTraditionalChinese: "繁體中文",
     languageEnglish: "English",
@@ -1173,6 +1220,7 @@ Object.assign(UI_TEXT, {
     testing: "Test en cours",
     saveSettings: "Enregistrer",
     resetSettings: "Réinitialiser",
+    resetCurrentSettings: "Réinitialiser",
     resetGeneralSettings: "Réinitialiser les paramètres généraux",
     resetCurrentModelSettings: "Réinitialiser le modèle actuel",
     resetCurrentPromptTemplate: "Réinitialiser le prompt actuel",
@@ -1187,6 +1235,11 @@ Object.assign(UI_TEXT, {
     deletePromptTemplate: "Supprimer le modèle",
     resetSectionTitle: "Réinitialisation ciblée",
     resetSectionHint: "Chaque action de réinitialisation ne touche que sa zone.",
+    resetGeneralHelp: "Réinitialise uniquement la langue, le thème, la taille du texte et les couleurs. Les modèles, prompts et conversations sont conservés.",
+    resetModelHelp: "Réinitialise uniquement la configuration du modèle sélectionné. Les autres modèles sont conservés.",
+    resetPromptHelp: "Restaure uniquement le preset de prompt en cours d’édition. Les autres presets sont conservés.",
+    clearHistoryTitle: "Historique",
+    clearHistoryHelp: "Efface tout l’historique et crée une conversation vide. Les paramètres, modèles et presets de prompts sont conservés.",
     factoryResetTitle: "Restauration d’usine",
     factoryResetHint: "Efface les paramètres, configurations de modèles, presets de prompts et l’historique.",
     modelPreset: "Preset de service modèle",
@@ -1210,6 +1263,9 @@ Object.assign(UI_TEXT, {
     interfaceLanguage: "Langue de l’interface",
     answerLanguage: "Langue de réponse par défaut",
     translationLanguage: "Langue cible de traduction",
+    fontSizeLabel: "Taille du texte",
+    fontSizeSmall: "Petite (par défaut)",
+    fontSizeLarge: "Grande",
     languageChinese: "简体中文",
     languageTraditionalChinese: "繁體中文",
     languageEnglish: "English",
@@ -1339,6 +1395,7 @@ Object.assign(UI_TEXT, {
     testing: "Probando",
     saveSettings: "Guardar",
     resetSettings: "Restablecer",
+    resetCurrentSettings: "Restablecer",
     resetGeneralSettings: "Restablecer ajustes generales",
     resetCurrentModelSettings: "Restablecer modelo actual",
     resetCurrentPromptTemplate: "Restablecer preset de prompt actual",
@@ -1353,6 +1410,11 @@ Object.assign(UI_TEXT, {
     deletePromptTemplate: "Eliminar plantilla",
     resetSectionTitle: "Restablecimiento por área",
     resetSectionHint: "Cada acción de restablecimiento solo afecta a su área.",
+    resetGeneralHelp: "Solo restablece idioma, tema, tamaño de texto y colores. Modelos, prompts y conversaciones se conservan.",
+    resetModelHelp: "Solo restablece la configuración del modelo seleccionado. Los demás modelos se conservan.",
+    resetPromptHelp: "Solo restaura el preset de prompt que estás editando. Los demás presets se conservan.",
+    clearHistoryTitle: "Historial",
+    clearHistoryHelp: "Borra todo el historial y crea una conversación vacía. Se conservan ajustes, modelos y presets de prompts.",
     factoryResetTitle: "Restablecer de fábrica",
     factoryResetHint: "Borra ajustes, configuraciones de modelos, presets de prompts e historial.",
     modelPreset: "Preset de servicio de modelo",
@@ -1376,6 +1438,9 @@ Object.assign(UI_TEXT, {
     interfaceLanguage: "Idioma de interfaz",
     answerLanguage: "Idioma de respuesta predeterminado",
     translationLanguage: "Idioma destino de traducción",
+    fontSizeLabel: "Tamaño de texto",
+    fontSizeSmall: "Pequeño (predeterminado)",
+    fontSizeLarge: "Grande",
     languageChinese: "简体中文",
     languageTraditionalChinese: "繁體中文",
     languageEnglish: "English",
@@ -1505,6 +1570,7 @@ Object.assign(UI_TEXT, {
     testing: "Test läuft",
     saveSettings: "Speichern",
     resetSettings: "Zurücksetzen",
+    resetCurrentSettings: "Zurücksetzen",
     resetGeneralSettings: "Allgemeine Einstellungen zurücksetzen",
     resetCurrentModelSettings: "Aktuelles Modell zurücksetzen",
     resetCurrentPromptTemplate: "Aktuelles Prompt-Preset zurücksetzen",
@@ -1519,6 +1585,11 @@ Object.assign(UI_TEXT, {
     deletePromptTemplate: "Vorlage löschen",
     resetSectionTitle: "Gezieltes Zurücksetzen",
     resetSectionHint: "Jede Zurücksetzen-Aktion betrifft nur den jeweiligen Bereich.",
+    resetGeneralHelp: "Setzt nur Sprache, Design, Textgröße und Farbschema zurück. Modelle, Prompts und Chats bleiben erhalten.",
+    resetModelHelp: "Setzt nur die aktuell ausgewählte Modellkonfiguration zurück. Andere Modelle bleiben erhalten.",
+    resetPromptHelp: "Stellt nur das aktuell bearbeitete Prompt-Preset wieder her. Andere Presets bleiben erhalten.",
+    clearHistoryTitle: "Chatverlauf",
+    clearHistoryHelp: "Löscht den gesamten Chatverlauf und erstellt eine leere neue Unterhaltung. Einstellungen, Modelle und Prompt-Presets bleiben erhalten.",
     factoryResetTitle: "Werkseinstellungen",
     factoryResetHint: "Löscht Einstellungen, Modellkonfigurationen, Prompt-Presets und Chatverlauf.",
     modelPreset: "Modellservice-Preset",
@@ -1542,6 +1613,9 @@ Object.assign(UI_TEXT, {
     interfaceLanguage: "Oberflächensprache",
     answerLanguage: "Standard-Antwortsprache",
     translationLanguage: "Standard-Zielsprache",
+    fontSizeLabel: "Textgröße",
+    fontSizeSmall: "Klein (Standard)",
+    fontSizeLarge: "Groß",
     languageChinese: "简体中文",
     languageTraditionalChinese: "繁體中文",
     languageEnglish: "English",
@@ -1666,6 +1740,7 @@ const els = {
   settingsTabs: document.querySelector(".settings-tabs"),
   settingsTabButtons: [...document.querySelectorAll(".settings-tab")],
   settingsTabPanels: [...document.querySelectorAll(".settings-tab-panel")],
+  settingsFooterActions: document.querySelector(".settings-footer-actions"),
   settingsPanel: document.querySelector("#settingsPanel"),
   toast: document.querySelector("#toast"),
   settingsForm: document.querySelector("#settingsForm"),
@@ -1689,6 +1764,7 @@ const els = {
   languageInput: document.querySelector("#languageInput"),
   answerLanguageInput: document.querySelector("#answerLanguageInput"),
   translationLanguageInput: document.querySelector("#translationLanguageInput"),
+  fontSizeInput: document.querySelector("#fontSizeInput"),
   colorSchemeInput: document.querySelector("#colorSchemeInput"),
   resetGeneralSettings: document.querySelector("#resetGeneralSettings"),
   resetCurrentModelSettings: document.querySelector("#resetCurrentModelSettings"),
@@ -1723,7 +1799,7 @@ let promptInputComposing = false;
 const customSelects = new Map();
 const systemThemeQuery = window.matchMedia?.("(prefers-color-scheme: dark)");
 const THEME_MODES = ["light", "dark", "system"];
-const GENERAL_SETTINGS_KEYS = ["language", "answerLanguage", "translationLanguage", "colorScheme", "theme"];
+const GENERAL_SETTINGS_KEYS = ["language", "answerLanguage", "translationLanguage", "fontSize", "colorScheme", "theme"];
 const MODEL_SETTINGS_KEYS = [
   "provider",
   "preset",
@@ -2062,6 +2138,7 @@ function syncSettingsToForm() {
   els.languageInput.value = normalizeLanguage(state.settings.language);
   els.answerLanguageInput.value = normalizeLanguage(state.settings.answerLanguage);
   els.translationLanguageInput.value = normalizeLanguage(state.settings.translationLanguage);
+  els.fontSizeInput.value = FONT_SIZES.includes(state.settings.fontSize) ? state.settings.fontSize : DEFAULT_SETTINGS.fontSize;
   els.colorSchemeInput.value = state.settings.colorScheme || DEFAULT_SETTINGS.colorScheme;
   els.ollamaModelField.classList.toggle("hidden", config.apiFormat !== "ollama");
   els.testOllama?.classList.toggle("hidden", true);
@@ -2128,9 +2205,9 @@ function applyLanguage() {
     setButtonContent(els.testOllama, els.testOllama.disabled ? t("testing") : t("testOllama"), "bot");
   }
   setButtonContent(document.querySelector("#saveSettings"), t("saveSettings"), "settings");
-  setButtonContent(els.resetGeneralSettings, t("resetGeneralSettings"), "refreshCw");
-  setButtonContent(els.resetCurrentModelSettings, t("resetCurrentModelSettings"), "refreshCw");
-  setButtonContent(els.resetCurrentPromptTemplate, t("resetCurrentPromptTemplate"), "refreshCw");
+  setButtonContent(els.resetGeneralSettings, t("resetCurrentSettings"), "refreshCw");
+  setButtonContent(els.resetCurrentModelSettings, t("resetCurrentSettings"), "refreshCw");
+  setButtonContent(els.resetCurrentPromptTemplate, t("resetCurrentSettings"), "refreshCw");
   setButtonContent(els.clearHistorySettings, t("clearHistorySettings"), "trash");
   setButtonContent(els.factoryResetSettings, t("factoryResetSettings"), "alertTriangle");
   setButtonContent(els.thinkingToggle, t("thinkingMode"), "brain");
@@ -2191,6 +2268,9 @@ function applyTheme() {
     ? state.settings.colorScheme
     : DEFAULT_SETTINGS.colorScheme;
   document.body.classList.toggle("dark-mode", isDark);
+  document.documentElement.dataset.fontSize = FONT_SIZES.includes(state.settings.fontSize)
+    ? state.settings.fontSize
+    : DEFAULT_SETTINGS.fontSize;
   document.body.dataset.themeMode = getThemeMode();
   document.body.dataset.colorScheme = colorScheme;
   updateThemeButton();
@@ -2261,6 +2341,7 @@ function activateSettingsTab(tabName) {
     panel.classList.toggle("active", active);
     panel.classList.toggle("hidden", !active);
   }
+  els.settingsFooterActions?.classList.toggle("hidden", tabName === "data");
 }
 
 function setHealthStatus(status, detail = "") {
@@ -2414,6 +2495,9 @@ function iconForSelectOption(select, option) {
   }
   if (select.id === "languageInput" || select.id === "answerLanguageInput" || select.id === "translationLanguageInput") {
     return "languages";
+  }
+  if (select.id === "fontSizeInput") {
+    return "text";
   }
   if (select.id === "colorSchemeInput") {
     return "sun";
@@ -3412,6 +3496,7 @@ function persistCurrentProviderFields() {
   state.settings.language = normalizeLanguage(els.languageInput.value);
   state.settings.answerLanguage = normalizeLanguage(els.answerLanguageInput.value);
   state.settings.translationLanguage = normalizeLanguage(els.translationLanguageInput.value, "en-US");
+  state.settings.fontSize = FONT_SIZES.includes(els.fontSizeInput.value) ? els.fontSizeInput.value : DEFAULT_SETTINGS.fontSize;
   state.settings.colorScheme = COLOR_SCHEMES.includes(els.colorSchemeInput.value) ? els.colorSchemeInput.value : DEFAULT_SETTINGS.colorScheme;
   applyTheme();
 }
@@ -4069,6 +4154,13 @@ els.translationLanguageInput.addEventListener("change", () => {
   syncCustomSelects();
 });
 
+els.fontSizeInput.addEventListener("change", () => {
+  setSettingsSectionDirty("general", true);
+  state.settings.fontSize = FONT_SIZES.includes(els.fontSizeInput.value) ? els.fontSizeInput.value : DEFAULT_SETTINGS.fontSize;
+  applyTheme();
+  syncCustomSelects();
+});
+
 els.colorSchemeInput.addEventListener("change", () => {
   setSettingsSectionDirty("general", true);
   state.settings.colorScheme = COLOR_SCHEMES.includes(els.colorSchemeInput.value) ? els.colorSchemeInput.value : DEFAULT_SETTINGS.colorScheme;
@@ -4150,6 +4242,9 @@ els.deletePromptTemplate.addEventListener("click", async () => {
 
 els.settingsForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+  if ((els.settingsPanel.dataset.activeTab || "general") === "data") {
+    return;
+  }
   persistCurrentProviderFields();
   await saveSettings();
   captureSettingsSnapshot({ resetPrompt: false });
@@ -4165,6 +4260,7 @@ els.resetGeneralSettings.addEventListener("click", async () => {
   state.settings.language = DEFAULT_SETTINGS.language;
   state.settings.answerLanguage = DEFAULT_SETTINGS.answerLanguage;
   state.settings.translationLanguage = DEFAULT_SETTINGS.translationLanguage;
+  state.settings.fontSize = DEFAULT_SETTINGS.fontSize;
   state.settings.colorScheme = DEFAULT_SETTINGS.colorScheme;
   state.settings.theme = DEFAULT_SETTINGS.theme;
   await saveSettings();

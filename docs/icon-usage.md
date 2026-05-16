@@ -64,6 +64,7 @@ For static HTML icon slots:
 - Delete / clear history: `trash`
 - Translation workflows: `languages`
 - History: `history`
+- Font size: `text`
 
 ## Adding Icons
 

@@ -130,6 +130,11 @@ const APP_ICON_PATHS = {
     '<path d="m6.3 17.7-1.4 1.4" />',
     '<path d="m19.1 4.9-1.4 1.4" />'
   ],
+  text: [
+    '<path d="M4 7V4h16v3" />',
+    '<path d="M9 20h6" />',
+    '<path d="M12 4v16" />'
+  ],
   trash: [
     '<path d="M3 6h18" />',
     '<path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />',
