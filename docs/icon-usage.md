@@ -2,7 +2,7 @@
 
 This project uses a small, local SVG icon wrapper in `src/components/AppIcon.js`.
 
-The icon style follows the Lucide visual language: clean outline icons, rounded caps and joins, and lightweight strokes. The current project is a vanilla Chrome extension without React or a bundler, so `lucide-react` is not installed or imported directly. This avoids adding a React build chain only for icons.
+The icon style follows the Lucide visual language: clean outline icons, rounded caps and joins, and lightweight strokes. The current project is a vanilla browser extension without React or a bundler, so `lucide-react` is not installed or imported directly. This avoids adding a React build chain only for icons.
 
 ## Defaults
 
@@ -52,16 +52,19 @@ For static HTML icon slots:
 - Thinking: `brain`
 - New chat: `plus`
 - Sidebar collapse / expand: `chevronLeft`, `chevronRight`
+- Return to latest message: `chevronDown`
 - Settings: `settings`
 - Theme: `moon`, `sun`
 - Export / import: `download`, `upload`
-- Markdown export: `fileText`
+- Save: `save`
+- Markdown export: `fileDown`
 - Send / stop: `send`, `square`
 - Copy: `copy`
 - Regenerate: `refreshCw`
 - Continue from here: `route`
 - Rename: `edit`
 - Delete / clear history: `trash`
+- Remove from folder: `folderOutput`
 - Translation workflows: `languages`
 - History: `history`
 - Font size: `text`

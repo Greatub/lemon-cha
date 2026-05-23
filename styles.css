@@ -57,6 +57,7 @@
   --space-xl: 32px;
   --control-height: 36px;
   --compact-control-height: 24px;
+  --small-icon-button-size: 24px;
   --sidebar-item-height: 40px;
   --sidebar-collapsed-width: 48px;
   --icon-button-size: 36px;
@@ -69,6 +70,10 @@
   --textarea-scrollbar-inset: 24px;
   --collapsed-sidebar-inline-padding: 5px;
   --composer-action-inset: 14px;
+  --composer-input-min-height: 112px;
+  --composer-input-max-height: 220px;
+  --composer-input-action-space: 64px;
+  --composer-safe-space: calc(var(--composer-input-min-height) + var(--space-xl) + var(--space-lg));
   --content-width: 920px;
   --message-width: var(--content-width);
   --scrollbar-reserve: 17px;
@@ -77,6 +82,7 @@
   --shadow-panel: 0 6px 22px rgba(104, 87, 32, 0.10);
   --shadow-soft: 0 14px 38px rgba(104, 87, 32, 0.13);
   --shadow-message: 0 3px 12px rgba(104, 87, 32, 0.055);
+  --focus-ring: 0 0 0 3px var(--color-focus);
   --state-hover: color-mix(in srgb, var(--color-tertiary) 12%, transparent);
   --state-selected: color-mix(in srgb, var(--color-tertiary) 18%, var(--color-surface-warm));
 }
@@ -470,7 +476,7 @@ button:focus-visible,
 .message-action:focus-visible {
   outline: none;
   border-color: var(--color-tertiary);
-  box-shadow: 0 0 0 3px var(--color-focus);
+  box-shadow: var(--focus-ring);
 }
 
 button:active {
@@ -903,8 +909,8 @@ button:disabled {
 .menu-icon {
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: var(--small-icon-button-size);
+  height: var(--small-icon-button-size);
   border: 0;
   border-radius: var(--radius-sm);
   color: var(--color-secondary);
@@ -916,8 +922,8 @@ button:disabled {
 }
 
 .menu-icon .app-icon {
-  width: 15px;
-  height: 15px;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
 }
 
 .menu-label {
@@ -1095,10 +1101,10 @@ button:disabled {
 .conversation-action {
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: var(--small-icon-button-size);
+  height: var(--small-icon-button-size);
   border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-control);
   color: var(--color-secondary);
   background: transparent;
   font-size: 1rem;
@@ -1110,8 +1116,8 @@ button:disabled {
 
 .conversation-menu-toggle .app-icon,
 .conversation-action .app-icon {
-  width: 15px;
-  height: 15px;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
 }
 
 .conversation-menu-toggle:hover,
@@ -1130,7 +1136,7 @@ button:disabled {
 .conversation-menu-toggle:focus-visible,
 .conversation-action:focus-visible {
   border-color: transparent;
-  box-shadow: 0 0 0 3px var(--color-focus);
+  box-shadow: var(--focus-ring);
 }
 
 .conversation-action-menu {
@@ -1533,10 +1539,13 @@ button:disabled {
 }
 
 .settings .custom-select-button:hover,
-.settings .custom-select-button:focus-visible,
 .settings .custom-select.open .custom-select-button {
   border-color: var(--color-border-strong);
-  box-shadow: 0 0 0 3px var(--color-focus);
+}
+
+.settings .custom-select-button:focus-visible {
+  border-color: var(--color-border-strong);
+  box-shadow: var(--focus-ring);
 }
 
 .settings .custom-select-menu {
@@ -1554,11 +1563,18 @@ button:disabled {
   background: var(--scheme-sidebar-item-active);
 }
 
-.settings .settings-actions button:hover,
+.settings .settings-actions button:not(.danger):hover,
 .settings .secondary:hover {
   border-color: transparent;
   color: var(--color-primary);
   background: var(--scheme-sidebar-item-hover);
+}
+
+.settings .settings-actions button.danger:hover,
+.settings .danger:hover {
+  border-color: var(--color-danger);
+  color: var(--color-on-dark);
+  background: var(--color-danger);
 }
 
 .settings .settings-actions {
@@ -1755,7 +1771,7 @@ label {
 input.dirty,
 textarea.dirty {
   border-color: var(--color-tertiary);
-  box-shadow: 0 0 0 3px var(--color-focus);
+  box-shadow: var(--focus-ring);
 }
 
 .checkbox-label {
@@ -1837,10 +1853,13 @@ select {
 }
 
 .custom-select.open .custom-select-button,
-.custom-select-button:hover,
+.custom-select-button:hover {
+  border-color: var(--color-tertiary);
+}
+
 .custom-select-button:focus-visible {
   border-color: var(--color-tertiary);
-  box-shadow: 0 0 0 3px var(--color-focus);
+  box-shadow: var(--focus-ring);
 }
 
 .custom-select.open .custom-select-button {
@@ -1993,7 +2012,7 @@ input:focus,
 select:focus,
 textarea:focus {
   border-color: var(--color-tertiary);
-  box-shadow: 0 0 0 3px var(--color-focus);
+  box-shadow: var(--focus-ring);
 }
 
 select:focus {
@@ -2186,10 +2205,11 @@ select:focus {
   gap: var(--space-md);
   min-height: 0;
   max-height: 100%;
-  padding: var(--space-xl) 0 calc(var(--space-xl) + 148px);
+  padding: var(--space-xl) 0 var(--composer-safe-space);
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-gutter: stable;
+  scroll-padding-bottom: var(--composer-safe-space);
 }
 
 .messages::before,
@@ -2301,9 +2321,9 @@ select:focus {
 .message-action {
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
-  min-height: 24px;
+  width: var(--small-icon-button-size);
+  height: var(--small-icon-button-size);
+  min-height: var(--small-icon-button-size);
   padding: 0;
   border-color: transparent;
   border-radius: var(--radius-control);
@@ -2619,6 +2639,54 @@ select:focus {
   margin-inline: auto;
 }
 
+.scroll-to-bottom {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + var(--space-sm));
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: var(--icon-button-size);
+  height: var(--icon-button-size);
+  min-height: var(--icon-button-size);
+  border: 0;
+  border-radius: var(--radius-full);
+  padding: 0;
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--scheme-input-surface) 78%, transparent);
+  box-shadow: var(--shadow-panel);
+  backdrop-filter: blur(12px);
+  opacity: 1;
+  transform: translateX(-50%);
+  transition:
+    opacity 0.14s ease,
+    transform 0.14s ease,
+    background-color 0.14s ease;
+  pointer-events: auto;
+}
+
+.scroll-to-bottom.hidden {
+  display: grid;
+  opacity: 0;
+  transform: translate(-50%, var(--space-sm));
+  pointer-events: none;
+}
+
+.scroll-to-bottom:active {
+  transform: translate(-50%, 1px);
+}
+
+.scroll-to-bottom:hover,
+.scroll-to-bottom:focus-visible {
+  color: var(--color-on-dark);
+  background: var(--color-tertiary);
+}
+
+.scroll-to-bottom .app-icon {
+  width: 18px;
+  height: 18px;
+}
+
 .composer-box {
   position: relative;
   z-index: 1;
@@ -2626,13 +2694,14 @@ select:focus {
 }
 
 .composer textarea {
-  min-height: 112px;
-  max-height: 220px;
-  padding: var(--space-md) calc(var(--space-md) + var(--space-sm)) 64px var(--space-md);
+  min-height: var(--composer-input-min-height);
+  max-height: var(--composer-input-max-height);
+  padding: var(--space-md) calc(var(--space-md) + var(--space-sm)) var(--composer-input-action-space) var(--space-md);
   border-color: var(--color-border);
   border-radius: var(--radius-bubble);
   background: var(--scheme-input-surface);
   box-shadow: var(--shadow-soft);
+  overflow-y: hidden;
   resize: none;
 }
 
@@ -2710,7 +2779,8 @@ select:focus {
   margin-left: auto;
 }
 
-#thinkingToggle {
+#thinkingToggle,
+.composer-actions .composer-mode-button {
   height: var(--compact-control-height);
   min-height: var(--compact-control-height);
   padding: 0 var(--space-sm);
@@ -2722,6 +2792,17 @@ select:focus {
   font-weight: 500;
 }
 
+.composer-actions .composer-mode-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.composer-actions .composer-mode-button .app-icon {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}
+
 #thinkingToggle.active,
 #thinkingToggle[aria-pressed="true"] {
   border-color: var(--color-green);
@@ -2729,15 +2810,28 @@ select:focus {
   background: var(--color-green-soft);
 }
 
-#thinkingToggle:hover {
+#thinkingToggle:hover,
+.composer-actions .composer-mode-button:hover,
+.composer-actions .composer-mode-button:focus-visible {
   border-color: var(--color-tertiary);
   color: var(--color-on-dark);
   background: var(--color-tertiary);
 }
 
-#sendButton {
+.composer-actions .composer-mode-button.active,
+.composer-actions .composer-mode-button[aria-pressed="true"] {
+  border-color: var(--color-green);
+  color: var(--color-primary);
+  background: var(--color-green-soft);
+}
+
+#sendButton,
+#stopButton {
   min-width: 56px;
   border-radius: var(--radius-full);
+}
+
+#sendButton {
   color: var(--color-surface);
   background: var(--color-green);
   border-color: var(--color-green);
