@@ -1,21 +1,29 @@
-# lemon cha Chrome Extension
+# lemon cha Browser Extension
 
 [简体中文](README.zh-CN.md)
 
-lemon cha is a lightweight Chrome extension that opens a dedicated AI chat tab for two kinds of model providers:
+lemon cha is a lightweight Chrome and Firefox extension that opens a dedicated AI chat tab for two kinds of model providers:
 
 - Custom LLM APIs that use an OpenAI Chat Completions-compatible format.
 - Local Ollama models, with `http://127.0.0.1:11434/api/chat` as the default endpoint.
-- Requests are sent from the Chrome extension background service worker.
+- Requests are sent from the browser extension background context.
 - Local Ollama requests include a direct-connect fallback that normalizes the local origin path.
 - The interface supports streaming output, stop generation, Markdown rendering, copyable code blocks, multi-session history, folders, rename/delete actions, Markdown export, and JSON import/export.
 
-## Install locally
+## Install locally in Chrome
 
 1. Open Chrome and visit `chrome://extensions/`.
 2. Enable Developer mode.
 3. Click "Load unpacked".
-4. Select this repository directory.
+4. Select `dist/lemon-cha` after running `npm run build:chrome`.
+5. Click the extension action to open lemon cha in a dedicated browser tab.
+
+## Install locally in Firefox
+
+1. Run `npm run build:firefox`.
+2. Open Firefox and visit `about:debugging#/runtime/this-firefox`.
+3. Click "Load Temporary Add-on...".
+4. Select `dist/lemon-cha-firefox/manifest.json`.
 5. Click the extension action to open lemon cha in a dedicated browser tab.
 
 ## Development checks
@@ -28,11 +36,13 @@ npm run typecheck
 npm run build
 ```
 
-- `npm run lint`: validates required extension files, Manifest V3 setup, HTML asset references, and JavaScript syntax.
+- `npm run lint`: validates required extension files, Chrome and Firefox Manifest V3 setup, HTML asset references, and JavaScript syntax.
 - `npm run typecheck`: runs a lightweight syntax-oriented validation pass for this vanilla JavaScript project.
-- `npm run build`: copies runtime files into `dist/lemon-cha`.
+- `npm run build`: copies runtime files into `dist/lemon-cha` for Chrome and `dist/lemon-cha-firefox` for Firefox.
+- `npm run build:chrome`: builds only the Chrome package.
+- `npm run build:firefox`: builds only the Firefox package.
 
-After building, you can also load `dist/lemon-cha` in `chrome://extensions/`.
+Firefox uses the same runtime code with a generated Firefox manifest. The generated manifest swaps Chrome's `background.service_worker` for Firefox's `background.scripts` and adds Gecko extension settings required for Firefox distribution.
 
 ## Custom API settings
 
@@ -125,16 +135,16 @@ Connection strategy:
 - `localhost` is normalized to `127.0.0.1`.
 - `/api/tags` is used for model listing and connectivity tests.
 - `/api/chat` is used for multi-turn chat and streaming.
-- Local Ollama requests are handled from the extension background service worker.
+- Local Ollama requests are handled from the extension background context.
 
 ### Ollama 403 / Origin rejection
 
-If Ollama rejects the Chrome extension origin, restart Ollama with extension-origin allowance.
+If Ollama rejects the browser extension origin, restart Ollama with extension-origin allowance.
 
 macOS Ollama app:
 
 ```bash
-launchctl setenv OLLAMA_ORIGINS "chrome-extension://*"
+launchctl setenv OLLAMA_ORIGINS "chrome-extension://*,moz-extension://*"
 ```
 
 Quit the Ollama menu bar app completely, then open it again.
@@ -142,7 +152,7 @@ Quit the Ollama menu bar app completely, then open it again.
 macOS/Linux command line:
 
 ```bash
-OLLAMA_ORIGINS="chrome-extension://*" ollama serve
+OLLAMA_ORIGINS="chrome-extension://*,moz-extension://*" ollama serve
 ```
 
 Temporary broad debug option:
@@ -154,13 +164,14 @@ OLLAMA_ORIGINS="*" ollama serve
 Windows PowerShell:
 
 ```powershell
-$env:OLLAMA_ORIGINS="chrome-extension://*,http://localhost:*,http://127.0.0.1:*"
+$env:OLLAMA_ORIGINS="chrome-extension://*,moz-extension://*,http://localhost:*,http://127.0.0.1:*"
 ollama serve
 ```
 
 ## Repository layout
 
-- `manifest.json`: Chrome Manifest V3 configuration
+- `manifest.json`: source Chrome Manifest V3 configuration
+- `scripts/build-extension.js`: Chrome and Firefox extension package builder
 - `background.js`: background networking and provider calls
 - `chat.html`: dedicated chat page
 - `styles.css`: visual system and responsive layout

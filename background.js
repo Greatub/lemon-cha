@@ -18,8 +18,9 @@ const BG_TEXT = {
     nonJson: "接口返回的不是 JSON：{text}",
     ollamaModelNotFound: "Ollama 模型不存在：{message}。请点击“测试 Ollama”，从本地模型列表里选择已安装模型后保存。",
     custom404: "自定义 API 返回 404，当前地址不是聊天接口：{url}。OpenAI 兼容服务通常需要 /v1/chat/completions；如果你的服务是 Ollama 格式，请在设置里把接口格式改为 Ollama /api/chat。",
-    ollama403: "Ollama 拒绝了扩展来源。请设置 OLLAMA_ORIGINS=\"chrome-extension://*\" 后完全重启 Ollama。",
+    ollama403: "Ollama 拒绝了扩展来源。请设置 OLLAMA_ORIGINS=\"chrome-extension://*,moz-extension://*\" 后完全重启 Ollama。",
     ollamaFetchFailed: "无法连接 Ollama：{message}。请确认 Ollama 已启动，接口地址为 http://127.0.0.1:11434/api/chat，并允许扩展来源。",
+    apiKeyInvalid: "API Key 包含非英文字符或备注文字，请重新粘贴纯 API Key 后保存。",
     answerLanguagePrompt: "除非用户明确要求其他语言，请默认使用{language}回答。",
     statusFailed: "请求失败 {status}：{message}"
   },
@@ -38,8 +39,9 @@ const BG_TEXT = {
     nonJson: "The API did not return JSON: {text}",
     ollamaModelNotFound: "Ollama model not found: {message}. Click \"Test Ollama\", choose an installed local model, then save.",
     custom404: "Custom API returned 404. The current URL is not a chat endpoint: {url}. OpenAI-compatible services usually need /v1/chat/completions. If this is an Ollama-format service, change API Format to Ollama /api/chat in settings.",
-    ollama403: "Ollama rejected the extension origin. Set OLLAMA_ORIGINS=\"chrome-extension://*\" and fully restart Ollama.",
+    ollama403: "Ollama rejected the extension origin. Set OLLAMA_ORIGINS=\"chrome-extension://*,moz-extension://*\" and fully restart Ollama.",
     ollamaFetchFailed: "Could not connect to Ollama: {message}. Make sure Ollama is running, the endpoint is http://127.0.0.1:11434/api/chat, and the extension origin is allowed.",
+    apiKeyInvalid: "The API key contains non-English characters or notes. Paste the raw API key and save again.",
     answerLanguagePrompt: "Unless the user explicitly asks for another language, answer in {language} by default.",
     statusFailed: "Request failed {status}: {message}"
   }
@@ -61,7 +63,7 @@ Object.assign(BG_TEXT, {
     nonJson: "介面回傳的不是 JSON：{text}",
     ollamaModelNotFound: "Ollama 模型不存在：{message}。請點選「測試 Ollama」，從本機模型清單選擇已安裝模型後儲存。",
     custom404: "自訂 API 回傳 404，目前位址不是聊天介面：{url}。OpenAI 相容服務通常需要 /v1/chat/completions；如果你的服務是 Ollama 格式，請在設定中把介面格式改為 Ollama /api/chat。",
-    ollama403: "Ollama 拒絕了擴充功能來源。請設定 OLLAMA_ORIGINS=\"chrome-extension://*\" 後完整重新啟動 Ollama。",
+    ollama403: "Ollama 拒絕了擴充功能來源。請設定 OLLAMA_ORIGINS=\"chrome-extension://*,moz-extension://*\" 後完整重新啟動 Ollama。",
     ollamaFetchFailed: "無法連線 Ollama：{message}。請確認 Ollama 已啟動，介面位址為 http://127.0.0.1:11434/api/chat，並允許擴充功能來源。",
     answerLanguagePrompt: "除非使用者明確要求其他語言，請預設使用{language}回答。",
     statusFailed: "請求失敗 {status}：{message}"
@@ -81,7 +83,7 @@ Object.assign(BG_TEXT, {
     nonJson: "API が JSON を返しませんでした: {text}",
     ollamaModelNotFound: "Ollama モデルが見つかりません: {message}。「Ollama をテスト」をクリックし、インストール済みのローカルモデルを選んで保存してください。",
     custom404: "カスタム API が 404 を返しました。現在の URL はチャットエンドポイントではありません: {url}。OpenAI 互換サービスでは通常 /v1/chat/completions が必要です。Ollama 形式のサービスなら、設定で API 形式を Ollama /api/chat に変更してください。",
-    ollama403: "Ollama が拡張機能の origin を拒否しました。OLLAMA_ORIGINS=\"chrome-extension://*\" を設定し、Ollama を完全に再起動してください。",
+    ollama403: "Ollama が拡張機能の origin を拒否しました。OLLAMA_ORIGINS=\"chrome-extension://*,moz-extension://*\" を設定し、Ollama を完全に再起動してください。",
     ollamaFetchFailed: "Ollama に接続できません: {message}。Ollama が起動していること、エンドポイントが http://127.0.0.1:11434/api/chat であること、拡張機能の origin が許可されていることを確認してください。",
     answerLanguagePrompt: "ユーザーが明示的に別の言語を求めない限り、既定では{language}で回答してください。",
     statusFailed: "リクエスト失敗 {status}: {message}"
@@ -101,7 +103,7 @@ Object.assign(BG_TEXT, {
     nonJson: "API가 JSON을 반환하지 않았습니다: {text}",
     ollamaModelNotFound: "Ollama 모델을 찾을 수 없습니다: {message}. “Ollama 테스트”를 클릭하고 설치된 로컬 모델을 선택한 뒤 저장하세요.",
     custom404: "사용자 지정 API가 404를 반환했습니다. 현재 URL은 채팅 엔드포인트가 아닙니다: {url}. OpenAI 호환 서비스는 보통 /v1/chat/completions가 필요합니다. Ollama 형식 서비스라면 설정에서 API 형식을 Ollama /api/chat으로 바꾸세요.",
-    ollama403: "Ollama가 확장 프로그램 origin을 거부했습니다. OLLAMA_ORIGINS=\"chrome-extension://*\" 를 설정하고 Ollama를 완전히 다시 시작하세요.",
+    ollama403: "Ollama가 확장 프로그램 origin을 거부했습니다. OLLAMA_ORIGINS=\"chrome-extension://*,moz-extension://*\" 를 설정하고 Ollama를 완전히 다시 시작하세요.",
     ollamaFetchFailed: "Ollama에 연결할 수 없습니다: {message}. Ollama가 실행 중이고 엔드포인트가 http://127.0.0.1:11434/api/chat 이며 확장 프로그램 origin이 허용되었는지 확인하세요.",
     answerLanguagePrompt: "사용자가 명시적으로 다른 언어를 요청하지 않는 한 기본적으로 {language}로 답변하세요.",
     statusFailed: "요청 실패 {status}: {message}"
@@ -121,7 +123,7 @@ Object.assign(BG_TEXT, {
     nonJson: "L’API n’a pas renvoyé de JSON : {text}",
     ollamaModelNotFound: "Modèle Ollama introuvable : {message}. Cliquez sur « Tester Ollama », choisissez un modèle local installé, puis enregistrez.",
     custom404: "L’API personnalisée a renvoyé 404. L’URL actuelle n’est pas un point d’accès de chat : {url}. Les services compatibles OpenAI utilisent généralement /v1/chat/completions. Si le service est au format Ollama, changez le format API en Ollama /api/chat dans les paramètres.",
-    ollama403: "Ollama a rejeté l’origine de l’extension. Définissez OLLAMA_ORIGINS=\"chrome-extension://*\" puis redémarrez complètement Ollama.",
+    ollama403: "Ollama a rejeté l’origine de l’extension. Définissez OLLAMA_ORIGINS=\"chrome-extension://*,moz-extension://*\" puis redémarrez complètement Ollama.",
     ollamaFetchFailed: "Impossible de se connecter à Ollama : {message}. Vérifiez qu’Ollama est lancé, que le point d’accès est http://127.0.0.1:11434/api/chat et que l’origine de l’extension est autorisée.",
     answerLanguagePrompt: "Sauf demande explicite d’une autre langue, réponds par défaut en {language}.",
     statusFailed: "Requête échouée {status} : {message}"
@@ -141,7 +143,7 @@ Object.assign(BG_TEXT, {
     nonJson: "La API no devolvió JSON: {text}",
     ollamaModelNotFound: "Modelo de Ollama no encontrado: {message}. Haz clic en “Probar Ollama”, elige un modelo local instalado y guarda.",
     custom404: "La API personalizada devolvió 404. La URL actual no es un endpoint de chat: {url}. Los servicios compatibles con OpenAI suelen necesitar /v1/chat/completions. Si el servicio usa formato Ollama, cambia el Formato API a Ollama /api/chat en ajustes.",
-    ollama403: "Ollama rechazó el origen de la extensión. Configura OLLAMA_ORIGINS=\"chrome-extension://*\" y reinicia Ollama por completo.",
+    ollama403: "Ollama rechazó el origen de la extensión. Configura OLLAMA_ORIGINS=\"chrome-extension://*,moz-extension://*\" y reinicia Ollama por completo.",
     ollamaFetchFailed: "No se pudo conectar con Ollama: {message}. Comprueba que Ollama esté iniciado, que el endpoint sea http://127.0.0.1:11434/api/chat y que el origen de la extensión esté permitido.",
     answerLanguagePrompt: "A menos que el usuario pida explícitamente otro idioma, responde por defecto en {language}.",
     statusFailed: "Solicitud fallida {status}: {message}"
@@ -161,7 +163,7 @@ Object.assign(BG_TEXT, {
     nonJson: "Die API hat kein JSON zurückgegeben: {text}",
     ollamaModelNotFound: "Ollama-Modell nicht gefunden: {message}. Klicke auf „Ollama testen“, wähle ein installiertes lokales Modell und speichere.",
     custom404: "Benutzerdefinierte API gab 404 zurück. Die aktuelle URL ist kein Chat-Endpunkt: {url}. OpenAI-kompatible Dienste benötigen meist /v1/chat/completions. Wenn dein Dienst Ollama-Format nutzt, stelle in den Einstellungen API-Format auf Ollama /api/chat.",
-    ollama403: "Ollama hat den Ursprung der Erweiterung abgelehnt. Setze OLLAMA_ORIGINS=\"chrome-extension://*\" und starte Ollama vollständig neu.",
+    ollama403: "Ollama hat den Ursprung der Erweiterung abgelehnt. Setze OLLAMA_ORIGINS=\"chrome-extension://*,moz-extension://*\" und starte Ollama vollständig neu.",
     ollamaFetchFailed: "Keine Verbindung zu Ollama: {message}. Prüfe, ob Ollama läuft, der Endpunkt http://127.0.0.1:11434/api/chat ist und der Ursprung der Erweiterung erlaubt ist.",
     answerLanguagePrompt: "Sofern der Nutzer nicht ausdrücklich eine andere Sprache verlangt, standardmäßig auf {language} antworten.",
     statusFailed: "Anfrage fehlgeschlagen {status}: {message}"
@@ -291,13 +293,7 @@ async function checkModelHealth(payload) {
     return { status: "ok", detail: bt(config, "modelAvailable", { model: config.model }) };
   }
 
-  const headers = {
-    "Content-Type": "application/json"
-  };
-
-  if (config.apiKey) {
-    headers.Authorization = `Bearer ${config.apiKey}`;
-  }
+  const headers = createJsonHeaders(config);
 
   const response = await fetch(config.endpoint, {
     method: "POST",
@@ -377,6 +373,14 @@ async function handleChatStream(payload, port, signal) {
       port.postMessage({ type: "aborted" });
       return;
     }
+    console.error("[lemon cha] stream request failed", {
+      message: error.message || bt(config, "requestFailed"),
+      provider: config.provider,
+      apiFormat: config.apiFormat,
+      endpoint: config.endpoint,
+      model: config.model,
+      messageCount: messages.length
+    });
     port.postMessage({ type: "error", error: error.message || bt(config, "requestFailed") });
   }
 }
@@ -403,18 +407,50 @@ function clamp(value, min, max, fallback) {
   return Math.min(max, Math.max(min, value));
 }
 
+function createJsonHeaders(config) {
+  const headers = {
+    "Content-Type": "application/json"
+  };
+  const apiKey = sanitizeApiKey(config);
+
+  if (apiKey) {
+    headers.Authorization = `Bearer ${apiKey}`;
+  }
+
+  return headers;
+}
+
+function sanitizeApiKey(config) {
+  const value = String(config.apiKey || "")
+    .replace(/[\s\u200B-\u200D\uFEFF]+/g, "")
+    .trim();
+
+  if (!value) {
+    return "";
+  }
+
+  if (!isHeaderByteString(value)) {
+    throw new Error(bt(config, "apiKeyInvalid"));
+  }
+
+  return value;
+}
+
+function isHeaderByteString(value) {
+  for (let index = 0; index < value.length; index += 1) {
+    if (value.charCodeAt(index) > 255) {
+      return false;
+    }
+  }
+  return true;
+}
+
 async function callCustomApi(config, messages) {
   if (config.apiFormat === "ollama") {
     return callOllama(config, messages);
   }
 
-  const headers = {
-    "Content-Type": "application/json"
-  };
-
-  if (config.apiKey) {
-    headers.Authorization = `Bearer ${config.apiKey}`;
-  }
+  const headers = createJsonHeaders(config);
 
   const response = await fetch(config.endpoint, {
     method: "POST",
@@ -436,13 +472,7 @@ async function callCustomApi(config, messages) {
 }
 
 async function streamCustomApi(config, messages, port, signal, meta) {
-  const headers = {
-    "Content-Type": "application/json"
-  };
-
-  if (config.apiKey) {
-    headers.Authorization = `Bearer ${config.apiKey}`;
-  }
+  const headers = createJsonHeaders(config);
 
   const response = await fetch(config.endpoint, {
     method: "POST",

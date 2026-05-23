@@ -277,6 +277,7 @@ const DEFAULT_SETTINGS = {
   language: "zh-CN",
   answerLanguage: "zh-CN",
   translationLanguage: "en-US",
+  translationStyle: "balanced",
   fontSize: "small",
   colorScheme: "llmon",
   theme: "light"
@@ -284,6 +285,7 @@ const DEFAULT_SETTINGS = {
 
 const COLOR_SCHEMES = ["llmon", "leaf", "citrus", "blue", "gray"];
 const FONT_SIZES = ["small", "large"];
+const TRANSLATION_STYLES = ["balanced", "faithful", "polished", "professional"];
 const SUPPORTED_LANGUAGES = ["zh-CN", "zh-TW", "en-US", "ja-JP", "ko-KR", "fr-FR", "es-ES", "de-DE"];
 const NATIVE_LANGUAGE_NAMES = {
   "zh-CN": "简体中文",
@@ -350,6 +352,10 @@ const UI_TEXT = {
     factoryResetSettings: "恢复出厂设置",
     send: "发送",
     stop: "停止",
+    chatMode: "对话",
+    translateMode: "翻译",
+    inputModeAria: "输入模式",
+    targetLanguageAria: "目标语言",
     promptPlaceholder: "输入问题，Enter 发送，Shift+Enter 换行",
     promptTemplatePlaceholder: "选择 Prompt 预设",
     savePromptTemplate: "保存",
@@ -357,7 +363,7 @@ const UI_TEXT = {
     deletePromptTemplate: "删除模板",
     resetSectionTitle: "分区重置",
     resetSectionHint: "每个重置操作只影响对应区域。",
-    resetGeneralHelp: "仅恢复语言、主题、字体和配色，不影响模型、提示词和对话。",
+    resetGeneralHelp: "仅恢复语言、翻译风格、主题、字体和配色，不影响模型、提示词和对话。",
     resetModelHelp: "仅重置当前选中的模型配置，不影响其他模型。",
     resetPromptHelp: "仅恢复当前提示词预设编辑内容，不影响其他预设。",
     clearHistoryTitle: "对话历史",
@@ -384,7 +390,11 @@ const UI_TEXT = {
     thinkingMode: "思考",
     interfaceLanguage: "界面语言",
     answerLanguage: "默认回答语言",
-    translationLanguage: "默认翻译目标语言",
+    translationStyle: "翻译风格",
+    translationStyleBalanced: "自然准确",
+    translationStyleFaithful: "忠实原文",
+    translationStylePolished: "流畅润色",
+    translationStyleProfessional: "专业正式",
     fontSizeLabel: "字体大小",
     fontSizeSmall: "小（默认）",
     fontSizeLarge: "大",
@@ -431,6 +441,7 @@ const UI_TEXT = {
     rename: "重命名",
     delete: "删除",
     copied: "已复制",
+    scrollToBottom: "回到最新消息",
     ollamaConnectionFailed: "无法连接 Ollama。",
     ollamaFoundModels: "Ollama 连接成功，发现 {count} 个模型。",
     noModelsFound: "未发现模型",
@@ -454,6 +465,8 @@ const UI_TEXT = {
     replace: "替换",
     promptTemplateApplied: "提示词预设已应用。",
     settingsSaved: "设置已保存。",
+    settingsAutoSaved: "已保存",
+    settingsSaveFailed: "保存失败，请重试",
     settingsReset: "设置已恢复默认。",
     generalSettingsReset: "通用设置已重置。",
     modelSettingsReset: "当前模型设置已重置。",
@@ -525,6 +538,10 @@ const UI_TEXT = {
     factoryResetSettings: "Factory Reset",
     send: "Send",
     stop: "Stop",
+    chatMode: "Chat",
+    translateMode: "Translate",
+    inputModeAria: "Input Mode",
+    targetLanguageAria: "Target Language",
     promptPlaceholder: "Ask a question. Enter to send, Shift+Enter for a new line",
     promptTemplatePlaceholder: "Choose a prompt preset",
     savePromptTemplate: "Save",
@@ -532,7 +549,7 @@ const UI_TEXT = {
     deletePromptTemplate: "Delete Template",
     resetSectionTitle: "Scoped Reset",
     resetSectionHint: "Each reset action only affects its own area.",
-    resetGeneralHelp: "Only resets language, theme, font size, and color scheme. Models, prompts, and chats are kept.",
+    resetGeneralHelp: "Only resets language, translation style, theme, font size, and color scheme. Models, prompts, and chats are kept.",
     resetModelHelp: "Only resets the currently selected model configuration. Other models are kept.",
     resetPromptHelp: "Only restores the currently edited prompt preset. Other presets are kept.",
     clearHistoryTitle: "Chat History",
@@ -559,7 +576,11 @@ const UI_TEXT = {
     thinkingMode: "Think",
     interfaceLanguage: "Interface Language",
     answerLanguage: "Default Answer Language",
-    translationLanguage: "Default Translation Target",
+    translationStyle: "Translation Style",
+    translationStyleBalanced: "Natural & Accurate",
+    translationStyleFaithful: "Faithful",
+    translationStylePolished: "Polished",
+    translationStyleProfessional: "Professional",
     fontSizeLabel: "Font Size",
     fontSizeSmall: "Small (Default)",
     fontSizeLarge: "Large",
@@ -606,6 +627,7 @@ const UI_TEXT = {
     rename: "Rename",
     delete: "Delete",
     copied: "Copied",
+    scrollToBottom: "Jump to latest message",
     ollamaConnectionFailed: "Could not connect to Ollama.",
     ollamaFoundModels: "Ollama connected. Found {count} models.",
     noModelsFound: "No models found",
@@ -629,6 +651,8 @@ const UI_TEXT = {
     replace: "Replace",
     promptTemplateApplied: "Prompt preset applied.",
     settingsSaved: "Settings saved.",
+    settingsAutoSaved: "Saved",
+    settingsSaveFailed: "Save failed. Please try again.",
     settingsReset: "Settings reset to defaults.",
     generalSettingsReset: "General settings reset.",
     modelSettingsReset: "Current model settings reset.",
@@ -784,6 +808,7 @@ Object.assign(UI_TEXT, {
     rename: "重新命名",
     delete: "刪除",
     copied: "已複製",
+    scrollToBottom: "回到最新訊息",
     ollamaConnectionFailed: "無法連線 Ollama。",
     ollamaFoundModels: "Ollama 連線成功，找到 {count} 個模型。",
     noModelsFound: "未找到模型",
@@ -807,6 +832,8 @@ Object.assign(UI_TEXT, {
     replace: "替換",
     promptTemplateApplied: "提示詞預設已套用。",
     settingsSaved: "設定已儲存。",
+    settingsAutoSaved: "已儲存",
+    settingsSaveFailed: "儲存失敗，請重試",
     settingsReset: "設定已恢復預設。",
     generalSettingsReset: "通用設定已重設。",
     modelSettingsReset: "目前模型設定已重設。",
@@ -959,6 +986,7 @@ Object.assign(UI_TEXT, {
     rename: "名前を変更",
     delete: "削除",
     copied: "コピーしました",
+    scrollToBottom: "最新メッセージへ移動",
     ollamaConnectionFailed: "Ollama に接続できません。",
     ollamaFoundModels: "Ollama に接続しました。{count} 個のモデルが見つかりました。",
     noModelsFound: "モデルが見つかりません",
@@ -982,6 +1010,8 @@ Object.assign(UI_TEXT, {
     replace: "置き換え",
     promptTemplateApplied: "プロンプトプリセットを適用しました。",
     settingsSaved: "設定を保存しました。",
+    settingsAutoSaved: "保存しました",
+    settingsSaveFailed: "保存に失敗しました。もう一度お試しください。",
     settingsReset: "設定を初期値に戻しました。",
     generalSettingsReset: "一般設定をリセットしました。",
     modelSettingsReset: "現在のモデル設定をリセットしました。",
@@ -1134,6 +1164,7 @@ Object.assign(UI_TEXT, {
     rename: "이름 변경",
     delete: "삭제",
     copied: "복사됨",
+    scrollToBottom: "최신 메시지로 이동",
     ollamaConnectionFailed: "Ollama에 연결할 수 없습니다.",
     ollamaFoundModels: "Ollama 연결 성공. 모델 {count}개를 찾았습니다.",
     noModelsFound: "모델을 찾을 수 없음",
@@ -1157,6 +1188,8 @@ Object.assign(UI_TEXT, {
     replace: "바꾸기",
     promptTemplateApplied: "프롬프트 프리셋을 적용했습니다.",
     settingsSaved: "설정을 저장했습니다.",
+    settingsAutoSaved: "저장됨",
+    settingsSaveFailed: "저장에 실패했습니다. 다시 시도하세요.",
     settingsReset: "설정을 기본값으로 복원했습니다.",
     generalSettingsReset: "일반 설정을 초기화했습니다.",
     modelSettingsReset: "현재 모델 설정을 초기화했습니다.",
@@ -1309,6 +1342,7 @@ Object.assign(UI_TEXT, {
     rename: "Renommer",
     delete: "Supprimer",
     copied: "Copié",
+    scrollToBottom: "Aller au dernier message",
     ollamaConnectionFailed: "Impossible de se connecter à Ollama.",
     ollamaFoundModels: "Ollama connecté. {count} modèles trouvés.",
     noModelsFound: "Aucun modèle trouvé",
@@ -1332,6 +1366,8 @@ Object.assign(UI_TEXT, {
     replace: "Remplacer",
     promptTemplateApplied: "Preset de prompt appliqué.",
     settingsSaved: "Paramètres enregistrés.",
+    settingsAutoSaved: "Enregistré",
+    settingsSaveFailed: "Échec de l’enregistrement. Réessayez.",
     settingsReset: "Paramètres réinitialisés.",
     generalSettingsReset: "Paramètres généraux réinitialisés.",
     modelSettingsReset: "Paramètres du modèle actuel réinitialisés.",
@@ -1484,6 +1520,7 @@ Object.assign(UI_TEXT, {
     rename: "Renombrar",
     delete: "Eliminar",
     copied: "Copiado",
+    scrollToBottom: "Ir al mensaje más reciente",
     ollamaConnectionFailed: "No se pudo conectar con Ollama.",
     ollamaFoundModels: "Ollama conectado. Se encontraron {count} modelos.",
     noModelsFound: "No se encontraron modelos",
@@ -1507,6 +1544,8 @@ Object.assign(UI_TEXT, {
     replace: "Reemplazar",
     promptTemplateApplied: "Preset de prompt aplicado.",
     settingsSaved: "Ajustes guardados.",
+    settingsAutoSaved: "Guardado",
+    settingsSaveFailed: "No se pudo guardar. Inténtalo de nuevo.",
     settingsReset: "Ajustes restablecidos.",
     generalSettingsReset: "Ajustes generales restablecidos.",
     modelSettingsReset: "Ajustes del modelo actual restablecidos.",
@@ -1659,6 +1698,7 @@ Object.assign(UI_TEXT, {
     rename: "Umbenennen",
     delete: "Löschen",
     copied: "Kopiert",
+    scrollToBottom: "Zur neuesten Nachricht",
     ollamaConnectionFailed: "Keine Verbindung zu Ollama möglich.",
     ollamaFoundModels: "Ollama verbunden. {count} Modelle gefunden.",
     noModelsFound: "Keine Modelle gefunden",
@@ -1682,6 +1722,8 @@ Object.assign(UI_TEXT, {
     replace: "Ersetzen",
     promptTemplateApplied: "Prompt-Preset angewendet.",
     settingsSaved: "Einstellungen gespeichert.",
+    settingsAutoSaved: "Gespeichert",
+    settingsSaveFailed: "Speichern fehlgeschlagen. Bitte erneut versuchen.",
     settingsReset: "Einstellungen zurückgesetzt.",
     generalSettingsReset: "Allgemeine Einstellungen zurückgesetzt.",
     modelSettingsReset: "Aktuelle Modelleinstellungen zurückgesetzt.",
@@ -1708,6 +1750,78 @@ Object.assign(UI_TEXT, {
   }
 });
 
+Object.assign(UI_TEXT["zh-TW"], {
+  chatMode: "對話",
+  translateMode: "翻譯",
+  inputModeAria: "輸入模式",
+  targetLanguageAria: "目標語言",
+  translationStyle: "翻譯風格",
+  translationStyleBalanced: "自然準確",
+  translationStyleFaithful: "忠於原文",
+  translationStylePolished: "流暢潤飾",
+  translationStyleProfessional: "專業正式"
+});
+
+Object.assign(UI_TEXT["ja-JP"], {
+  chatMode: "チャット",
+  translateMode: "翻訳",
+  inputModeAria: "入力モード",
+  targetLanguageAria: "翻訳先言語",
+  translationStyle: "翻訳スタイル",
+  translationStyleBalanced: "自然で正確",
+  translationStyleFaithful: "原文に忠実",
+  translationStylePolished: "読みやすく推敲",
+  translationStyleProfessional: "専門的でフォーマル"
+});
+
+Object.assign(UI_TEXT["ko-KR"], {
+  chatMode: "대화",
+  translateMode: "번역",
+  inputModeAria: "입력 모드",
+  targetLanguageAria: "대상 언어",
+  translationStyle: "번역 스타일",
+  translationStyleBalanced: "자연스럽고 정확하게",
+  translationStyleFaithful: "원문에 충실하게",
+  translationStylePolished: "매끄럽게 다듬기",
+  translationStyleProfessional: "전문적이고 격식 있게"
+});
+
+Object.assign(UI_TEXT["fr-FR"], {
+  chatMode: "Discussion",
+  translateMode: "Traduction",
+  inputModeAria: "Mode de saisie",
+  targetLanguageAria: "Langue cible",
+  translationStyle: "Style de traduction",
+  translationStyleBalanced: "Naturel et précis",
+  translationStyleFaithful: "Fidèle au texte",
+  translationStylePolished: "Fluide et révisé",
+  translationStyleProfessional: "Professionnel"
+});
+
+Object.assign(UI_TEXT["es-ES"], {
+  chatMode: "Chat",
+  translateMode: "Traducir",
+  inputModeAria: "Modo de entrada",
+  targetLanguageAria: "Idioma de destino",
+  translationStyle: "Estilo de traducción",
+  translationStyleBalanced: "Natural y preciso",
+  translationStyleFaithful: "Fiel al original",
+  translationStylePolished: "Fluido y pulido",
+  translationStyleProfessional: "Profesional"
+});
+
+Object.assign(UI_TEXT["de-DE"], {
+  chatMode: "Chat",
+  translateMode: "Übersetzen",
+  inputModeAria: "Eingabemodus",
+  targetLanguageAria: "Zielsprache",
+  translationStyle: "Übersetzungsstil",
+  translationStyleBalanced: "Natürlich und genau",
+  translationStyleFaithful: "Quelltextnah",
+  translationStylePolished: "Flüssig überarbeitet",
+  translationStyleProfessional: "Professionell"
+});
+
 const state = {
   settings: { ...DEFAULT_SETTINGS },
   conversations: [],
@@ -1724,7 +1838,8 @@ const state = {
     model: false
   },
   promptTemplateDirty: false,
-  lastPromptTemplateManageValue: ""
+  lastPromptTemplateManageValue: "",
+  composerMode: "chat"
 };
 
 const els = {
@@ -1763,7 +1878,7 @@ const els = {
   thinkingToggle: document.querySelector("#thinkingToggle"),
   languageInput: document.querySelector("#languageInput"),
   answerLanguageInput: document.querySelector("#answerLanguageInput"),
-  translationLanguageInput: document.querySelector("#translationLanguageInput"),
+  translationStyleInput: document.querySelector("#translationStyleInput"),
   fontSizeInput: document.querySelector("#fontSizeInput"),
   colorSchemeInput: document.querySelector("#colorSchemeInput"),
   resetGeneralSettings: document.querySelector("#resetGeneralSettings"),
@@ -1782,7 +1897,10 @@ const els = {
   importFile: document.querySelector("#importFile"),
   messages: document.querySelector("#messages"),
   chatForm: document.querySelector("#chatForm"),
+  scrollToBottom: document.querySelector("#scrollToBottom"),
+  composerModeToggle: document.querySelector("#composerModeToggle"),
   promptTemplateSelect: document.querySelector("#promptTemplateSelect"),
+  translationTargetSelect: document.querySelector("#translationTargetSelect"),
   promptTemplateManageSelect: document.querySelector("#promptTemplateManageSelect"),
   promptTemplateNameInput: document.querySelector("#promptTemplateNameInput"),
   promptTemplateContentInput: document.querySelector("#promptTemplateContentInput"),
@@ -1799,7 +1917,7 @@ let promptInputComposing = false;
 const customSelects = new Map();
 const systemThemeQuery = window.matchMedia?.("(prefers-color-scheme: dark)");
 const THEME_MODES = ["light", "dark", "system"];
-const GENERAL_SETTINGS_KEYS = ["language", "answerLanguage", "translationLanguage", "fontSize", "colorScheme", "theme"];
+const GENERAL_SETTINGS_KEYS = ["language", "answerLanguage", "translationStyle", "fontSize", "colorScheme", "theme"];
 const MODEL_SETTINGS_KEYS = [
   "provider",
   "preset",
@@ -1817,6 +1935,7 @@ const MODEL_SETTINGS_KEYS = [
   "defaultPresetId",
   "memoryEnabled"
 ];
+const MESSAGE_BOTTOM_THRESHOLD = 160;
 
 const ACTION_ICON_MAP = {
   copy: "copy",
@@ -1919,6 +2038,10 @@ async function loadState() {
   syncSettingsToForm();
   enhanceSelects();
   render();
+  requestAnimationFrame(() => {
+    resizePromptInput({ keepCaretVisible: true });
+    updateComposerSafeSpace();
+  });
   maybeAutoCheckLocalModel();
 }
 
@@ -2137,7 +2260,12 @@ function syncSettingsToForm() {
   els.thinkingToggle.setAttribute("aria-pressed", String(Boolean(state.settings.thinkingEnabled)));
   els.languageInput.value = normalizeLanguage(state.settings.language);
   els.answerLanguageInput.value = normalizeLanguage(state.settings.answerLanguage);
-  els.translationLanguageInput.value = normalizeLanguage(state.settings.translationLanguage);
+  els.translationStyleInput.value = TRANSLATION_STYLES.includes(state.settings.translationStyle)
+    ? state.settings.translationStyle
+    : DEFAULT_SETTINGS.translationStyle;
+  if (els.translationTargetSelect) {
+    els.translationTargetSelect.value = normalizeLanguage(state.settings.translationLanguage, DEFAULT_SETTINGS.translationLanguage);
+  }
   els.fontSizeInput.value = FONT_SIZES.includes(state.settings.fontSize) ? state.settings.fontSize : DEFAULT_SETTINGS.fontSize;
   els.colorSchemeInput.value = state.settings.colorScheme || DEFAULT_SETTINGS.colorScheme;
   els.ollamaModelField.classList.toggle("hidden", config.apiFormat !== "ollama");
@@ -2204,7 +2332,7 @@ function applyLanguage() {
   if (els.testOllama) {
     setButtonContent(els.testOllama, els.testOllama.disabled ? t("testing") : t("testOllama"), "bot");
   }
-  setButtonContent(document.querySelector("#saveSettings"), t("saveSettings"), "settings");
+  setButtonContent(document.querySelector("#saveSettings"), t("saveSettings"), "save");
   setButtonContent(els.resetGeneralSettings, t("resetCurrentSettings"), "refreshCw");
   setButtonContent(els.resetCurrentModelSettings, t("resetCurrentSettings"), "refreshCw");
   setButtonContent(els.resetCurrentPromptTemplate, t("resetCurrentSettings"), "refreshCw");
@@ -2214,9 +2342,11 @@ function applyLanguage() {
   setButtonContent(els.sendButton, t("send"), "send");
   setButtonContent(els.stopButton, t("stop"), "square");
   els.promptInput.placeholder = t("promptPlaceholder");
-  els.promptTemplateSelect.setAttribute("aria-label", t("promptPresetAria"));
-  els.toolbarModelSelect.setAttribute("aria-label", t("currentModelAria"));
-  setButtonContent(els.savePromptTemplate, t("savePromptTemplate"), "fileText");
+  els.promptTemplateSelect?.setAttribute("aria-label", t("promptPresetAria"));
+  els.translationTargetSelect?.setAttribute("aria-label", t("targetLanguageAria"));
+  els.toolbarModelSelect?.setAttribute("aria-label", t("currentModelAria"));
+  setTooltip(els.scrollToBottom, t("scrollToBottom"));
+  setButtonContent(els.savePromptTemplate, t("savePromptTemplate"), "save");
   setButtonContent(els.savePromptTemplateAs, t("savePromptTemplateAs"), "copyPlus");
   setButtonContent(els.deletePromptTemplate, t("deletePromptTemplate"), "trash");
   document.querySelector(".sidebar")?.setAttribute("aria-label", t("sidebarHistory"));
@@ -2231,6 +2361,7 @@ function applyLanguage() {
       updateHealthLabel(t("healthChecking"));
     }
   }
+  syncComposerMode();
   mountStaticIcons();
 }
 
@@ -2341,7 +2472,7 @@ function activateSettingsTab(tabName) {
     panel.classList.toggle("active", active);
     panel.classList.toggle("hidden", !active);
   }
-  els.settingsFooterActions?.classList.toggle("hidden", tabName === "data");
+  els.settingsFooterActions?.classList.toggle("hidden", tabName === "general" || tabName === "data");
 }
 
 function setHealthStatus(status, detail = "") {
@@ -2395,6 +2526,36 @@ function updateChatTitle() {
   const title = conversation?.title || t("newChatTitle");
   els.chatTitle.textContent = title;
   els.chatTitle.title = title;
+}
+
+function setComposerMode(mode) {
+  state.composerMode = mode === "translate" ? "translate" : "chat";
+  syncComposerMode();
+  els.promptInput.focus();
+}
+
+function toggleComposerMode() {
+  setComposerMode(state.composerMode === "translate" ? "chat" : "translate");
+}
+
+function syncComposerMode() {
+  const mode = state.composerMode === "translate" ? "translate" : "chat";
+  if (els.composerModeToggle) {
+    const label = mode === "translate" ? t("translateMode") : t("chatMode");
+    const icon = mode === "translate" ? "languages" : "messageCircle";
+    els.composerModeToggle.classList.toggle("active", mode === "translate");
+    els.composerModeToggle.setAttribute("aria-pressed", String(mode === "translate"));
+    setButtonContent(els.composerModeToggle, label, icon);
+    clearTooltip(els.composerModeToggle, label);
+  }
+
+  const promptShell = els.promptTemplateSelect ? customSelects.get(els.promptTemplateSelect)?.shell : null;
+  const targetShell = els.translationTargetSelect ? customSelects.get(els.translationTargetSelect)?.shell : null;
+  promptShell?.classList.toggle("hidden", mode !== "chat");
+  targetShell?.classList.toggle("hidden", mode !== "translate");
+  els.promptTemplateSelect?.classList.toggle("hidden", mode !== "chat");
+  els.translationTargetSelect?.classList.toggle("hidden", mode !== "translate");
+  closeCustomSelects();
 }
 
 function enhanceSelects() {
@@ -2493,8 +2654,11 @@ function iconForSelectOption(select, option) {
   if (select.id === "customFormatInput") {
     return option.value === "ollama" ? "bot" : "messageCircle";
   }
-  if (select.id === "languageInput" || select.id === "answerLanguageInput" || select.id === "translationLanguageInput") {
+  if (select.id === "languageInput" || select.id === "answerLanguageInput" || select.id === "translationTargetSelect") {
     return "languages";
+  }
+  if (select.id === "translationStyleInput") {
+    return "edit";
   }
   if (select.id === "fontSizeInput") {
     return "text";
@@ -2648,6 +2812,29 @@ function resolvePromptTemplateVariables(content) {
   );
 }
 
+function translationStyleInstruction() {
+  const style = TRANSLATION_STYLES.includes(state.settings.translationStyle)
+    ? state.settings.translationStyle
+    : DEFAULT_SETTINGS.translationStyle;
+  const language = uiLanguage();
+  const instructions = {
+    "zh-CN": {
+      balanced: "翻译风格：自然准确，兼顾原意和目标语言表达。",
+      faithful: "翻译风格：忠实原文，优先保留原文结构、术语和语气。",
+      polished: "翻译风格：流畅润色，在不改变原意的前提下提升表达自然度。",
+      professional: "翻译风格：专业正式，适合商务、研究或正式场景。"
+    },
+    "en-US": {
+      balanced: "Translation style: natural and accurate, balancing source meaning with target-language expression.",
+      faithful: "Translation style: faithful to the source, preserving structure, terms, and tone where possible.",
+      polished: "Translation style: polished and fluent, improving natural flow without changing meaning.",
+      professional: "Translation style: professional and formal, suitable for business, research, or formal contexts."
+    }
+  };
+
+  return (instructions[language] || instructions["en-US"])[style] || instructions["en-US"].balanced;
+}
+
 function fillPromptTemplateEditor(template = null) {
   els.promptTemplateNameInput.value = template ? localizedTemplateName(template) : "";
   els.promptTemplateContentInput.value = template ? localizedTemplateContent(template) : "";
@@ -2701,6 +2888,16 @@ function restoreSettingsKeys(keys) {
   }
 }
 
+function updateSettingsSnapshotKeys(keys) {
+  if (!state.settingsSnapshot) {
+    state.settingsSnapshot = cloneSettings(state.settings);
+    return;
+  }
+  for (const key of keys) {
+    state.settingsSnapshot[key] = cloneSettings(state.settings[key]);
+  }
+}
+
 function discardSettingsSection(section) {
   if (section === "general") {
     restoreSettingsKeys(GENERAL_SETTINGS_KEYS);
@@ -2716,6 +2913,25 @@ function discardSettingsSection(section) {
     fillPromptTemplateEditor(getPromptTemplate(els.promptTemplateManageSelect.value));
   }
   setSettingsSectionDirty(section, false);
+}
+
+async function autoSaveGeneralSettings(applyChange, afterChange = () => {}) {
+  const previousSettings = cloneSettings(state.settings);
+  try {
+    applyChange();
+    afterChange();
+    await saveSettings();
+    updateSettingsSnapshotKeys(GENERAL_SETTINGS_KEYS);
+    setSettingsSectionDirty("general", false);
+    pushSystemMessage(t("settingsAutoSaved"));
+  } catch (error) {
+    state.settings = previousSettings;
+    syncSettingsToForm();
+    applyTheme();
+    render();
+    syncCustomSelects();
+    pushSystemMessage(t("settingsSaveFailed"));
+  }
 }
 
 function confirmDiscardSettingsSection(section) {
@@ -2903,10 +3119,10 @@ function createConversationItem(conversation, options = {}) {
   menu.className = "conversation-action-menu hidden";
   const menuActions = [
     createConversationMenuAction("rename", "edit", t("rename")),
-    createConversationMenuAction("exportMarkdown", "fileText", t("exportMarkdown"))
+    createConversationMenuAction("exportMarkdown", "fileDown", t("exportMarkdown"))
   ];
   if (options.inFolder) {
-    menuActions.push(createConversationMenuAction("removeFromFolder", "folder", t("removeFromFolder")));
+    menuActions.push(createConversationMenuAction("removeFromFolder", "folderOutput", t("removeFromFolder")));
   }
   menuActions.push(createConversationMenuAction("delete", "trash", t("delete"), "danger"));
   menu.append(...menuActions);
@@ -2953,11 +3169,54 @@ function conversationSectionLabel(timestamp) {
   return t("earlierSection");
 }
 
+function getMessagesBottomDistance() {
+  if (!els.messages) return 0;
+  return els.messages.scrollHeight - els.messages.scrollTop - els.messages.clientHeight;
+}
+
+function isMessagesNearBottom(threshold = MESSAGE_BOTTOM_THRESHOLD) {
+  return getMessagesBottomDistance() <= threshold;
+}
+
+function updateScrollToBottomButton() {
+  if (!els.scrollToBottom || !els.messages) return;
+  const showButton = getMessagesBottomDistance() > MESSAGE_BOTTOM_THRESHOLD;
+  els.scrollToBottom.classList.toggle("hidden", !showButton);
+  els.scrollToBottom.setAttribute("aria-hidden", String(!showButton));
+}
+
+function scrollMessagesToBottom({ smooth = false } = {}) {
+  if (!els.messages) return;
+
+  const jumpToBottom = () => {
+    if (smooth) {
+      els.messages.scrollTo({ top: els.messages.scrollHeight, behavior: "smooth" });
+    } else {
+      els.messages.scrollTop = els.messages.scrollHeight;
+    }
+  };
+
+  jumpToBottom();
+  updateScrollToBottomButton();
+  if (!smooth) {
+    requestAnimationFrame(() => {
+      jumpToBottom();
+      updateScrollToBottomButton();
+      requestAnimationFrame(() => {
+        jumpToBottom();
+        updateScrollToBottomButton();
+      });
+    });
+  }
+}
+
 function renderMessages() {
   const messages = getActiveMessages();
   const visibleMessages = messages
     .map((message, index) => ({ message, index }))
     .filter((item) => item.message.role !== "system");
+  const shouldStickToBottom = isMessagesNearBottom();
+  const previousBottomDistance = getMessagesBottomDistance();
   els.messages.innerHTML = "";
 
   if (!visibleMessages.length) {
@@ -2965,6 +3224,7 @@ function renderMessages() {
     empty.className = "empty-state";
     empty.textContent = t("emptyState");
     els.messages.append(empty);
+    updateScrollToBottomButton();
     return;
   }
 
@@ -2997,7 +3257,12 @@ function renderMessages() {
   }
 
   requestAnimationFrame(() => {
-    els.messages.scrollTop = els.messages.scrollHeight;
+    if (shouldStickToBottom) {
+      scrollMessagesToBottom();
+    } else {
+      els.messages.scrollTop = Math.max(0, els.messages.scrollHeight - els.messages.clientHeight - previousBottomDistance);
+      updateScrollToBottomButton();
+    }
   });
 }
 
@@ -3495,7 +3760,9 @@ function persistCurrentProviderFields() {
   state.settings.thinkingEnabled = Boolean(state.settings.thinkingEnabled);
   state.settings.language = normalizeLanguage(els.languageInput.value);
   state.settings.answerLanguage = normalizeLanguage(els.answerLanguageInput.value);
-  state.settings.translationLanguage = normalizeLanguage(els.translationLanguageInput.value, "en-US");
+  state.settings.translationStyle = TRANSLATION_STYLES.includes(els.translationStyleInput.value)
+    ? els.translationStyleInput.value
+    : DEFAULT_SETTINGS.translationStyle;
   state.settings.fontSize = FONT_SIZES.includes(els.fontSizeInput.value) ? els.fontSizeInput.value : DEFAULT_SETTINGS.fontSize;
   state.settings.colorScheme = COLOR_SCHEMES.includes(els.colorSchemeInput.value) ? els.colorSchemeInput.value : DEFAULT_SETTINGS.colorScheme;
   applyTheme();
@@ -3546,10 +3813,11 @@ function normalizeOllamaEndpoint(endpoint) {
   }
 }
 
-async function submitPrompt(prompt) {
+async function submitPrompt(prompt, options = {}) {
   const config = getActiveConfig();
   const conversation = getActiveConversation();
   const shouldGenerateTitle = conversation.messages.length === 0 || conversation.title === t("newChatTitle");
+  const requestPrompt = options.requestPrompt || prompt;
 
   if (!config.endpoint || !config.model) {
     pushSystemMessage(t("missingEndpointModel"));
@@ -3563,11 +3831,19 @@ async function submitPrompt(prompt) {
   await saveConversations();
   render();
 
-  const requestMessages = getContextMessages(config);
+  const requestMessages = getContextMessages(config, requestPrompt);
   await generateAssistantResponse(conversation, config, requestMessages);
   if (shouldGenerateTitle) {
     generateConversationTitle(conversation, config);
   }
+}
+
+function buildTranslationRequestPrompt(input) {
+  const template = getPromptTemplate("translate-polish");
+  const templateContent = template
+    ? localizedTemplateContent(template)
+    : "Translate the following content into natural, accurate {defaultTranslationLanguage}.\n\nContent:\n";
+  return `${translationStyleInstruction()}\n\n${resolvePromptTemplateVariables(templateContent)}${input}`;
 }
 
 async function generateAssistantResponse(conversation, config, requestMessages) {
@@ -3613,6 +3889,14 @@ async function generateAssistantResponse(conversation, config, requestMessages) 
         ? `${assistantMessage.content}\n\n[${t("stoppedGeneration")}]`
         : `[${t("stoppedGeneration")}]`;
     } else {
+      console.error("[lemon cha] chat request failed", {
+        message: error.message || t("requestFailed"),
+        provider: config.provider,
+        apiFormat: config.apiFormat,
+        endpoint: config.endpoint,
+        model: config.model,
+        requestMessageCount: requestMessages.length
+      });
       conversation.messages = conversation.messages.filter((message) => message !== assistantMessage);
       pushSystemMessage(error.message || t("requestFailed"), false);
     }
@@ -3720,8 +4004,17 @@ async function generateConversationTitle(conversation, config) {
   }
 }
 
-function getContextMessages(config) {
-  return serializeContextMessages(getActiveMessages(), config.memoryEnabled ? config.historyLimit : 1);
+function getContextMessages(config, latestUserContent = null) {
+  const messages = serializeContextMessages(getActiveMessages(), config.memoryEnabled ? config.historyLimit : 1);
+  if (latestUserContent === null) {
+    return messages;
+  }
+
+  const lastUserMessage = [...messages].reverse().find((message) => message.role === "user");
+  if (lastUserMessage) {
+    lastUserMessage.content = latestUserContent;
+  }
+  return messages;
 }
 
 function serializeContextMessages(messages, limit) {
@@ -3844,15 +4137,56 @@ function focusPromptPlaceholder() {
   input.setSelectionRange(value.length, value.length);
 }
 
+function keepPromptCaretVisible() {
+  const input = els.promptInput;
+  if (!input) return;
+
+  const selectionStart = input.selectionStart;
+  const selectionEnd = input.selectionEnd;
+  input.setSelectionRange(selectionStart, selectionEnd);
+
+  if (selectionEnd >= input.value.length) {
+    input.scrollTop = input.scrollHeight;
+  }
+}
+
+function updateComposerSafeSpace() {
+  const composerHeight = els.chatForm?.offsetHeight || 0;
+  const safeSpace = Math.max(148, composerHeight + 24);
+  document.documentElement.style.setProperty("--composer-safe-space", `${safeSpace}px`);
+}
+
+function resizePromptInput({ keepCaretVisible = false } = {}) {
+  const input = els.promptInput;
+  if (!input) return;
+
+  const styles = window.getComputedStyle(input);
+  const minHeight = Number.parseFloat(styles.minHeight) || 0;
+  const maxHeight = Number.parseFloat(styles.maxHeight) || input.scrollHeight;
+
+  input.style.height = "auto";
+  const nextHeight = Math.min(Math.max(input.scrollHeight, minHeight), maxHeight);
+  input.style.height = `${nextHeight}px`;
+  input.style.overflowY = input.scrollHeight > maxHeight ? "auto" : "hidden";
+  updateComposerSafeSpace();
+
+  if (keepCaretVisible) {
+    requestAnimationFrame(keepPromptCaretVisible);
+  }
+}
+
 function applyPromptTemplateToInput(content) {
   els.promptInput.value = content;
+  resizePromptInput({ keepCaretVisible: true });
   requestAnimationFrame(() => {
     focusPromptPlaceholder();
+    resizePromptInput({ keepCaretVisible: true });
   });
 }
 
 function clearComposerInput({ focus = false } = {}) {
   els.promptInput.value = "";
+  resizePromptInput();
   els.promptTemplateSelect.value = "";
   syncCustomSelects();
 
@@ -3860,6 +4194,7 @@ function clearComposerInput({ focus = false } = {}) {
     requestAnimationFrame(() => {
       els.promptInput.focus();
       els.promptInput.setSelectionRange(0, 0);
+      resizePromptInput({ keepCaretVisible: true });
     });
   }
 }
@@ -3868,6 +4203,7 @@ async function copyMessage(index) {
   const message = getActiveMessages()[index];
   if (!message) return;
   await navigator.clipboard.writeText(message.content || "");
+  pushSystemMessage(t("copied"));
 }
 
 async function deleteMessage(index) {
@@ -3999,9 +4335,12 @@ els.settingsToggle.addEventListener("click", () => {
 });
 
 els.themeToggle.addEventListener("click", async () => {
-  state.settings.theme = getNextThemeMode();
-  applyTheme();
-  await saveSettings();
+  autoSaveGeneralSettings(
+    () => {
+      state.settings.theme = getNextThemeMode();
+    },
+    applyTheme
+  );
 });
 
 document.addEventListener("click", (event) => {
@@ -4136,36 +4475,79 @@ els.messages.addEventListener("click", async (event) => {
   }
 });
 
+els.messages.addEventListener("scroll", updateScrollToBottomButton, { passive: true });
+
+function handleScrollToBottomRequest(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  els.scrollToBottom?.blur();
+  scrollMessagesToBottom({ smooth: true });
+}
+
+els.scrollToBottom?.addEventListener("pointerdown", handleScrollToBottomRequest);
+
+els.scrollToBottom?.addEventListener("click", (event) => {
+  if (event.detail !== 0) {
+    event.preventDefault();
+    event.stopPropagation();
+    return;
+  }
+  handleScrollToBottomRequest(event);
+});
+
 els.languageInput.addEventListener("change", () => {
-  setSettingsSectionDirty("general", true);
-  state.settings.language = normalizeLanguage(els.languageInput.value);
-  render();
+  autoSaveGeneralSettings(
+    () => {
+      state.settings.language = normalizeLanguage(els.languageInput.value);
+    },
+    () => {
+      render();
+    }
+  );
 });
 
 els.answerLanguageInput.addEventListener("change", () => {
-  setSettingsSectionDirty("general", true);
-  state.settings.answerLanguage = normalizeLanguage(els.answerLanguageInput.value);
-  syncCustomSelects();
+  autoSaveGeneralSettings(
+    () => {
+      state.settings.answerLanguage = normalizeLanguage(els.answerLanguageInput.value);
+    },
+    syncCustomSelects
+  );
 });
 
-els.translationLanguageInput.addEventListener("change", () => {
-  setSettingsSectionDirty("general", true);
-  state.settings.translationLanguage = normalizeLanguage(els.translationLanguageInput.value, "en-US");
-  syncCustomSelects();
+els.translationStyleInput.addEventListener("change", () => {
+  autoSaveGeneralSettings(
+    () => {
+      state.settings.translationStyle = TRANSLATION_STYLES.includes(els.translationStyleInput.value)
+        ? els.translationStyleInput.value
+        : DEFAULT_SETTINGS.translationStyle;
+    },
+    syncCustomSelects
+  );
 });
 
 els.fontSizeInput.addEventListener("change", () => {
-  setSettingsSectionDirty("general", true);
-  state.settings.fontSize = FONT_SIZES.includes(els.fontSizeInput.value) ? els.fontSizeInput.value : DEFAULT_SETTINGS.fontSize;
-  applyTheme();
-  syncCustomSelects();
+  autoSaveGeneralSettings(
+    () => {
+      state.settings.fontSize = FONT_SIZES.includes(els.fontSizeInput.value) ? els.fontSizeInput.value : DEFAULT_SETTINGS.fontSize;
+    },
+    () => {
+      applyTheme();
+      syncCustomSelects();
+    }
+  );
 });
 
 els.colorSchemeInput.addEventListener("change", () => {
-  setSettingsSectionDirty("general", true);
-  state.settings.colorScheme = COLOR_SCHEMES.includes(els.colorSchemeInput.value) ? els.colorSchemeInput.value : DEFAULT_SETTINGS.colorScheme;
-  applyTheme();
-  syncCustomSelects();
+  autoSaveGeneralSettings(
+    () => {
+      state.settings.colorScheme = COLOR_SCHEMES.includes(els.colorSchemeInput.value) ? els.colorSchemeInput.value : DEFAULT_SETTINGS.colorScheme;
+    },
+    () => {
+      applyTheme();
+      syncCustomSelects();
+    }
+  );
 });
 
 els.promptTemplateSelect.addEventListener("change", async () => {
@@ -4186,6 +4568,12 @@ els.promptTemplateSelect.addEventListener("change", async () => {
 
   applyPromptTemplateToInput(content);
   pushSystemMessage(t("promptTemplateApplied"));
+});
+
+els.translationTargetSelect?.addEventListener("change", async () => {
+  state.settings.translationLanguage = normalizeLanguage(els.translationTargetSelect.value, DEFAULT_SETTINGS.translationLanguage);
+  await saveSettings();
+  syncCustomSelects();
 });
 
 els.promptTemplateManageSelect.addEventListener("change", () => {
@@ -4242,7 +4630,8 @@ els.deletePromptTemplate.addEventListener("click", async () => {
 
 els.settingsForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  if ((els.settingsPanel.dataset.activeTab || "general") === "data") {
+  const activeSettingsTab = els.settingsPanel.dataset.activeTab || "general";
+  if (activeSettingsTab === "general" || activeSettingsTab === "data") {
     return;
   }
   persistCurrentProviderFields();
@@ -4259,7 +4648,7 @@ els.resetGeneralSettings.addEventListener("click", async () => {
   }
   state.settings.language = DEFAULT_SETTINGS.language;
   state.settings.answerLanguage = DEFAULT_SETTINGS.answerLanguage;
-  state.settings.translationLanguage = DEFAULT_SETTINGS.translationLanguage;
+  state.settings.translationStyle = DEFAULT_SETTINGS.translationStyle;
   state.settings.fontSize = DEFAULT_SETTINGS.fontSize;
   state.settings.colorScheme = DEFAULT_SETTINGS.colorScheme;
   state.settings.theme = DEFAULT_SETTINGS.theme;
@@ -4567,9 +4956,15 @@ els.chatForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const prompt = els.promptInput.value.trim();
   if (!prompt || state.sending) return;
+  const requestPrompt = state.composerMode === "translate"
+    ? buildTranslationRequestPrompt(prompt)
+    : prompt;
   els.promptInput.value = "";
-  await submitPrompt(prompt);
+  resizePromptInput();
+  await submitPrompt(prompt, { requestPrompt });
 });
+
+els.composerModeToggle?.addEventListener("click", toggleComposerMode);
 
 els.promptInput.addEventListener("keydown", (event) => {
   if (event.isComposing || promptInputComposing || event.keyCode === 229) {
@@ -4582,12 +4977,17 @@ els.promptInput.addEventListener("keydown", (event) => {
   }
 });
 
+els.promptInput.addEventListener("input", () => {
+  resizePromptInput({ keepCaretVisible: true });
+});
+
 els.promptInput.addEventListener("compositionstart", () => {
   promptInputComposing = true;
 });
 
 els.promptInput.addEventListener("compositionend", () => {
   promptInputComposing = false;
+  resizePromptInput({ keepCaretVisible: true });
 });
 
 els.thinkingToggle.addEventListener("click", async () => {

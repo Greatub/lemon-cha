@@ -1,20 +1,28 @@
-# lemon cha Chrome Extension
+# lemon cha Browser Extension
 
 [English](README.md)
 
-一个零构建步骤的 Chrome 插件，用独立标签页聊天界面连接两类模型服务：
+一个轻量的 Chrome / Firefox 浏览器插件，用独立标签页聊天界面连接两类模型服务：
 
 - 自定义 LLM API：默认使用 OpenAI Chat Completions 兼容格式。
 - Ollama 本地模型：默认直连 `http://127.0.0.1:11434/api/chat`。
-- 请求由 Chrome extension background service worker 发出，并对本地 Ollama 请求提供直连兜底处理。
+- 请求由浏览器扩展后台上下文发出，并对本地 Ollama 请求提供直连兜底处理。
 - 支持流式输出、停止生成、Markdown 展示、代码块复制、多会话保存、文件夹管理、会话重命名、删除单条对话、Markdown 导出，以及 JSON 导入/导出。
 
-## 安装
+## 在 Chrome 本地安装
 
 1. 打开 Chrome，进入 `chrome://extensions/`。
 2. 开启右上角的“开发者模式”。
 3. 点击“加载已解压的扩展程序”。
-4. 选择当前仓库目录。
+4. 运行 `npm run build:chrome` 后选择 `dist/lemon-cha`。
+5. 点击浏览器工具栏里的扩展图标，插件会打开一个独立标签页开始使用。
+
+## 在 Firefox 本地安装
+
+1. 运行 `npm run build:firefox`。
+2. 打开 Firefox，进入 `about:debugging#/runtime/this-firefox`。
+3. 点击“Load Temporary Add-on...”或“临时载入附加组件”。
+4. 选择 `dist/lemon-cha-firefox/manifest.json`。
 5. 点击浏览器工具栏里的扩展图标，插件会打开一个独立标签页开始使用。
 
 ## 开发验证
@@ -27,11 +35,13 @@ npm run typecheck
 npm run build
 ```
 
-- `npm run lint`：检查扩展必要文件、Manifest V3 配置、HTML 静态资源引用和 JavaScript 语法。
+- `npm run lint`：检查扩展必要文件、Chrome 和 Firefox Manifest V3 配置、HTML 静态资源引用和 JavaScript 语法。
 - `npm run typecheck`：当前项目是原生 JavaScript，没有 TypeScript 类型检查；此命令会执行 JavaScript 语法检查，作为轻量替代。
-- `npm run build`：复制扩展运行所需文件到 `dist/lemon-cha`。
+- `npm run build`：复制扩展运行所需文件到 Chrome 产物 `dist/lemon-cha` 和 Firefox 产物 `dist/lemon-cha-firefox`。
+- `npm run build:chrome`：只构建 Chrome 版本。
+- `npm run build:firefox`：只构建 Firefox 版本。
 
-构建后也可以在 `chrome://extensions/` 中加载 `dist/lemon-cha` 进行验证。
+Firefox 使用同一套运行时代码，但构建时会生成 Firefox 专用 manifest：将 Chrome 的 `background.service_worker` 换成 Firefox 的 `background.scripts`，并补充 Gecko 扩展设置。
 
 ## 自定义 API 配置
 
@@ -122,16 +132,16 @@ ollama pull llama3.1
 - `localhost` 会自动规范为 `127.0.0.1`。
 - 插件使用 `/api/tags` 获取模型列表和检查连接。
 - 插件使用 `/api/chat` 进行多轮对话和流式输出。
-- 本地 Ollama 请求由 background service worker 发起。
+- 本地 Ollama 请求由扩展后台上下文发起。
 
-### Chrome 插件请求 Ollama 返回 403
+### 浏览器插件请求 Ollama 返回 403
 
-如果 Ollama 拒绝 Chrome 扩展来源，需要重启 Ollama 并允许扩展 origin。
+如果 Ollama 拒绝浏览器扩展来源，需要重启 Ollama 并允许扩展 origin。
 
 macOS Ollama App：
 
 ```bash
-launchctl setenv OLLAMA_ORIGINS "chrome-extension://*"
+launchctl setenv OLLAMA_ORIGINS "chrome-extension://*,moz-extension://*"
 ```
 
 然后从菜单栏完全退出 Ollama，再重新打开。
@@ -139,7 +149,7 @@ launchctl setenv OLLAMA_ORIGINS "chrome-extension://*"
 macOS/Linux 命令行启动：
 
 ```bash
-OLLAMA_ORIGINS="chrome-extension://*" ollama serve
+OLLAMA_ORIGINS="chrome-extension://*,moz-extension://*" ollama serve
 ```
 
 调试阶段也可以临时放开所有来源：
@@ -151,13 +161,14 @@ OLLAMA_ORIGINS="*" ollama serve
 Windows PowerShell：
 
 ```powershell
-$env:OLLAMA_ORIGINS="chrome-extension://*,http://localhost:*,http://127.0.0.1:*"
+$env:OLLAMA_ORIGINS="chrome-extension://*,moz-extension://*,http://localhost:*,http://127.0.0.1:*"
 ollama serve
 ```
 
 ## 文件结构
 
-- `manifest.json`：Chrome Manifest V3 配置。
+- `manifest.json`：源 Chrome Manifest V3 配置。
+- `scripts/build-extension.js`：Chrome 和 Firefox 扩展产物构建脚本。
 - `background.js`：后台网络与模型请求逻辑。
 - `chat.html`：独立标签页聊天界面。
 - `styles.css`：视觉系统与响应式布局。

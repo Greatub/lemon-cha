@@ -24,6 +24,7 @@ const APP_ICON_PATHS = {
     '<path d="M8 12h8" />'
   ],
   chevronLeft: ['<path d="m15 18-6-6 6-6" />'],
+  chevronDown: ['<path d="m6 9 6 6 6-6" />'],
   chevronRight: ['<path d="m9 18 6-6-6-6" />'],
   copy: [
     '<rect width="14" height="14" x="8" y="8" rx="2" />',
@@ -51,8 +52,19 @@ const APP_ICON_PATHS = {
     '<path d="M16 13H8" />',
     '<path d="M16 17H8" />'
   ],
+  fileDown: [
+    '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />',
+    '<path d="M14 2v4a2 2 0 0 0 2 2h4" />',
+    '<path d="M12 18v-6" />',
+    '<path d="m9 15 3 3 3-3" />'
+  ],
   folder: [
     '<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.2a2 2 0 0 1-1.4-.6L9.6 3.6A2 2 0 0 0 8.2 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />'
+  ],
+  folderOutput: [
+    '<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.2a2 2 0 0 1-1.4-.6L9.6 3.6A2 2 0 0 0 8.2 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />',
+    '<path d="M15 12H9" />',
+    '<path d="m12 9-3 3 3 3" />'
   ],
   folderPlus: [
     '<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.2a2 2 0 0 1-1.4-.6L9.6 3.6A2 2 0 0 0 8.2 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />',
@@ -109,6 +121,11 @@ const APP_ICON_PATHS = {
     '<circle cx="6" cy="19" r="3" />',
     '<path d="M9 19h8.5a3.5 3.5 0 0 0 0-7H6.5a3.5 3.5 0 0 1 0-7H15" />',
     '<circle cx="18" cy="5" r="3" />'
+  ],
+  save: [
+    '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" />',
+    '<path d="M17 21v-8H7v8" />',
+    '<path d="M7 3v5h8" />'
   ],
   send: [
     '<path d="m22 2-7 20-4-9-9-4Z" />',
