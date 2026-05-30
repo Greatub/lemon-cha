@@ -174,6 +174,18 @@ function validateCssInteractionStates() {
     if (selector.includes(":hover") && /\bbox-shadow\s*:/.test(declarations)) {
       fail(`hover styles must not use box-shadow; use background/border changes instead: ${selector}`);
     }
+
+    const isContextualCustomSelect = /(?:^|[\s,])(?:\.settings|\.composer-actions)\s+\.custom-select/.test(selector);
+    const isCustomSelectState = /(?::hover|:focus-visible|\.open|\[aria-selected=)/.test(selector);
+    if (isContextualCustomSelect && isCustomSelectState) {
+      fail(`custom select interaction states must be defined globally, not per area: ${selector}`);
+    }
+
+    const isContextualSettingsState = /(?:^|[\s,])\.settings\s+\.(?:settings-tab|secondary|danger|settings-actions\b[^,{]*)/.test(selector)
+      && /(?::hover|:focus-visible|\.active)/.test(selector);
+    if (isContextualSettingsState) {
+      fail(`settings component interaction states must use the shared component rules: ${selector}`);
+    }
   }
 }
 
