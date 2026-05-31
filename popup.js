@@ -52,6 +52,7 @@ const MODEL_PRESETS = {
 
 const DIRECT_OLLAMA_ENDPOINT = "http://127.0.0.1:11434/api/chat";
 const LEGACY_OLLAMA_PROXY_ENDPOINT = "http://127.0.0.1:8787/api/chat";
+const TRANSLATION_PROMPT_TEMPLATE = "You are a professional translator.\n\nYour goal is to accurately convey the meaning, tone, nuance, and context of the original text while following {defaultTranslationLanguage} grammar, vocabulary, idioms, and cultural conventions.\n\nTranslation style:\n{translationStyle}\n\nRequirements:\n- Translate the text into {defaultTranslationLanguage}.\n- Preserve the original meaning and intent.\n- Adapt wording naturally for {defaultTranslationLanguage}.\n- Do not add explanations, notes, summaries, markdown headings, or commentary.\n- Output only the translated text.\n\nText to translate:\n";
 
 const BUILT_IN_PROMPT_TEMPLATES = [
   {
@@ -63,10 +64,10 @@ const BUILT_IN_PROMPT_TEMPLATES = [
   },
   {
     id: "translate-polish",
-    name: "翻译润色",
-    nameEn: "Translate & Polish",
-    content: "请将以下内容翻译成自然、准确、专业的 {defaultTranslationLanguage}，并在不改变原意的前提下提升表达流畅度。请先给出译文，再列出 3 条关键措辞说明。\n\n内容：\n",
-    contentEn: "Translate the following content into natural, accurate, professional {defaultTranslationLanguage}, and improve fluency without changing the meaning. First provide the translation, then list 3 notes on key wording choices.\n\nContent:\n"
+    name: "专业翻译",
+    nameEn: "Professional Translation",
+    content: TRANSLATION_PROMPT_TEMPLATE,
+    contentEn: TRANSLATION_PROMPT_TEMPLATE
   },
   {
     id: "code-review",
@@ -123,32 +124,6 @@ const BUILT_IN_PROMPT_TEMPLATE_LOCALES = {
     "de-DE": {
       name: "Zusammenfassen",
       content: "Fasse den folgenden Inhalt zusammen und arbeite die wichtigsten Schlussfolgerungen, relevanten Details und konkreten nächsten Schritte heraus. Nutze diese Struktur:\n\n### Wichtigste Schlussfolgerungen\n- \n\n### Relevante Details\n- \n\n### Nächste Schritte\n- \n\nInhalt:\n"
-    }
-  },
-  "translate-polish": {
-    "zh-TW": {
-      name: "翻譯潤飾",
-      content: "請將以下內容翻譯成自然、準確且專業的 {defaultTranslationLanguage}，並在不改變原意的前提下讓表達更流暢。請先提供譯文，再列出 3 點關鍵用詞說明。\n\n內容：\n"
-    },
-    "ja-JP": {
-      name: "翻訳と推敲",
-      content: "以下の内容を自然で正確かつ専門的な {defaultTranslationLanguage} に翻訳し、意味を変えずに読みやすさを高めてください。まず訳文を示し、その後に重要な表現選びについて 3 点説明してください。\n\n内容：\n"
-    },
-    "ko-KR": {
-      name: "번역 및 다듬기",
-      content: "다음 내용을 자연스럽고 정확하며 전문적인 {defaultTranslationLanguage}(으)로 번역하고, 의미를 바꾸지 않는 범위에서 표현을 더 매끄럽게 다듬어 주세요. 먼저 번역문을 제시한 뒤, 핵심 표현 선택에 대한 설명 3가지를 적어 주세요.\n\n내용:\n"
-    },
-    "fr-FR": {
-      name: "Traduire et améliorer",
-      content: "Traduis le contenu suivant dans un {defaultTranslationLanguage} naturel, précis et professionnel, puis améliore la fluidité sans altérer le sens. Fournis d’abord la traduction, puis 3 remarques sur les choix de formulation importants.\n\nContenu :\n"
-    },
-    "es-ES": {
-      name: "Traducir y pulir",
-      content: "Traduce el siguiente contenido a un {defaultTranslationLanguage} natural, preciso y profesional, y mejora la fluidez sin alterar el significado. Primero ofrece la traducción y después incluye 3 notas sobre decisiones importantes de redacción.\n\nContenido:\n"
-    },
-    "de-DE": {
-      name: "Übersetzen und verbessern",
-      content: "Übersetze den folgenden Inhalt in natürliches, präzises und professionelles {defaultTranslationLanguage} und verbessere die sprachliche Wirkung, ohne die Bedeutung zu verändern. Gib zuerst die Übersetzung aus und nenne anschließend 3 Hinweise zu wichtigen Formulierungsentscheidungen.\n\nInhalt:\n"
     }
   },
   "code-review": {
@@ -302,6 +277,14 @@ const DEFAULT_TRANSLATION_LANGUAGE_VARIABLES = [
   "{targetLanguage}",
   "{目标语言}"
 ];
+const TRANSLATION_STYLE_VARIABLES = [
+  "{translationStyle}",
+  "{翻译风格}"
+];
+const HIDDEN_BUILT_IN_PROMPT_TEMPLATE_IDS = new Set(["translate-polish"]);
+const VISIBLE_BUILT_IN_PROMPT_TEMPLATES = BUILT_IN_PROMPT_TEMPLATES.filter(
+  (template) => !HIDDEN_BUILT_IN_PROMPT_TEMPLATE_IDS.has(template.id)
+);
 const LANGUAGE_UI_FALLBACK = {};
 
 const UI_TEXT = {
@@ -390,7 +373,7 @@ const UI_TEXT = {
     thinkingMode: "思考",
     interfaceLanguage: "界面语言",
     answerLanguage: "默认回答语言",
-    translationStyle: "翻译风格",
+    translationStyle: "翻译工具风格",
     translationStyleBalanced: "自然准确",
     translationStyleFaithful: "忠实原文",
     translationStylePolished: "流畅润色",
@@ -576,7 +559,7 @@ const UI_TEXT = {
     thinkingMode: "Think",
     interfaceLanguage: "Interface Language",
     answerLanguage: "Default Answer Language",
-    translationStyle: "Translation Style",
+    translationStyle: "Translation Tool Style",
     translationStyleBalanced: "Natural & Accurate",
     translationStyleFaithful: "Faithful",
     translationStylePolished: "Polished",
@@ -1755,7 +1738,7 @@ Object.assign(UI_TEXT["zh-TW"], {
   translateMode: "翻譯",
   inputModeAria: "輸入模式",
   targetLanguageAria: "目標語言",
-  translationStyle: "翻譯風格",
+  translationStyle: "翻譯工具風格",
   translationStyleBalanced: "自然準確",
   translationStyleFaithful: "忠於原文",
   translationStylePolished: "流暢潤飾",
@@ -1767,7 +1750,7 @@ Object.assign(UI_TEXT["ja-JP"], {
   translateMode: "翻訳",
   inputModeAria: "入力モード",
   targetLanguageAria: "翻訳先言語",
-  translationStyle: "翻訳スタイル",
+  translationStyle: "翻訳ツールのスタイル",
   translationStyleBalanced: "自然で正確",
   translationStyleFaithful: "原文に忠実",
   translationStylePolished: "読みやすく推敲",
@@ -1779,7 +1762,7 @@ Object.assign(UI_TEXT["ko-KR"], {
   translateMode: "번역",
   inputModeAria: "입력 모드",
   targetLanguageAria: "대상 언어",
-  translationStyle: "번역 스타일",
+  translationStyle: "번역 도구 스타일",
   translationStyleBalanced: "자연스럽고 정확하게",
   translationStyleFaithful: "원문에 충실하게",
   translationStylePolished: "매끄럽게 다듬기",
@@ -1791,7 +1774,7 @@ Object.assign(UI_TEXT["fr-FR"], {
   translateMode: "Traduction",
   inputModeAria: "Mode de saisie",
   targetLanguageAria: "Langue cible",
-  translationStyle: "Style de traduction",
+  translationStyle: "Style de l’outil de traduction",
   translationStyleBalanced: "Naturel et précis",
   translationStyleFaithful: "Fidèle au texte",
   translationStylePolished: "Fluide et révisé",
@@ -1803,7 +1786,7 @@ Object.assign(UI_TEXT["es-ES"], {
   translateMode: "Traducir",
   inputModeAria: "Modo de entrada",
   targetLanguageAria: "Idioma de destino",
-  translationStyle: "Estilo de traducción",
+  translationStyle: "Estilo de la herramienta de traducción",
   translationStyleBalanced: "Natural y preciso",
   translationStyleFaithful: "Fiel al original",
   translationStylePolished: "Fluido y pulido",
@@ -1815,7 +1798,7 @@ Object.assign(UI_TEXT["de-DE"], {
   translateMode: "Übersetzen",
   inputModeAria: "Eingabemodus",
   targetLanguageAria: "Zielsprache",
-  translationStyle: "Übersetzungsstil",
+  translationStyle: "Stil des Übersetzungswerkzeugs",
   translationStyleBalanced: "Natürlich und genau",
   translationStyleFaithful: "Quelltextnah",
   translationStylePolished: "Flüssig überarbeitet",
@@ -2669,7 +2652,6 @@ function iconForSelectOption(select, option) {
   if (select.id === "promptTemplateSelect" || select.id === "promptTemplateManageSelect" || select.id === "defaultPresetInput") {
     const promptIcons = {
       summarize: "fileText",
-      "translate-polish": "languages",
       "code-review": "bot",
       debug: "refreshCw",
       writing: "edit",
@@ -2736,12 +2718,12 @@ function renderPromptTemplates() {
     els.defaultPresetInput.append(defaultPlaceholder);
   }
 
-  appendPromptTemplateGroup(t("builtInTemplates"), BUILT_IN_PROMPT_TEMPLATES);
+  appendPromptTemplateGroup(t("builtInTemplates"), VISIBLE_BUILT_IN_PROMPT_TEMPLATES);
   appendPromptTemplateGroup(t("customTemplates"), state.promptTemplates);
-  appendPromptTemplateGroup(t("builtInTemplates"), BUILT_IN_PROMPT_TEMPLATES, els.promptTemplateManageSelect);
+  appendPromptTemplateGroup(t("builtInTemplates"), VISIBLE_BUILT_IN_PROMPT_TEMPLATES, els.promptTemplateManageSelect);
   appendPromptTemplateGroup(t("customTemplates"), state.promptTemplates, els.promptTemplateManageSelect);
   if (els.defaultPresetInput) {
-    appendPromptTemplateGroup(t("builtInTemplates"), BUILT_IN_PROMPT_TEMPLATES, els.defaultPresetInput);
+    appendPromptTemplateGroup(t("builtInTemplates"), VISIBLE_BUILT_IN_PROMPT_TEMPLATES, els.defaultPresetInput);
     appendPromptTemplateGroup(t("customTemplates"), state.promptTemplates, els.defaultPresetInput);
   }
 
@@ -2806,9 +2788,13 @@ function defaultTranslationLanguageName() {
 }
 
 function resolvePromptTemplateVariables(content) {
-  return DEFAULT_TRANSLATION_LANGUAGE_VARIABLES.reduce(
+  const withLanguage = DEFAULT_TRANSLATION_LANGUAGE_VARIABLES.reduce(
     (resolved, variable) => resolved.split(variable).join(defaultTranslationLanguageName()),
     content
+  );
+  return TRANSLATION_STYLE_VARIABLES.reduce(
+    (resolved, variable) => resolved.split(variable).join(translationStyleInstruction()),
+    withLanguage
   );
 }
 
@@ -2816,23 +2802,14 @@ function translationStyleInstruction() {
   const style = TRANSLATION_STYLES.includes(state.settings.translationStyle)
     ? state.settings.translationStyle
     : DEFAULT_SETTINGS.translationStyle;
-  const language = uiLanguage();
   const instructions = {
-    "zh-CN": {
-      balanced: "翻译风格：自然准确，兼顾原意和目标语言表达。",
-      faithful: "翻译风格：忠实原文，优先保留原文结构、术语和语气。",
-      polished: "翻译风格：流畅润色，在不改变原意的前提下提升表达自然度。",
-      professional: "翻译风格：专业正式，适合商务、研究或正式场景。"
-    },
-    "en-US": {
-      balanced: "Translation style: natural and accurate, balancing source meaning with target-language expression.",
-      faithful: "Translation style: faithful to the source, preserving structure, terms, and tone where possible.",
-      polished: "Translation style: polished and fluent, improving natural flow without changing meaning.",
-      professional: "Translation style: professional and formal, suitable for business, research, or formal contexts."
-    }
+    balanced: "Natural and accurate, balancing source meaning with target-language fluency.",
+    faithful: "Faithful to the source, preserving structure, terminology, tone, and nuance where possible.",
+    polished: "Polished and fluent, improving readability and flow without changing meaning.",
+    professional: "Professional and formal, suitable for business, academic, research, or other formal contexts."
   };
 
-  return (instructions[language] || instructions["en-US"])[style] || instructions["en-US"].balanced;
+  return instructions[style] || instructions.balanced;
 }
 
 function fillPromptTemplateEditor(template = null) {
@@ -3842,8 +3819,8 @@ function buildTranslationRequestPrompt(input) {
   const template = getPromptTemplate("translate-polish");
   const templateContent = template
     ? localizedTemplateContent(template)
-    : "Translate the following content into natural, accurate {defaultTranslationLanguage}.\n\nContent:\n";
-  return `${translationStyleInstruction()}\n\n${resolvePromptTemplateVariables(templateContent)}${input}`;
+    : TRANSLATION_PROMPT_TEMPLATE;
+  return `${resolvePromptTemplateVariables(templateContent)}${input}`;
 }
 
 async function generateAssistantResponse(conversation, config, requestMessages) {
