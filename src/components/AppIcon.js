@@ -101,6 +101,11 @@ const APP_ICON_PATHS = {
   messageCircle: [
     '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />'
   ],
+  messagePlus: [
+    '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />',
+    '<path d="M12 8v6" />',
+    '<path d="M9 11h6" />'
+  ],
   monitor: [
     '<rect width="20" height="14" x="2" y="3" rx="2" />',
     '<path d="M8 21h8" />',
@@ -126,6 +131,10 @@ const APP_ICON_PATHS = {
     '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" />',
     '<path d="M17 21v-8H7v8" />',
     '<path d="M7 3v5h8" />'
+  ],
+  search: [
+    '<circle cx="11" cy="11" r="8" />',
+    '<path d="m21 21-4.3-4.3" />'
   ],
   send: [
     '<path d="m22 2-7 20-4-9-9-4Z" />',

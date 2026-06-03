@@ -20,9 +20,21 @@
 
         <div class="sidebar-primary">
           <button id="newChat" type="button" class="sidebar-text-button new-chat-button">
-            <span class="icon-slot" data-icon="plus" aria-hidden="true"></span>
+            <span class="icon-slot" data-icon="messagePlus" aria-hidden="true"></span>
             <span class="menu-label">新建对话</span>
           </button>
+          <button id="sidebarTranslateTool" type="button" class="sidebar-text-button sidebar-translate-button">
+            <span class="icon-slot" data-icon="languages" aria-hidden="true"></span>
+            <span class="menu-label">翻译</span>
+          </button>
+          <button id="conversationSearchToggle" type="button" class="sidebar-text-button conversation-search-button" aria-expanded="false" aria-controls="conversationSearchPanel">
+            <span class="icon-slot" data-icon="search" aria-hidden="true"></span>
+            <span class="menu-label">搜索对话</span>
+          </button>
+          <div id="conversationSearchPanel" class="conversation-search-panel hidden">
+            <label class="visually-hidden" for="conversationSearchInput">搜索对话</label>
+            <input id="conversationSearchInput" class="conversation-search-input" type="search" placeholder="搜索标题或内容" autocomplete="off">
+          </div>
         </div>
 
         <nav class="conversation-list" aria-label="对话列表">
@@ -37,11 +49,12 @@
         </nav>
 
         <div class="sidebar-footer">
+          <button id="settingsToggle" type="button" class="sidebar-text-button sidebar-settings-button" aria-expanded="false">
+            <span class="icon-slot" data-icon="settings" aria-hidden="true"></span>
+            <span class="menu-label">设置</span>
+          </button>
           <button id="themeToggle" class="icon-button" type="button" aria-label="夜间模式" aria-pressed="false">
             <span class="icon-slot" data-icon="moon" aria-hidden="true"></span>
-          </button>
-          <button id="settingsToggle" class="icon-button" type="button" aria-label="设置" aria-expanded="false">
-            <span class="icon-slot" data-icon="settings" aria-hidden="true"></span>
           </button>
         </div>
       </aside>
