@@ -77,6 +77,7 @@
   --select-scrollbar-inset: 26px;
   --rounded-scrollbar-inset: 14px;
   --textarea-scrollbar-inset: 24px;
+  --app-min-width: 760px;
   --collapsed-sidebar-inline-padding: var(--sidebar-content-padding-inline);
   --composer-action-inset: 14px;
   --composer-input-min-height: 112px;
@@ -372,13 +373,14 @@ body.dark-mode {
 }
 
 body {
-  min-width: 0;
+  min-width: var(--app-min-width);
   color: var(--color-primary);
   background:
     radial-gradient(circle at 0 100%, var(--scheme-glow-primary), transparent 24%),
     radial-gradient(circle at 100% 0, var(--scheme-glow-secondary), transparent 24%),
     var(--scheme-chat-surface);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 button,
@@ -500,6 +502,7 @@ button:disabled {
 .app {
   display: grid;
   grid-template-columns: 292px minmax(0, 1fr);
+  min-width: var(--app-min-width);
   height: 100vh;
   min-height: 0;
 }
@@ -2731,34 +2734,6 @@ select:focus {
 }
 
 @media (max-width: 760px) {
-  body {
-    min-width: 0;
-  }
-
-  .app {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
-  }
-
-  .sidebar {
-    grid-template-rows: var(--sidebar-header-height) auto minmax(0, 1fr) var(--sidebar-footer-height);
-    border-right: 0;
-    border-bottom: 0;
-  }
-
-  .conversation-list {
-    display: grid;
-    grid-template-rows: auto auto;
-    grid-auto-flow: column;
-    grid-auto-columns: 220px;
-    overflow-x: auto;
-    overflow-y: hidden;
-  }
-
-  .conversation-list-body {
-    overflow: visible;
-  }
-
   .settings-form {
     grid-template-columns: 1fr;
   }
