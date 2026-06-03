@@ -635,7 +635,7 @@ button:disabled {
   min-height: var(--sidebar-footer-height);
   align-items: center;
   justify-content: center;
-  padding: var(--space-md) var(--collapsed-sidebar-inline-padding);
+  padding: calc((var(--sidebar-footer-height) - var(--sidebar-item-height)) / 2) var(--collapsed-sidebar-inline-padding);
   border-top: 0;
 }
 
@@ -897,16 +897,32 @@ button:disabled {
   justify-content: space-between;
   gap: var(--space-sm);
   min-height: var(--sidebar-footer-height);
-  padding: var(--space-md) var(--sidebar-content-padding-inline);
+  padding: calc((var(--sidebar-footer-height) - var(--sidebar-item-height)) / 2) var(--sidebar-content-padding-inline);
   border-top: 0;
 }
 
-.sidebar-footer .sidebar-text-button {
-  flex: 1 1 auto;
+.sidebar-footer #themeToggle {
+  flex: 0 0 var(--sidebar-collapsed-action-size);
+}
+
+.sidebar-footer .sidebar-settings-button {
+  flex: 0 1 clamp(120px, 54%, 180px);
+  max-width: calc(100% - var(--sidebar-collapsed-action-size) - var(--space-sm));
+}
+
+.sidebar-settings-button .menu-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sidebar-collapsed .sidebar-footer .sidebar-text-button {
   flex: 0 0 auto;
+}
+
+.sidebar-collapsed .sidebar-footer .sidebar-settings-button {
+  max-width: var(--sidebar-collapsed-action-size);
 }
 
 .settings-menu {
