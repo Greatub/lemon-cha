@@ -609,8 +609,9 @@ button:disabled {
   align-items: center;
   min-width: 0;
   color: var(--color-primary);
+  font-family: var(--font-label);
   font-size: 26px;
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1;
   letter-spacing: 0;
   white-space: nowrap;
