@@ -924,7 +924,6 @@ button:disabled {
 .sidebar-settings-button .menu-label {
   min-width: 0;
   overflow: hidden;
-  line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2125,6 +2124,10 @@ select:focus {
 .sidebar .menu-item,
 .sidebar .sidebar-text-button {
   font-weight: 400;
+}
+
+.sidebar .menu-label {
+  line-height: 1.35;
 }
 
 .messages {
