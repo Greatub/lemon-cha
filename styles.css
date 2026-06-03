@@ -609,7 +609,7 @@ button:disabled {
   align-items: center;
   min-width: 0;
   color: var(--color-primary);
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 400;
   line-height: 1;
   letter-spacing: 0;
