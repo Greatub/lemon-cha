@@ -924,8 +924,13 @@ button:disabled {
 .sidebar-settings-button .menu-label {
   min-width: 0;
   overflow: hidden;
+  line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.sidebar-settings-button .app-icon {
+  overflow: visible;
 }
 
 .sidebar-collapsed .sidebar-footer .sidebar-text-button {
