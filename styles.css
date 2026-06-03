@@ -499,7 +499,7 @@ button:disabled {
 
 .app {
   display: grid;
-  grid-template-columns: 304px minmax(0, 1fr);
+  grid-template-columns: 292px minmax(0, 1fr);
   height: 100vh;
   min-height: 0;
 }
@@ -589,7 +589,7 @@ button:disabled {
   justify-content: space-between;
   gap: var(--space-sm);
   min-height: var(--sidebar-header-height);
-  padding: var(--space-xs) var(--space-md);
+  padding: var(--space-xs) var(--sidebar-content-padding-inline) var(--space-xs) var(--space-md);
   border-bottom: 0;
 }
 
@@ -897,7 +897,7 @@ button:disabled {
   justify-content: space-between;
   gap: var(--space-sm);
   min-height: var(--sidebar-footer-height);
-  padding: var(--space-md) var(--space-md) var(--space-md) var(--sidebar-content-padding-inline);
+  padding: var(--space-md) var(--sidebar-content-padding-inline);
   border-top: 0;
 }
 
