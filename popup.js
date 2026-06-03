@@ -2041,6 +2041,23 @@ function clearTooltip(node, label = "") {
   }
 }
 
+function syncSidebarActionTooltips() {
+  const actions = [
+    [els.newChat, t("newChat")],
+    [els.sidebarTranslateTool, t("newTranslation")],
+    [els.conversationSearchToggle, t("searchConversations")],
+    [els.settingsToggle, t("settingsTitle")]
+  ];
+
+  for (const [button, label] of actions) {
+    if (state.sidebarCollapsed) {
+      setTooltip(button, label);
+    } else {
+      clearTooltip(button, label);
+    }
+  }
+}
+
 function setButtonContent(button, label, iconName = "") {
   if (!button) return;
   button.textContent = "";
@@ -2385,17 +2402,7 @@ function applyLanguage() {
   }
   setTooltip(els.sidebarToggle, state.sidebarCollapsed ? t("showSidebar") : t("hideSidebar"));
   setIconOnly(els.sidebarToggle, "panelLeft");
-  if (state.sidebarCollapsed) {
-    setTooltip(els.newChat, t("newChat"));
-    setTooltip(els.sidebarTranslateTool, t("newTranslation"));
-    setTooltip(els.conversationSearchToggle, t("searchConversations"));
-    setTooltip(els.settingsToggle, t("settingsTitle"));
-  } else {
-    clearTooltip(els.newChat, t("newChat"));
-    clearTooltip(els.sidebarTranslateTool, t("newTranslation"));
-    clearTooltip(els.conversationSearchToggle, t("searchConversations"));
-    clearTooltip(els.settingsToggle, t("settingsTitle"));
-  }
+  syncSidebarActionTooltips();
   els.conversationSearchInput.placeholder = t("searchConversationsPlaceholder");
   els.conversationSearchInput.setAttribute("aria-label", t("searchConversations"));
   syncConversationSearchState();
@@ -2454,17 +2461,7 @@ function setMenuLabel(button, label) {
 function applySidebarState(persist = true) {
   document.body.classList.toggle("sidebar-collapsed", state.sidebarCollapsed);
   setTooltip(els.sidebarToggle, state.sidebarCollapsed ? t("showSidebar") : t("hideSidebar"));
-  if (state.sidebarCollapsed) {
-    setTooltip(els.newChat, t("newChat"));
-    setTooltip(els.sidebarTranslateTool, t("newTranslation"));
-    setTooltip(els.conversationSearchToggle, t("searchConversations"));
-    setTooltip(els.settingsToggle, t("settingsTitle"));
-  } else {
-    clearTooltip(els.newChat, t("newChat"));
-    clearTooltip(els.sidebarTranslateTool, t("newTranslation"));
-    clearTooltip(els.conversationSearchToggle, t("searchConversations"));
-    clearTooltip(els.settingsToggle, t("settingsTitle"));
-  }
+  syncSidebarActionTooltips();
   syncConversationSearchState();
   setIconOnly(els.sidebarToggle, "panelLeft");
   if (state.sidebarCollapsed) {

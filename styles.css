@@ -851,6 +851,7 @@ button:disabled {
 }
 
 .conversation-search-input {
+  appearance: none;
   display: block;
   width: 100%;
   max-width: 100%;
@@ -863,6 +864,13 @@ button:disabled {
   background: var(--scheme-sidebar-item-surface);
   font: inherit;
   outline: none;
+}
+
+.conversation-search-input::-webkit-search-cancel-button,
+.conversation-search-input::-webkit-search-decoration,
+.conversation-search-input::-webkit-search-results-button,
+.conversation-search-input::-webkit-search-results-decoration {
+  display: none;
 }
 
 .conversation-search-input::placeholder {
