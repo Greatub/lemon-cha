@@ -16,12 +16,12 @@ Build the extension and package it from the repository root:
 ```bash
 npm run build
 cd dist
-zip -r -X -FS lemon-cha-extension-0.2.3.zip lemon-cha
+zip -r -X lemon-cha-extension-0.2.4.zip lemon-cha
 ```
 
 Expected upload file:
 
-`dist/lemon-cha-extension-0.2.3.zip`
+`dist/lemon-cha-extension-0.2.4.zip`
 
 ## Before submitting
 

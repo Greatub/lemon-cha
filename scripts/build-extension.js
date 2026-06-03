@@ -70,6 +70,9 @@ function createManifest(browserTarget) {
       ...(manifest.browser_specific_settings || {}),
       gecko: {
         id: "lemon-cha@georgehuang.local",
+        data_collection_permissions: {
+          required: ["none"]
+        },
         strict_min_version: "113.0",
         ...(manifest.browser_specific_settings?.gecko || {})
       }

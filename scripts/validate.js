@@ -94,6 +94,9 @@ function createManifestForTarget(baseManifest, browserTarget) {
       ...(manifest.browser_specific_settings || {}),
       gecko: {
         id: "lemon-cha@georgehuang.local",
+        data_collection_permissions: {
+          required: ["none"]
+        },
         strict_min_version: "113.0",
         ...(manifest.browser_specific_settings?.gecko || {})
       }
@@ -140,6 +143,9 @@ function validateManifest(browserTarget) {
     }
     if (!manifest.browser_specific_settings?.gecko?.id) {
       fail("firefox manifest must define browser_specific_settings.gecko.id");
+    }
+    if (!manifest.browser_specific_settings?.gecko?.data_collection_permissions?.required?.includes("none")) {
+      fail("firefox manifest must declare browser_specific_settings.gecko.data_collection_permissions.required");
     }
   }
 

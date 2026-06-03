@@ -1,5 +1,7 @@
-chrome.action.onClicked.addListener(() => {
-  chrome.tabs.create({ url: chrome.runtime.getURL("chat.html") });
+const extensionApi = globalThis.browser || globalThis.chrome;
+
+extensionApi.action.onClicked.addListener(() => {
+  extensionApi.tabs.create({ url: extensionApi.runtime.getURL("chat.html") });
 });
 
 const BG_TEXT = {
@@ -184,7 +186,7 @@ function bt(configOrLang, key, replacements = {}) {
   );
 }
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+extensionApi.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type === "llm:title") {
     generateChatTitle(message.payload)
       .then((title) => sendResponse({ ok: true, title }))
@@ -220,7 +222,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 
-chrome.runtime.onConnect.addListener((port) => {
+extensionApi.runtime.onConnect.addListener((port) => {
   if (port.name !== "llm-stream") {
     return;
   }
@@ -571,7 +573,7 @@ async function fetchOllamaDirect(url, options = {}, config = {}) {
 
 async function ensureOllamaCorsRule(url) {
   const origin = getLocalOllamaOrigin(url);
-  if (!origin || activeOllamaCorsOrigin === origin || !chrome.declarativeNetRequest?.updateDynamicRules) {
+  if (!origin || activeOllamaCorsOrigin === origin || !extensionApi.declarativeNetRequest?.updateDynamicRules) {
     return;
   }
 
@@ -617,8 +619,13 @@ function getLocalOllamaOrigin(url) {
 
 function updateDynamicRules(options) {
   return new Promise((resolve, reject) => {
-    chrome.declarativeNetRequest.updateDynamicRules(options, () => {
-      const error = chrome.runtime.lastError;
+    if (globalThis.browser?.declarativeNetRequest) {
+      extensionApi.declarativeNetRequest.updateDynamicRules(options).then(resolve, reject);
+      return;
+    }
+
+    extensionApi.declarativeNetRequest.updateDynamicRules(options, () => {
+      const error = extensionApi.runtime.lastError;
       if (error) {
         reject(new Error(error.message));
         return;
