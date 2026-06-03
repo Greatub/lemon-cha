@@ -87,7 +87,7 @@
   --message-width: var(--content-width);
   --scrollbar-reserve: 17px;
   --sidebar-header-height: 64px;
-  --sidebar-footer-height: 69px;
+  --sidebar-footer-height: 72px;
   --shadow-panel: 0 6px 22px rgba(104, 87, 32, 0.10);
   --shadow-soft: 0 14px 38px rgba(104, 87, 32, 0.13);
   --shadow-message: 0 3px 12px rgba(104, 87, 32, 0.055);
@@ -635,7 +635,7 @@ button:disabled {
   min-height: var(--sidebar-footer-height);
   align-items: center;
   justify-content: center;
-  padding: calc((var(--sidebar-footer-height) - var(--sidebar-item-height)) / 2) var(--collapsed-sidebar-inline-padding);
+  padding: var(--space-md) var(--collapsed-sidebar-inline-padding);
   border-top: 0;
 }
 
@@ -897,7 +897,7 @@ button:disabled {
   justify-content: space-between;
   gap: var(--space-sm);
   min-height: var(--sidebar-footer-height);
-  padding: calc((var(--sidebar-footer-height) - var(--sidebar-item-height)) / 2) var(--sidebar-content-padding-inline);
+  padding: var(--space-md) var(--space-md) var(--space-md) var(--sidebar-content-padding-inline);
   border-top: 0;
 }
 
