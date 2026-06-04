@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "lemon cha",
-  "description": "A browser extension chat window for supported LLM APIs and local Ollama models.",
+  "description": "A lightweight browser AI chat workspace with custom LLM APIs, local Ollama, translation, and chat history.",
   "version": "0.2.4",
   "action": {
     "default_title": "lemon cha",

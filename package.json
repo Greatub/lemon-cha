@@ -2,7 +2,7 @@
   "name": "lemon-cha",
   "version": "0.2.4",
   "private": true,
-  "description": "lemon cha browser AI chat extension",
+  "description": "Lightweight browser AI chat workspace with custom LLM APIs, local Ollama, translation, and chat history.",
   "scripts": {
     "lint": "node scripts/validate.js",
     "lint:chrome": "node scripts/validate.js --target=chrome",
