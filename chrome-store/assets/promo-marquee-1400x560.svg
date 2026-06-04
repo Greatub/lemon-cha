@@ -1,0 +1,69 @@
+<svg width="1400" height="560" viewBox="0 0 1400 560" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1400" y2="560" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFBEA"/>
+      <stop offset="0.55" stop-color="#F7F7E8"/>
+      <stop offset="1" stop-color="#EAF3D5"/>
+    </linearGradient>
+    <filter id="panelShadow" x="-20%" y="-20%" width="140%" height="150%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="20" stdDeviation="26" flood-color="#53623D" flood-opacity="0.16"/>
+    </filter>
+    <filter id="chipShadow" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#53623D" flood-opacity="0.12"/>
+    </filter>
+    <clipPath id="logoClip">
+      <rect x="112" y="120" width="116" height="116" rx="32"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1400" height="560" fill="url(#bg)"/>
+  <circle cx="1180" cy="50" r="210" fill="#F5D94E" opacity="0.32"/>
+  <circle cx="1330" cy="470" r="245" fill="#92B85A" opacity="0.2"/>
+  <circle cx="66" cy="520" r="190" fill="#F9E889" opacity="0.32"/>
+
+  <image href="../../assets/logo-square.png" x="112" y="120" width="116" height="116" preserveAspectRatio="xMidYMid slice" clip-path="url(#logoClip)"/>
+
+  <text x="112" y="297" fill="#2D3824" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="70" font-weight="750">lemon cha</text>
+  <text x="116" y="350" fill="#56634A" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="26" font-weight="560">Fresh AI chat for your browser.</text>
+  <text x="116" y="392" fill="#6B755F" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="22" font-weight="500">Custom APIs · Local Ollama · Translation · History</text>
+
+  <g filter="url(#chipShadow)">
+    <rect x="116" y="430" width="178" height="54" rx="24" fill="#F8E77A"/>
+    <text x="146" y="465" fill="#33401F" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="20" font-weight="700">Chat</text>
+    <path d="M236 451c0-8.8 7.2-16 16-16h3c8.8 0 16 7.2 16 16v1c0 8.8-7.2 16-16 16h-4l-16 14v-30Z" fill="#6F8F3C" opacity="0.82"/>
+  </g>
+  <g filter="url(#chipShadow)">
+    <rect x="316" y="430" width="206" height="54" rx="24" fill="#EAF3D5"/>
+    <text x="348" y="465" fill="#3E5428" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="20" font-weight="700">Translate</text>
+    <path d="M477 444h16m-8-8v18m-22 18h44" stroke="#6F8F3C" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+  <g filter="url(#panelShadow)">
+    <rect x="730" y="84" width="540" height="392" rx="34" fill="#FFFDF4"/>
+    <rect x="730" y="84" width="540" height="392" rx="34" stroke="#E4E9CE" stroke-width="2"/>
+  </g>
+
+  <rect x="768" y="122" width="176" height="46" rx="18" fill="#F8E77A"/>
+  <text x="792" y="152" fill="#33401F" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="18" font-weight="700">New chat</text>
+  <path d="M906 138c0-6.6 5.4-12 12-12h1c6.6 0 12 5.4 12 12v1c0 6.6-5.4 12-12 12h-3l-10 10v-23Z" fill="#6F8F3C" opacity="0.8"/>
+  <path d="M919 134v10m-5-5h10" stroke="#FFFDF4" stroke-width="2.4" stroke-linecap="round"/>
+
+  <rect x="960" y="122" width="194" height="46" rx="18" fill="#EAF3D5"/>
+  <text x="984" y="152" fill="#3E5428" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="18" font-weight="700">New translate</text>
+
+  <rect x="768" y="204" width="216" height="60" rx="24" fill="#F5F2DE"/>
+  <text x="796" y="240" fill="#526044" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="18" font-weight="650">Today</text>
+  <circle cx="945" cy="234" r="10" fill="#92B85A"/>
+  <rect x="1008" y="204" width="216" height="60" rx="24" fill="#FFF9D6"/>
+  <text x="1036" y="240" fill="#526044" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="18" font-weight="650">Translation</text>
+  <circle cx="1185" cy="234" r="10" fill="#F5D94E"/>
+
+  <rect x="790" y="304" width="304" height="58" rx="24" fill="#F2F7E4"/>
+  <text x="820" y="340" fill="#405133" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="19" font-weight="650">Summarize this article</text>
+  <rect x="924" y="382" width="272" height="58" rx="24" fill="#F8E77A"/>
+  <text x="956" y="418" fill="#33401F" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="19" font-weight="700">Translate to English</text>
+
+  <path d="M1198 126h26m-13-13v26" stroke="#6F8F3C" stroke-width="5" stroke-linecap="round"/>
+  <path d="M778 451h170" stroke="#DDE8C2" stroke-width="6" stroke-linecap="round"/>
+  <path d="M778 431h118" stroke="#E9E0A7" stroke-width="6" stroke-linecap="round"/>
+</svg>
