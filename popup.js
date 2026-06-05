@@ -281,7 +281,6 @@ const DEFAULT_SETTINGS = {
   defaultPresetId: "",
   memoryEnabled: true,
   thinkingEnabled: false,
-  webAccessEnabled: false,
   language: defaultInterfaceLanguage(),
   answerLanguage: "zh-CN",
   translationLanguage: "en-US",
@@ -373,7 +372,6 @@ const UI_TEXT = {
     stop: "停止",
     chatMode: "对话",
     translateMode: "翻译",
-    webAccessMode: "联网",
     inputModeAria: "输入模式",
     targetLanguageAria: "目标语言",
     promptPlaceholder: "输入问题，Enter 发送，Shift+Enter 换行",
@@ -564,7 +562,6 @@ const UI_TEXT = {
     stop: "Stop",
     chatMode: "Chat",
     translateMode: "Translate",
-    webAccessMode: "Web",
     inputModeAria: "Input Mode",
     targetLanguageAria: "Target Language",
     promptPlaceholder: "Ask a question. Enter to send, Shift+Enter for a new line",
@@ -1802,7 +1799,6 @@ Object.assign(UI_TEXT, {
 Object.assign(UI_TEXT["zh-TW"], {
   chatMode: "對話",
   translateMode: "翻譯",
-  webAccessMode: "連網",
   inputModeAria: "輸入模式",
   targetLanguageAria: "目標語言",
   translationStyle: "翻譯工具風格",
@@ -1815,7 +1811,6 @@ Object.assign(UI_TEXT["zh-TW"], {
 Object.assign(UI_TEXT["ja-JP"], {
   chatMode: "チャット",
   translateMode: "翻訳",
-  webAccessMode: "Web",
   inputModeAria: "入力モード",
   targetLanguageAria: "翻訳先言語",
   translationStyle: "翻訳ツールのスタイル",
@@ -1828,7 +1823,6 @@ Object.assign(UI_TEXT["ja-JP"], {
 Object.assign(UI_TEXT["ko-KR"], {
   chatMode: "대화",
   translateMode: "번역",
-  webAccessMode: "웹",
   inputModeAria: "입력 모드",
   targetLanguageAria: "대상 언어",
   translationStyle: "번역 도구 스타일",
@@ -1841,7 +1835,6 @@ Object.assign(UI_TEXT["ko-KR"], {
 Object.assign(UI_TEXT["fr-FR"], {
   chatMode: "Discussion",
   translateMode: "Traduction",
-  webAccessMode: "Web",
   inputModeAria: "Mode de saisie",
   targetLanguageAria: "Langue cible",
   translationStyle: "Style de l’outil de traduction",
@@ -1854,7 +1847,6 @@ Object.assign(UI_TEXT["fr-FR"], {
 Object.assign(UI_TEXT["es-ES"], {
   chatMode: "Chat",
   translateMode: "Traducir",
-  webAccessMode: "Web",
   inputModeAria: "Modo de entrada",
   targetLanguageAria: "Idioma de destino",
   translationStyle: "Estilo de la herramienta de traducción",
@@ -1867,7 +1859,6 @@ Object.assign(UI_TEXT["es-ES"], {
 Object.assign(UI_TEXT["de-DE"], {
   chatMode: "Chat",
   translateMode: "Übersetzen",
-  webAccessMode: "Web",
   inputModeAria: "Eingabemodus",
   targetLanguageAria: "Zielsprache",
   translationStyle: "Stil des Übersetzungswerkzeugs",
@@ -1933,7 +1924,6 @@ const els = {
   defaultPresetInput: document.querySelector("#defaultPresetInput"),
   memoryEnabledInput: document.querySelector("#memoryEnabledInput"),
   thinkingToggle: document.querySelector("#thinkingToggle"),
-  webAccessToggle: document.querySelector("#webAccessToggle"),
   languageInput: document.querySelector("#languageInput"),
   answerLanguageInput: document.querySelector("#answerLanguageInput"),
   translationStyleInput: document.querySelector("#translationStyleInput"),
@@ -2247,7 +2237,6 @@ function getActiveConfig() {
     defaultPresetId: config.defaultPresetId || "",
     memoryEnabled: config.memoryEnabled !== false,
     thinkingEnabled: Boolean(state.settings.thinkingEnabled),
-    webAccessEnabled: Boolean(state.settings.webAccessEnabled),
     language: normalizeLanguage(state.settings.language),
     answerLanguage: normalizeLanguage(state.settings.answerLanguage),
     translationLanguage: normalizeLanguage(state.settings.translationLanguage)
@@ -2360,7 +2349,6 @@ function syncSettingsToForm() {
   els.defaultPresetInput.value = config.defaultPresetId || "";
   els.memoryEnabledInput.checked = config.memoryEnabled;
   syncThinkingToggle();
-  syncWebAccessToggle();
   els.languageInput.value = normalizeLanguage(state.settings.language);
   els.answerLanguageInput.value = normalizeLanguage(state.settings.answerLanguage);
   els.translationStyleInput.value = TRANSLATION_STYLES.includes(state.settings.translationStyle)
@@ -2445,7 +2433,6 @@ function applyLanguage() {
   setButtonContent(els.factoryResetSettings, t("factoryResetSettings"), "alertTriangle");
   syncComposerMode();
   syncThinkingToggle();
-  syncWebAccessToggle();
   setButtonContent(els.sendButton, t("send"), "send");
   setButtonContent(els.stopButton, t("stop"), "square");
   els.promptInput.placeholder = t("promptPlaceholder");
@@ -2706,14 +2693,6 @@ function syncComposerMode() {
   els.promptTemplateSelect?.classList.toggle("hidden", mode !== "chat");
   els.translationTargetSelect?.classList.toggle("hidden", mode !== "translate");
   closeCustomSelects();
-}
-
-function syncWebAccessToggle() {
-  if (!els.webAccessToggle) return;
-  const enabled = Boolean(state.settings.webAccessEnabled);
-  els.webAccessToggle.classList.toggle("active", enabled);
-  els.webAccessToggle.setAttribute("aria-pressed", String(enabled));
-  setIconButtonContent(els.webAccessToggle, t("webAccessMode"), "globe");
 }
 
 function syncThinkingToggle() {
@@ -3935,7 +3914,6 @@ function persistCurrentProviderFields() {
   state.settings.defaultPresetId = els.defaultPresetInput.value || "";
   state.settings.memoryEnabled = Boolean(els.memoryEnabledInput.checked);
   state.settings.thinkingEnabled = Boolean(state.settings.thinkingEnabled);
-  state.settings.webAccessEnabled = Boolean(state.settings.webAccessEnabled);
   state.settings.language = normalizeLanguage(els.languageInput.value);
   state.settings.answerLanguage = normalizeLanguage(els.answerLanguageInput.value);
   state.settings.translationStyle = TRANSLATION_STYLES.includes(els.translationStyleInput.value)
@@ -5235,13 +5213,6 @@ els.promptInput.addEventListener("compositionend", () => {
 
 els.thinkingToggle.addEventListener("click", async () => {
   state.settings.thinkingEnabled = !state.settings.thinkingEnabled;
-  await saveSettings();
-  render();
-  els.promptInput.focus();
-});
-
-els.webAccessToggle?.addEventListener("click", async () => {
-  state.settings.webAccessEnabled = !state.settings.webAccessEnabled;
   await saveSettings();
   render();
   els.promptInput.focus();
