@@ -281,9 +281,7 @@
             <button id="scrollToBottom" class="scroll-to-bottom hidden" type="button" aria-label="回到最新消息">
               <span class="icon-slot" data-icon="chevronDown" aria-hidden="true"></span>
             </button>
-            <input id="attachmentInput" class="visually-hidden" type="file" multiple accept=".txt,.md,.json,.csv,.html,.htm,.css,.js,.ts,.jsx,.tsx,.py,.xml,.yaml,.yml,text/plain,text/markdown,application/json,text/csv,text/html,text/css,text/javascript,application/xml,text/xml">
             <textarea id="promptInput" rows="3" placeholder="输入问题，Enter 发送，Shift+Enter 换行"></textarea>
-            <div id="attachmentTray" class="attachment-tray hidden" aria-live="polite"></div>
             <div class="composer-actions">
               <select id="toolbarModelSelect" aria-label="当前模型">
                 <option value="">未配置</option>
@@ -310,16 +308,7 @@
                   <span class="icon-slot" data-icon="brain" aria-hidden="true"></span>
                   <span class="visually-hidden">思考</span>
                 </button>
-                <div id="composerSubmitGroup" class="composer-submit-group">
-                  <button id="uploadButton" class="composer-upload-button" type="button" aria-label="上传文件">
-                    <span class="icon-slot" data-icon="upload" aria-hidden="true"></span>
-                    <span class="visually-hidden">上传文件</span>
-                  </button>
-                  <button id="sendButton" class="composer-send-button" type="submit" aria-label="发送">
-                    <span class="icon-slot" data-icon="send" aria-hidden="true"></span>
-                    <span class="visually-hidden">发送</span>
-                  </button>
-                </div>
+                <button id="sendButton" type="submit">发送</button>
                 <button id="stopButton" class="danger hidden" type="button">停止</button>
               </div>
             </div>

@@ -2638,69 +2638,6 @@ select:focus {
   resize: none;
 }
 
-.composer-box:has(.attachment-tray:not(.hidden)) textarea {
-  padding-bottom: calc(var(--composer-input-action-space) + 34px);
-}
-
-.attachment-tray {
-  position: absolute;
-  right: var(--composer-action-inset);
-  bottom: calc(var(--composer-action-inset) + var(--compact-control-height) + var(--space-sm));
-  left: var(--composer-action-inset);
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-xs);
-  pointer-events: auto;
-}
-
-.attachment-chip {
-  display: inline-flex;
-  align-items: center;
-  max-width: min(260px, 100%);
-  min-height: 26px;
-  padding: 0 4px 0 var(--space-sm);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  color: var(--color-secondary);
-  background: color-mix(in srgb, var(--scheme-input-surface) 86%, var(--color-surface-muted));
-  font-family: var(--font-label);
-  font-size: 0.6875rem;
-  font-weight: 500;
-}
-
-.attachment-chip-label {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.attachment-remove {
-  display: inline-grid;
-  place-items: center;
-  flex: 0 0 22px;
-  width: 22px;
-  height: 22px;
-  min-height: 22px;
-  margin-left: 2px;
-  padding: 0;
-  border: 0;
-  border-radius: var(--radius-full);
-  color: var(--color-secondary);
-  background: transparent;
-}
-
-.attachment-remove:hover,
-.attachment-remove:focus-visible {
-  color: var(--color-primary);
-  background: var(--color-surface-muted);
-}
-
-.attachment-remove .app-icon {
-  width: 13px;
-  height: 13px;
-}
-
 .composer-actions {
   position: absolute;
   right: var(--composer-action-inset);
@@ -2791,67 +2728,15 @@ select:focus {
   border-radius: var(--radius-full);
 }
 
-.composer-submit-group {
-  display: inline-flex;
-  align-items: stretch;
-  height: var(--compact-control-height);
-  min-height: var(--compact-control-height);
-  overflow: visible;
-  border: 1px solid var(--color-green);
-  border-radius: var(--radius-full);
-  background: var(--color-green);
-  pointer-events: auto;
-}
-
-.composer-submit-group button {
-  display: inline-grid;
-  place-items: center;
-  height: calc(var(--compact-control-height) - 2px);
-  min-height: calc(var(--compact-control-height) - 2px);
-  padding: 0;
-  border: 0;
-  color: var(--color-surface);
-  background: var(--color-green);
-  border-radius: 0;
-}
-
-.composer-submit-group button:first-child {
-  border-radius: var(--radius-full) 0 0 var(--radius-full);
-}
-
-.composer-submit-group button:last-child {
-  border-radius: 0 var(--radius-full) var(--radius-full) 0;
-}
-
-.composer-upload-button {
-  width: 34px;
-  min-width: 34px;
-  border-right: 1px solid color-mix(in srgb, var(--color-surface) 28%, transparent) !important;
-}
-
-.composer-send-button {
-  width: 46px;
-  min-width: 46px !important;
-}
-
-.composer-submit-group .app-icon {
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
-}
-
-.composer-submit-group:hover,
-.composer-submit-group:focus-within {
-  border-color: var(--color-green-hover);
-  background: var(--color-green-hover);
-}
-
-.composer-submit-group button:hover,
-.composer-submit-group button:focus-visible {
-  background: var(--color-green-hover);
-}
-
 #sendButton {
   color: var(--color-surface);
+  background: var(--color-green);
+  border-color: var(--color-green);
+}
+
+#sendButton:hover {
+  background: var(--color-green-hover);
+  border-color: var(--color-green-hover);
 }
 
 @media (max-width: 760px) {

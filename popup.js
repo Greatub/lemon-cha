@@ -444,18 +444,7 @@ const UI_TEXT = {
     newPromptTemplate: "新建预设",
     promptTemplateNameLabel: "模板名称",
     promptTemplateContentLabel: "模板内容",
-    emptyState: "开始对话，选择模型后即可发送。可附加文本、Markdown、JSON、CSV 和常见代码文件。",
-    emptyStateTranslate: "开始翻译，选择目标语言后输入或附加文本文件。支持 Markdown、JSON、CSV 和常见代码文件。",
-    uploadAttachment: "上传文件",
-    sendMessage: "发送",
-    removeAttachment: "移除文件",
-    attachmentDefaultPrompt: "请阅读并处理附件内容。",
-    attachmentTooLarge: "{name} 超过 200KB，暂不支持。",
-    attachmentTotalTooLarge: "附件总大小超过 400KB。",
-    attachmentUnsupported: "{name} 暂不支持。当前支持：{types}。",
-    attachmentLimitReached: "最多可同时附加 {count} 个文件。",
-    attachmentReadFailed: "读取文件失败：{name}",
-    attachmentTypeHint: "支持文本、Markdown、JSON、CSV、HTML、CSS、JS、TS、Python、XML、YAML。",
+    emptyState: "开始一个新对话，或在设置中选择 DeepSeek、OpenAI、通义千问、Kimi 等预设接口。",
     thinking: "模型正在思考",
     unconfigured: "未配置",
     selectedModelMissing: "未选择模型",
@@ -645,18 +634,7 @@ const UI_TEXT = {
     newPromptTemplate: "New Preset",
     promptTemplateNameLabel: "Template Name",
     promptTemplateContentLabel: "Template Content",
-    emptyState: "Start chatting after choosing a model. You can attach text, Markdown, JSON, CSV, and common code files.",
-    emptyStateTranslate: "Start translating after choosing a target language. You can type or attach text, Markdown, JSON, CSV, and common code files.",
-    uploadAttachment: "Upload file",
-    sendMessage: "Send",
-    removeAttachment: "Remove file",
-    attachmentDefaultPrompt: "Please read and process the attached file content.",
-    attachmentTooLarge: "{name} is over 200KB and is not supported yet.",
-    attachmentTotalTooLarge: "Attached files exceed the 400KB total limit.",
-    attachmentUnsupported: "{name} is not supported. Supported now: {types}.",
-    attachmentLimitReached: "Attach up to {count} files at a time.",
-    attachmentReadFailed: "Could not read file: {name}",
-    attachmentTypeHint: "Supports text, Markdown, JSON, CSV, HTML, CSS, JS, TS, Python, XML, and YAML.",
+    emptyState: "Start a new chat, or choose a preset such as DeepSeek, OpenAI, Qwen, or Kimi in settings.",
     thinking: "Model is thinking",
     unconfigured: "Not configured",
     selectedModelMissing: "No model selected",
@@ -1909,31 +1887,8 @@ const state = {
   },
   promptTemplateDirty: false,
   lastPromptTemplateManageValue: "",
-  composerMode: "chat",
-  attachments: []
+  composerMode: "chat"
 };
-
-const ATTACHMENT_TYPES = {
-  txt: { label: "Plain text", mime: "text/plain", fence: "text" },
-  md: { label: "Markdown", mime: "text/markdown", fence: "markdown" },
-  json: { label: "JSON", mime: "application/json", fence: "json" },
-  csv: { label: "CSV", mime: "text/csv", fence: "csv" },
-  html: { label: "HTML", mime: "text/html", fence: "html" },
-  htm: { label: "HTML", mime: "text/html", fence: "html" },
-  css: { label: "CSS", mime: "text/css", fence: "css" },
-  js: { label: "JavaScript", mime: "text/javascript", fence: "javascript" },
-  jsx: { label: "JavaScript JSX", mime: "text/javascript", fence: "jsx" },
-  ts: { label: "TypeScript", mime: "text/typescript", fence: "typescript" },
-  tsx: { label: "TypeScript TSX", mime: "text/typescript", fence: "tsx" },
-  py: { label: "Python", mime: "text/x-python", fence: "python" },
-  xml: { label: "XML", mime: "application/xml", fence: "xml" },
-  yaml: { label: "YAML", mime: "application/x-yaml", fence: "yaml" },
-  yml: { label: "YAML", mime: "application/x-yaml", fence: "yaml" }
-};
-const ATTACHMENT_ACCEPT = Object.keys(ATTACHMENT_TYPES).map((ext) => `.${ext}`).join(", ");
-const MAX_ATTACHMENT_FILES = 4;
-const MAX_ATTACHMENT_BYTES = 200 * 1024;
-const MAX_TOTAL_ATTACHMENT_BYTES = 400 * 1024;
 
 const els = {
   workspace: document.querySelector(".workspace"),
@@ -2004,11 +1959,7 @@ const els = {
   savePromptTemplate: document.querySelector("#savePromptTemplate"),
   savePromptTemplateAs: document.querySelector("#savePromptTemplateAs"),
   deletePromptTemplate: document.querySelector("#deletePromptTemplate"),
-  attachmentInput: document.querySelector("#attachmentInput"),
-  attachmentTray: document.querySelector("#attachmentTray"),
-  uploadButton: document.querySelector("#uploadButton"),
   promptInput: document.querySelector("#promptInput"),
-  composerSubmitGroup: document.querySelector("#composerSubmitGroup"),
   sendButton: document.querySelector("#sendButton"),
   stopButton: document.querySelector("#stopButton")
 };
@@ -2482,11 +2433,9 @@ function applyLanguage() {
   setButtonContent(els.factoryResetSettings, t("factoryResetSettings"), "alertTriangle");
   syncComposerMode();
   syncThinkingToggle();
-  setIconButtonContent(els.uploadButton, t("uploadAttachment"), "upload");
-  setIconButtonContent(els.sendButton, t("sendMessage"), "send");
+  setButtonContent(els.sendButton, t("send"), "send");
   setButtonContent(els.stopButton, t("stop"), "square");
   els.promptInput.placeholder = t("promptPlaceholder");
-  renderAttachmentTray();
   els.promptTemplateSelect?.setAttribute("aria-label", t("promptPresetAria"));
   els.translationTargetSelect?.setAttribute("aria-label", t("targetLanguageAria"));
   els.toolbarModelSelect?.setAttribute("aria-label", t("currentModelAria"));
@@ -2704,9 +2653,8 @@ function render() {
   renderMessages();
   syncCustomSelects();
   els.sendButton.disabled = state.sending;
-  els.uploadButton.disabled = state.sending;
   els.promptInput.disabled = state.sending;
-  els.composerSubmitGroup.classList.toggle("hidden", state.sending);
+  els.sendButton.classList.toggle("hidden", state.sending);
   els.stopButton.classList.toggle("hidden", !state.sending);
 }
 
@@ -2753,143 +2701,6 @@ function syncThinkingToggle() {
   els.thinkingToggle.classList.toggle("active", enabled);
   els.thinkingToggle.setAttribute("aria-pressed", String(enabled));
   setIconButtonContent(els.thinkingToggle, t("thinkingMode"), "brain");
-}
-
-function attachmentExtension(fileName) {
-  const match = String(fileName || "").toLowerCase().match(/\.([a-z0-9]+)$/);
-  return match?.[1] || "";
-}
-
-function attachmentTypeFor(file) {
-  return ATTACHMENT_TYPES[attachmentExtension(file.name)] || null;
-}
-
-function formatBytes(bytes) {
-  if (bytes >= 1024 * 1024) {
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  }
-  return `${Math.max(1, Math.round(bytes / 1024))} KB`;
-}
-
-async function addAttachmentFiles(files) {
-  const incoming = [...files];
-  if (!incoming.length) return;
-
-  for (const file of incoming) {
-    if (state.attachments.length >= MAX_ATTACHMENT_FILES) {
-      pushSystemMessage(t("attachmentLimitReached", { count: MAX_ATTACHMENT_FILES }));
-      break;
-    }
-
-    const type = attachmentTypeFor(file);
-    if (!type) {
-      pushSystemMessage(t("attachmentUnsupported", { name: file.name, types: ATTACHMENT_ACCEPT }));
-      continue;
-    }
-
-    if (file.size > MAX_ATTACHMENT_BYTES) {
-      pushSystemMessage(t("attachmentTooLarge", { name: file.name }));
-      continue;
-    }
-
-    const nextTotal = state.attachments.reduce((sum, item) => sum + item.size, 0) + file.size;
-    if (nextTotal > MAX_TOTAL_ATTACHMENT_BYTES) {
-      pushSystemMessage(t("attachmentTotalTooLarge"));
-      continue;
-    }
-
-    try {
-      state.attachments.push({
-        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-        name: file.name,
-        mime: file.type || type.mime,
-        label: type.label,
-        fence: type.fence,
-        size: file.size,
-        content: await file.text()
-      });
-    } catch (error) {
-      pushSystemMessage(t("attachmentReadFailed", { name: file.name }));
-    }
-  }
-
-  renderAttachmentTray();
-  resizePromptInput({ keepCaretVisible: true });
-}
-
-function removeAttachment(id) {
-  state.attachments = state.attachments.filter((attachment) => attachment.id !== id);
-  renderAttachmentTray();
-  resizePromptInput({ keepCaretVisible: true });
-  els.promptInput.focus();
-}
-
-function clearAttachments() {
-  state.attachments = [];
-  if (els.attachmentInput) {
-    els.attachmentInput.value = "";
-  }
-  renderAttachmentTray();
-}
-
-function renderAttachmentTray() {
-  if (!els.attachmentTray) return;
-  els.attachmentTray.innerHTML = "";
-  els.attachmentTray.classList.toggle("hidden", state.attachments.length === 0);
-
-  if (!state.attachments.length) return;
-
-  for (const attachment of state.attachments) {
-    const chip = document.createElement("span");
-    chip.className = "attachment-chip";
-
-    const label = document.createElement("span");
-    label.className = "attachment-chip-label";
-    label.textContent = `${attachment.name} · ${attachment.label} · ${formatBytes(attachment.size)}`;
-
-    const remove = document.createElement("button");
-    remove.className = "attachment-remove";
-    remove.type = "button";
-    remove.dataset.attachmentId = attachment.id;
-    setIconButtonContent(remove, t("removeAttachment"), "x");
-
-    chip.append(label, remove);
-    els.attachmentTray.append(chip);
-  }
-}
-
-function formatPromptWithAttachments(prompt, attachments = state.attachments) {
-  const intro = String(prompt || t("attachmentDefaultPrompt")).trim();
-  if (!attachments.length) return intro;
-
-  const parts = [
-    intro,
-    "",
-    "Attached files. Use the declared file type and content below when answering."
-  ];
-
-  for (const attachment of attachments) {
-    parts.push(
-      "",
-      `File name: ${attachment.name}`,
-      `File type: ${attachment.label}`,
-      `MIME: ${attachment.mime}`,
-      `Size: ${formatBytes(attachment.size)}`,
-      "",
-      `\`\`\`${attachment.fence}`,
-      attachment.content,
-      "```"
-    );
-  }
-
-  return parts.join("\n");
-}
-
-function formatDisplayPromptWithAttachments(prompt, attachments = state.attachments) {
-  const intro = String(prompt || t("attachmentDefaultPrompt")).trim();
-  if (!attachments.length) return intro;
-  const summary = attachments.map((attachment) => `- ${attachment.name} · ${attachment.label} · ${formatBytes(attachment.size)}`).join("\n");
-  return `${intro}\n\nAttached files:\n${summary}`;
 }
 
 function enhanceSelects() {
@@ -3567,7 +3378,7 @@ function renderMessages() {
   if (!visibleMessages.length) {
     const empty = document.createElement("div");
     empty.className = "empty-state";
-    empty.textContent = state.composerMode === "translate" ? t("emptyStateTranslate") : t("emptyState");
+    empty.textContent = t("emptyState");
     els.messages.append(empty);
     updateScrollToBottomButton();
     return;
@@ -4163,14 +3974,13 @@ async function submitPrompt(prompt, options = {}) {
   const conversation = getActiveConversation();
   const shouldGenerateTitle = conversation.messages.length === 0 || conversation.title === t("newChatTitle");
   const requestPrompt = options.requestPrompt || prompt;
-  const displayPrompt = options.displayPrompt || prompt;
 
   if (!config.endpoint || !config.model) {
     pushSystemMessage(t("missingEndpointModel"));
-    return false;
+    return;
   }
 
-  conversation.messages.push({ role: "user", content: displayPrompt });
+  conversation.messages.push({ role: "user", content: prompt });
   conversation.title = titleFromPrompt(conversation, prompt);
   conversation.updatedAt = Date.now();
   state.sending = true;
@@ -4182,7 +3992,6 @@ async function submitPrompt(prompt, options = {}) {
   if (shouldGenerateTitle) {
     generateConversationTitle(conversation, config);
   }
-  return true;
 }
 
 function buildTranslationRequestPrompt(input) {
@@ -5082,7 +4891,6 @@ els.newChat.addEventListener("click", async () => {
   await saveConversations();
   render();
   clearComposerInput({ focus: true });
-  clearAttachments();
 });
 
 els.sidebarTranslateTool?.addEventListener("click", async () => {
@@ -5099,7 +4907,6 @@ els.sidebarTranslateTool?.addEventListener("click", async () => {
   await saveConversations();
   render();
   clearComposerInput({ focus: true });
-  clearAttachments();
 });
 
 els.conversationSearchToggle?.addEventListener("click", () => {
@@ -5369,38 +5176,16 @@ els.conversationList.addEventListener("drop", async (event) => {
 els.chatForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const prompt = els.promptInput.value.trim();
-  if ((!prompt && !state.attachments.length) || state.sending) return;
-
-  const promptForModel = formatPromptWithAttachments(prompt);
-  const displayPrompt = formatDisplayPromptWithAttachments(prompt);
+  if (!prompt || state.sending) return;
   const requestPrompt = state.composerMode === "translate"
-    ? buildTranslationRequestPrompt(promptForModel)
-    : promptForModel;
-  const submitted = await submitPrompt(prompt || t("attachmentDefaultPrompt"), { requestPrompt, displayPrompt });
-  if (!submitted) return;
-
+    ? buildTranslationRequestPrompt(prompt)
+    : prompt;
   els.promptInput.value = "";
-  clearAttachments();
   resizePromptInput();
+  await submitPrompt(prompt, { requestPrompt });
 });
 
 els.composerModeToggle?.addEventListener("click", toggleComposerMode);
-
-els.uploadButton?.addEventListener("click", () => {
-  els.attachmentInput?.click();
-});
-
-els.attachmentInput?.addEventListener("change", async () => {
-  await addAttachmentFiles(els.attachmentInput.files || []);
-  els.attachmentInput.value = "";
-  els.promptInput.focus();
-});
-
-els.attachmentTray?.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-attachment-id]");
-  if (!button) return;
-  removeAttachment(button.dataset.attachmentId);
-});
 
 els.promptInput.addEventListener("keydown", (event) => {
   if (event.isComposing || promptInputComposing || event.keyCode === 229) {
