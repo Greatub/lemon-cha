@@ -17,6 +17,7 @@ const BG_TEXT = {
     modelAvailable: "{model} 可用",
     titlePrompt: "请为以上对话生成一个简洁标题。只输出标题，不要解释，最多 12 个中文字符或 8 个英文单词。",
     thinkingPrompt: "请在回答前进行充分分析，但只输出结论、必要推理摘要和可执行建议，不要输出完整隐藏思维过程。",
+    webAccessPrompt: "如果当前模型或服务支持联网搜索或网页浏览，请在需要实时信息时使用该能力；有来源时请给出来源，无法联网时请明确说明。不要编造实时数据。",
     nonJson: "接口返回的不是 JSON：{text}",
     ollamaModelNotFound: "Ollama 模型不存在：{message}。请点击“测试 Ollama”，从本地模型列表里选择已安装模型后保存。",
     custom404: "自定义 API 返回 404，当前地址不是聊天接口：{url}。OpenAI 兼容服务通常需要 /v1/chat/completions；如果你的服务是 Ollama 格式，请在设置里把接口格式改为 Ollama /api/chat。",
@@ -38,6 +39,7 @@ const BG_TEXT = {
     modelAvailable: "{model} available",
     titlePrompt: "Generate a concise title for the conversation above. Output only the title, no explanation. Maximum 8 English words or 12 Chinese characters.",
     thinkingPrompt: "Analyze carefully before answering, but only output the conclusion, a necessary reasoning summary, and actionable suggestions. Do not reveal hidden chain-of-thought.",
+    webAccessPrompt: "If the current model or service supports web search or browsing, use it when up-to-date information is needed. Cite or name sources when available, and clearly say when web access is unavailable. Do not invent current facts.",
     nonJson: "The API did not return JSON: {text}",
     ollamaModelNotFound: "Ollama model not found: {message}. Click \"Test Ollama\", choose an installed local model, then save.",
     custom404: "Custom API returned 404. The current URL is not a chat endpoint: {url}. OpenAI-compatible services usually need /v1/chat/completions. If this is an Ollama-format service, change API Format to Ollama /api/chat in settings.",
@@ -62,6 +64,7 @@ Object.assign(BG_TEXT, {
     modelAvailable: "{model} 可用",
     titlePrompt: "請為以上對話生成一個簡潔標題。只輸出標題，不要解釋，最多 12 個中文字元或 8 個英文單字。",
     thinkingPrompt: "請在回答前充分分析，但只輸出結論、必要推理摘要和可執行建議，不要輸出完整隱藏思維過程。",
+    webAccessPrompt: "如果目前模型或服務支援連網搜尋或網頁瀏覽，請在需要即時資訊時使用該能力；有來源時請列出來源，無法連網時請明確說明。不要編造即時資料。",
     nonJson: "介面回傳的不是 JSON：{text}",
     ollamaModelNotFound: "Ollama 模型不存在：{message}。請點選「測試 Ollama」，從本機模型清單選擇已安裝模型後儲存。",
     custom404: "自訂 API 回傳 404，目前位址不是聊天介面：{url}。OpenAI 相容服務通常需要 /v1/chat/completions；如果你的服務是 Ollama 格式，請在設定中把介面格式改為 Ollama /api/chat。",
@@ -82,6 +85,7 @@ Object.assign(BG_TEXT, {
     modelAvailable: "{model} は利用可能です",
     titlePrompt: "上の会話に短いタイトルを付けてください。タイトルだけを出力し、説明は不要です。最大 8 英単語または 12 中国語文字。",
     thinkingPrompt: "回答前に十分分析してください。ただし出力は結論、必要な推論要約、実行可能な提案だけにし、隠れた思考過程は出力しないでください。",
+    webAccessPrompt: "現在のモデルまたはサービスが Web 検索やブラウズに対応している場合、最新情報が必要なときに使用してください。利用可能なら出典を示し、Web アクセスできない場合は明確に伝えてください。現在の事実を作り上げないでください。",
     nonJson: "API が JSON を返しませんでした: {text}",
     ollamaModelNotFound: "Ollama モデルが見つかりません: {message}。「Ollama をテスト」をクリックし、インストール済みのローカルモデルを選んで保存してください。",
     custom404: "カスタム API が 404 を返しました。現在の URL はチャットエンドポイントではありません: {url}。OpenAI 互換サービスでは通常 /v1/chat/completions が必要です。Ollama 形式のサービスなら、設定で API 形式を Ollama /api/chat に変更してください。",
@@ -102,6 +106,7 @@ Object.assign(BG_TEXT, {
     modelAvailable: "{model} 사용 가능",
     titlePrompt: "위 대화의 간결한 제목을 생성하세요. 제목만 출력하고 설명하지 마세요. 최대 영어 8단어 또는 중국어 12자.",
     thinkingPrompt: "답변 전 충분히 분석하되, 결론, 필요한 추론 요약, 실행 가능한 제안만 출력하세요. 숨겨진 사고 과정은 출력하지 마세요.",
+    webAccessPrompt: "현재 모델이나 서비스가 웹 검색 또는 브라우징을 지원한다면 최신 정보가 필요할 때 사용하세요. 가능하면 출처를 제시하고, 웹 접근이 불가능하면 명확히 말하세요. 최신 사실을 지어내지 마세요.",
     nonJson: "API가 JSON을 반환하지 않았습니다: {text}",
     ollamaModelNotFound: "Ollama 모델을 찾을 수 없습니다: {message}. “Ollama 테스트”를 클릭하고 설치된 로컬 모델을 선택한 뒤 저장하세요.",
     custom404: "사용자 지정 API가 404를 반환했습니다. 현재 URL은 채팅 엔드포인트가 아닙니다: {url}. OpenAI 호환 서비스는 보통 /v1/chat/completions가 필요합니다. Ollama 형식 서비스라면 설정에서 API 형식을 Ollama /api/chat으로 바꾸세요.",
@@ -122,6 +127,7 @@ Object.assign(BG_TEXT, {
     modelAvailable: "{model} disponible",
     titlePrompt: "Génère un titre concis pour la conversation ci-dessus. Réponds uniquement par le titre, sans explication. Maximum 8 mots anglais ou 12 caractères chinois.",
     thinkingPrompt: "Analyse soigneusement avant de répondre, mais n’affiche que la conclusion, un résumé de raisonnement nécessaire et des suggestions actionnables. Ne révèle pas la chaîne de pensée cachée.",
+    webAccessPrompt: "Si le modèle ou service actuel prend en charge la recherche Web ou la navigation, utilise-la lorsque des informations à jour sont nécessaires. Cite les sources si elles sont disponibles et indique clairement si l’accès Web est indisponible. N’invente pas de faits actuels.",
     nonJson: "L’API n’a pas renvoyé de JSON : {text}",
     ollamaModelNotFound: "Modèle Ollama introuvable : {message}. Cliquez sur « Tester Ollama », choisissez un modèle local installé, puis enregistrez.",
     custom404: "L’API personnalisée a renvoyé 404. L’URL actuelle n’est pas un point d’accès de chat : {url}. Les services compatibles OpenAI utilisent généralement /v1/chat/completions. Si le service est au format Ollama, changez le format API en Ollama /api/chat dans les paramètres.",
@@ -142,6 +148,7 @@ Object.assign(BG_TEXT, {
     modelAvailable: "{model} disponible",
     titlePrompt: "Genera un título breve para la conversación anterior. Devuelve solo el título, sin explicación. Máximo 8 palabras en inglés o 12 caracteres chinos.",
     thinkingPrompt: "Analiza con cuidado antes de responder, pero muestra solo la conclusión, un resumen de razonamiento necesario y sugerencias accionables. No reveles razonamiento oculto.",
+    webAccessPrompt: "Si el modelo o servicio actual admite búsqueda web o navegación, úsala cuando haga falta información actualizada. Cita o nombra fuentes cuando estén disponibles e indica claramente si el acceso web no está disponible. No inventes datos actuales.",
     nonJson: "La API no devolvió JSON: {text}",
     ollamaModelNotFound: "Modelo de Ollama no encontrado: {message}. Haz clic en “Probar Ollama”, elige un modelo local instalado y guarda.",
     custom404: "La API personalizada devolvió 404. La URL actual no es un endpoint de chat: {url}. Los servicios compatibles con OpenAI suelen necesitar /v1/chat/completions. Si el servicio usa formato Ollama, cambia el Formato API a Ollama /api/chat en ajustes.",
@@ -162,6 +169,7 @@ Object.assign(BG_TEXT, {
     modelAvailable: "{model} verfügbar",
     titlePrompt: "Erzeuge einen kurzen Titel für die obige Unterhaltung. Gib nur den Titel aus, keine Erklärung. Maximal 8 englische Wörter oder 12 chinesische Zeichen.",
     thinkingPrompt: "Analysiere vor der Antwort sorgfältig, gib aber nur Schlussfolgerung, notwendige Begründungszusammenfassung und umsetzbare Vorschläge aus. Keine verborgene Gedankenkette ausgeben.",
+    webAccessPrompt: "Wenn das aktuelle Modell oder der Dienst Websuche oder Browsing unterstützt, nutze dies, sobald aktuelle Informationen erforderlich sind. Nenne verfügbare Quellen und sage klar, wenn kein Webzugriff möglich ist. Erfinde keine aktuellen Fakten.",
     nonJson: "Die API hat kein JSON zurückgegeben: {text}",
     ollamaModelNotFound: "Ollama-Modell nicht gefunden: {message}. Klicke auf „Ollama testen“, wähle ein installiertes lokales Modell und speichere.",
     custom404: "Benutzerdefinierte API gab 404 zurück. Die aktuelle URL ist kein Chat-Endpunkt: {url}. OpenAI-kompatible Dienste benötigen meist /v1/chat/completions. Wenn dein Dienst Ollama-Format nutzt, stelle in den Einstellungen API-Format auf Ollama /api/chat.",
@@ -325,8 +333,8 @@ async function generateChatTitle(payload) {
   ];
 
   const title = config.apiFormat === "ollama" || config.provider === "ollama"
-    ? await callOllama({ ...config, thinkingEnabled: false }, titlePrompt)
-    : await callCustomApi({ ...config, thinkingEnabled: false, temperature: 0.2 }, titlePrompt);
+    ? await callOllama({ ...config, thinkingEnabled: false, webAccessEnabled: false }, titlePrompt)
+    : await callCustomApi({ ...config, thinkingEnabled: false, webAccessEnabled: false, temperature: 0.2 }, titlePrompt);
 
   return String(title || "").replace(/^["“”']|["“”']$/g, "").trim().slice(0, 40);
 }
@@ -398,6 +406,7 @@ function normalizeConfig(config) {
     maxTokens: Math.max(1, Math.floor(Number(config.maxTokens) || 2048)),
     systemPrompt: String(config.systemPrompt || "").trim(),
     thinkingEnabled: Boolean(config.thinkingEnabled),
+    webAccessEnabled: Boolean(config.webAccessEnabled),
     language: ["zh-CN", "zh-TW", "en-US", "ja-JP", "ko-KR", "fr-FR", "es-ES", "de-DE"].includes(config.language) ? config.language : "zh-CN",
     answerLanguage: String(config.answerLanguage || "").trim(),
     translationLanguage: String(config.translationLanguage || "").trim()
@@ -691,6 +700,13 @@ function prepareMessages(config, messages) {
     prepared.unshift({
       role: "system",
       content: bt(config, "answerLanguagePrompt", { language: answerLanguage })
+    });
+  }
+
+  if (config.webAccessEnabled) {
+    prepared.unshift({
+      role: "system",
+      content: bt(config, "webAccessPrompt")
     });
   }
 

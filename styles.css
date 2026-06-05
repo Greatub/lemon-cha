@@ -2687,11 +2687,14 @@ select:focus {
   margin-left: auto;
 }
 
-#thinkingToggle,
-.composer-actions .composer-mode-button {
+.composer-actions .composer-icon-button {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 var(--compact-control-height);
+  width: var(--compact-control-height);
   height: var(--compact-control-height);
   min-height: var(--compact-control-height);
-  padding: 0 var(--space-sm);
+  padding: 0;
   border-color: var(--color-border);
   border-radius: var(--radius-control);
   color: var(--color-secondary);
@@ -2700,37 +2703,23 @@ select:focus {
   font-weight: 500;
 }
 
-.composer-actions .composer-mode-button {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-}
-
-.composer-actions .composer-mode-button .app-icon {
+.composer-actions .composer-icon-button .app-icon {
   width: var(--icon-size-sm);
   height: var(--icon-size-sm);
 }
 
-#thinkingToggle.active,
-#thinkingToggle[aria-pressed="true"] {
+.composer-actions .composer-icon-button.active,
+.composer-actions .composer-icon-button[aria-pressed="true"] {
   border-color: var(--color-green);
   color: var(--color-primary);
   background: var(--color-green-soft);
 }
 
-#thinkingToggle:hover,
-.composer-actions .composer-mode-button:hover,
-.composer-actions .composer-mode-button:focus-visible {
+.composer-actions .composer-icon-button:hover,
+.composer-actions .composer-icon-button:focus-visible {
   border-color: var(--color-tertiary);
   color: var(--color-on-dark);
   background: var(--color-tertiary);
-}
-
-.composer-actions .composer-mode-button.active,
-.composer-actions .composer-mode-button[aria-pressed="true"] {
-  border-color: var(--color-green);
-  color: var(--color-primary);
-  background: var(--color-green-soft);
 }
 
 #sendButton,

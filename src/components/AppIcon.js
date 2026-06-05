@@ -71,6 +71,12 @@ const APP_ICON_PATHS = {
     '<path d="M12 10v6" />',
     '<path d="M9 13h6" />'
   ],
+  globe: [
+    '<circle cx="12" cy="12" r="10" />',
+    '<path d="M2 12h20" />',
+    '<path d="M12 2a15.3 15.3 0 0 1 0 20" />',
+    '<path d="M12 2a15.3 15.3 0 0 0 0 20" />'
+  ],
   history: [
     '<path d="M3 12a9 9 0 1 0 9-9 9.8 9.8 0 0 0-6.4 2.4L3 8" />',
     '<path d="M3 3v5h5" />',
