@@ -3830,6 +3830,16 @@ function renderToolbarModelOptions(config = getActiveConfig()) {
   const currentValue = toolbarModelValueFor(config);
   const presetGroup = document.createElement("optgroup");
   presetGroup.label = t("modelPreset");
+  const customConfig = getModelConfigForPreset("custom");
+  const customModel = customConfig.model || state.settings.customModel || "";
+  const customOption = document.createElement("option");
+  customOption.value = "preset:custom";
+  customOption.textContent = customModel
+    ? `${t("presetCustom")} · ${customModel}`
+    : t("presetCustom");
+  customOption.selected = customOption.value === currentValue;
+  presetGroup.append(customOption);
+
   if (!currentValue && currentModel) {
     const option = document.createElement("option");
     option.value = `current:${currentModel}`;
@@ -3875,6 +3885,10 @@ function renderToolbarModelOptions(config = getActiveConfig()) {
 function toolbarModelValueFor(config) {
   if (config.apiFormat === "ollama") {
     return config.model ? `model:${config.model}` : `preset:ollama-proxy`;
+  }
+
+  if (state.settings.preset === "custom") {
+    return "preset:custom";
   }
 
   const preset = MODEL_PRESETS[state.settings.preset];
@@ -4565,7 +4579,7 @@ els.toolbarModelSelect.addEventListener("change", async () => {
     return;
   }
 
-  if (kind === "preset" && MODEL_PRESETS[value]) {
+  if (kind === "preset" && (value === "custom" || MODEL_PRESETS[value])) {
     applyPreset(value);
     if (value === "ollama-proxy") {
       await loadOllamaModels();
