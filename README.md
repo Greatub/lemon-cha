@@ -1,6 +1,8 @@
 # lemon cha Browser Extension
 
-[简体中文](README.zh-CN.md)
+**Primary documentation: English** · [简体中文](README.zh-CN.md)
+
+English is the source of truth for project documentation and release notes. The Chinese README is a supplementary translation; update it when user-facing behavior changes.
 
 lemon cha is a lightweight Chrome and Firefox extension that opens a dedicated AI chat tab for two kinds of model providers:
 
