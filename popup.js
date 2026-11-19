@@ -2582,7 +2582,7 @@ function applyLanguage() {
   setIconOnly(els.sidebarToggle, "panelLeft");
   if (extensionApi.sidePanel?.open) {
     setIconButtonContent(els.workspaceSurfaceToggle,
-      t(isSidePanel ? "openWorkspaceTab" : "openSidePanel"), isSidePanel ? "monitor" : "panelLeft");
+      t(isSidePanel ? "openWorkspaceTab" : "openSidePanel"), isSidePanel ? "monitor" : "panelRight");
   }
   syncSidebarActionTooltips();
   els.conversationSearchInput.placeholder = t("searchConversationsPlaceholder");
