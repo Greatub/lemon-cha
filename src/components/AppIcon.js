@@ -98,6 +98,10 @@ const APP_ICON_PATHS = {
     '<rect width="18" height="18" x="3" y="3" rx="2" />',
     '<path d="M9 3v18" />'
   ],
+  panelRight: [
+    '<rect width="18" height="18" x="3" y="3" rx="2" />',
+    '<path d="M15 3v18" />'
+  ],
   messageCircle: [
     '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />'
   ],
