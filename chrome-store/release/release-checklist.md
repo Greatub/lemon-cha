@@ -2,17 +2,22 @@
 
 ## Build and package
 
-- [ ] `npm run lint`
+- [ ] `npm run lint:chrome`
 - [ ] `npm run typecheck`
-- [ ] `npm run build`
+- [ ] `npm test`
+- [ ] `npm run build:chrome`
 - [ ] Load `dist/lemon-cha` in `chrome://extensions/`
-- [ ] Package `dist/lemon-cha-extension-0.2.4.zip`
-- [ ] Run `unzip -t dist/lemon-cha-extension-0.2.4.zip`
+- [ ] Package `dist/lemon-cha-extension-0.2.5.zip`
+- [ ] Run `unzip -t dist/lemon-cha-extension-0.2.5.zip`
 
 ## Functional smoke test
 
 - [ ] Open the dedicated chat page from the extension action.
+- [ ] Click the extension action again and confirm the existing workspace is focused.
+- [ ] Open the Chrome side panel from the workspace. Check chat, history, and model settings at narrow width.
+- [ ] Make concurrent changes in the workspace and side panel and verify the history is consistent in both views.
 - [ ] Configure an OpenAI-compatible API preset.
+- [ ] Test granting, denying and revoking access to a custom API host in Chrome.
 - [ ] Configure and test a local Ollama model if available.
 - [ ] Send a prompt and verify streaming output.
 - [ ] Apply a prompt preset and verify wildcard selection behavior.
@@ -39,7 +44,6 @@
 ## Packaging command
 
 ```bash
-npm run build
-cd dist
-zip -r -X lemon-cha-extension-0.2.4.zip lemon-cha
+npm run build:chrome
+(cd dist/lemon-cha && zip -r -X ../lemon-cha-extension-0.2.5.zip .)
 ```

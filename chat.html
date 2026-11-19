@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>lemon cha</title>
+    <link rel="icon" href="assets/icon-32.png">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
@@ -63,6 +64,7 @@
         <header class="chat-toolbar">
           <div class="chat-status">
             <h2 id="chatTitle" class="chat-title">新对话</h2>
+            <button id="workspaceSurfaceToggle" class="icon-button hidden" type="button"></button>
           </div>
         </header>
 
@@ -72,6 +74,7 @@
               <div>
                 <h2 id="settingsTitle" data-i18n="settingsTitle">设置</h2>
               </div>
+              <button id="closeSettings" class="secondary" type="button">返回对话</button>
             </div>
             <div class="settings-body">
               <div class="settings-tabs" role="tablist" aria-label="设置分类">
@@ -320,6 +323,7 @@
       <div id="toast" class="toast hidden" role="status"></div>
     </div>
     <script src="src/components/AppIcon.js"></script>
+    <script src="src/workspace-storage.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

@@ -14,14 +14,13 @@ This directory contains the store-facing materials for publishing **lemon cha**.
 Build the extension and package it from the repository root:
 
 ```bash
-npm run build
-cd dist
-zip -r -X lemon-cha-extension-0.2.4.zip lemon-cha
+npm run build:chrome
+(cd dist/lemon-cha && zip -r -X ../lemon-cha-extension-0.2.5.zip .)
 ```
 
 Expected upload file:
 
-`dist/lemon-cha-extension-0.2.4.zip`
+`dist/lemon-cha-extension-0.2.5.zip`
 
 ## Before submitting
 

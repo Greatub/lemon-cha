@@ -15,7 +15,7 @@
 2. 开启右上角的“开发者模式”。
 3. 点击“加载已解压的扩展程序”。
 4. 运行 `npm run build:chrome` 后选择 `dist/lemon-cha`。
-5. 点击浏览器工具栏里的扩展图标，插件会打开一个独立标签页开始使用。
+5. 点击浏览器工具栏中的扩展图标，打开或聚焦 lemon cha 工作台。点击工作台标题旁的侧边栏按钮，可并排浏览网页和对话。
 
 ## 在 Firefox 本地安装
 
@@ -57,6 +57,8 @@ Firefox 使用同一套运行时代码，但构建时会生成 Firefox 专用 ma
 如果接口格式选择 OpenAI Chat Completions，并且你只填写了域名或 `/v1`，插件会自动补全到 `/v1/chat/completions`。如果服务商使用自己的路径，请填写完整聊天接口地址。
 
 内置预设包括 DeepSeek、OpenAI、通义千问 DashScope、Kimi、SiliconFlow、OpenRouter、Groq 和 Ollama 本地模型。
+
+在 Chrome 中保存内置名单之外的接口时，请在浏览器提示中允许访问该站点。撤销授权后，可以再次保存接口地址来恢复访问。
 
 ## 对话管理
 

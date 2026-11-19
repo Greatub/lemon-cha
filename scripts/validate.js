@@ -10,7 +10,8 @@ const runtimeFiles = [
   "background.js",
   "popup.js",
   "local-ollama-proxy.js",
-  "src/components/AppIcon.js"
+  "src/components/AppIcon.js",
+  "src/workspace-storage.js"
 ];
 
 const requiredExtensionFiles = [
@@ -87,6 +88,8 @@ function createManifestForTarget(baseManifest, browserTarget) {
   const manifest = structuredClone(baseManifest);
 
   if (browserTarget === "firefox") {
+    delete manifest.side_panel;
+    manifest.permissions = manifest.permissions.filter((permission) => permission !== "sidePanel");
     manifest.background = {
       scripts: [baseManifest.background?.service_worker].filter(Boolean)
     };
@@ -128,6 +131,7 @@ function validateManifest(browserTarget) {
     } else {
       checkFileExists(background);
     }
+    if (manifest.side_panel?.default_path) checkFileExists(manifest.side_panel.default_path);
   }
 
   if (browserTarget === "firefox") {

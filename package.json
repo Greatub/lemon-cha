@@ -1,6 +1,6 @@
 {
   "name": "lemon-cha",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "private": true,
   "description": "Lightweight browser AI chat workspace with custom LLM APIs, local Ollama, translation, and chat history.",
   "scripts": {
@@ -11,7 +11,8 @@
     "build": "node scripts/build-extension.js",
     "build:chrome": "node scripts/build-extension.js --target=chrome",
     "build:firefox": "node scripts/build-extension.js --target=firefox",
-    "check": "npm run lint && npm run typecheck && npm run build"
+    "test": "node --test",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build"
   },
   "engines": {
     "node": ">=18"

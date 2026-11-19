@@ -51,6 +51,13 @@ const MODEL_PRESETS = {
 };
 
 const extensionApi = globalThis.browser || globalThis.chrome;
+const workspaceStorage = WorkspaceStorage.create(extensionApi.storage.local, navigator.locks);
+const SHARED_WORKSPACE_KEYS = ["settings", "conversations", "conversationFolders", "promptTemplates", "activeConversationId"];
+let sharedWorkspaceReady = false;
+let sharedWorkspaceRefreshId = 0;
+let failedHistoryWrite = false;
+let workspaceTab = null;
+let isSidePanel = false;
 
 const DIRECT_OLLAMA_ENDPOINT = "http://127.0.0.1:11434/api/chat";
 const LEGACY_OLLAMA_PROXY_ENDPOINT = "http://127.0.0.1:8787/api/chat";
@@ -406,8 +413,15 @@ const UI_TEXT = {
     optional: "可留空",
     historyLimit: "最大上下文轮数",
     thinkingMode: "思考",
+    openSidePanel: "打开侧边栏",
+    openWorkspaceTab: "打开工作台",
+    workspaceConflict: "对话已在另一窗口中更改，请查看会话列表后重试。",
+    workspaceStorageFailed: "无法保存或读取会话记录。",
+    endpointInvalid: "请输入有效的 HTTP 或 HTTPS 接口地址。",
+    endpointPermissionRequired: "请允许访问该接口域名后再保存。",
     interfaceLanguage: "界面语言",
     answerLanguage: "默认回答语言",
+    translationLanguage: "默认翻译目标语言",
     translationStyle: "翻译工具风格",
     translationStyleBalanced: "自然准确",
     translationStyleFaithful: "忠实原文",
@@ -596,8 +610,15 @@ const UI_TEXT = {
     optional: "Optional",
     historyLimit: "Context Turns",
     thinkingMode: "Think",
+    openSidePanel: "Open side panel",
+    openWorkspaceTab: "Open workspace tab",
+    workspaceConflict: "This conversation changed in another window. Check your conversation list and try again.",
+    workspaceStorageFailed: "Could not save or read conversation history.",
+    endpointInvalid: "Enter a valid HTTP or HTTPS endpoint.",
+    endpointPermissionRequired: "Allow access to this endpoint’s host before saving.",
     interfaceLanguage: "Interface Language",
     answerLanguage: "Default Answer Language",
+    translationLanguage: "Default Translation Language",
     translationStyle: "Translation Tool Style",
     translationStyleBalanced: "Natural & Accurate",
     translationStyleFaithful: "Faithful",
@@ -785,6 +806,12 @@ Object.assign(UI_TEXT, {
     optional: "可留空",
     historyLimit: "最大上下文輪數",
     thinkingMode: "思考",
+    openSidePanel: "開啟側邊欄",
+    openWorkspaceTab: "開啟工作台",
+    workspaceConflict: "對話已在另一個視窗中變更，請查看對話清單後再試一次。",
+    workspaceStorageFailed: "無法儲存或讀取對話記錄。",
+    endpointInvalid: "請輸入有效的 HTTP 或 HTTPS 介面位址。",
+    endpointPermissionRequired: "請允許存取此介面網域後再儲存。",
     interfaceLanguage: "介面語言",
     answerLanguage: "預設回答語言",
     translationLanguage: "預設翻譯目標語言",
@@ -967,6 +994,12 @@ Object.assign(UI_TEXT, {
     optional: "任意",
     historyLimit: "コンテキストターン数",
     thinkingMode: "思考",
+    openSidePanel: "サイドパネルを開く",
+    openWorkspaceTab: "ワークスペースを開く",
+    workspaceConflict: "別のウィンドウで会話が変更されました。一覧を確認してからやり直してください。",
+    workspaceStorageFailed: "会話履歴を保存または読み込めませんでした。",
+    endpointInvalid: "有効な HTTP または HTTPS エンドポイントを入力してください。",
+    endpointPermissionRequired: "保存するには、このエンドポイントのホストへのアクセスを許可してください。",
     interfaceLanguage: "画面言語",
     answerLanguage: "既定の回答言語",
     translationLanguage: "既定の翻訳先言語",
@@ -1149,6 +1182,12 @@ Object.assign(UI_TEXT, {
     optional: "선택 사항",
     historyLimit: "컨텍스트 턴 수",
     thinkingMode: "생각",
+    openSidePanel: "사이드 패널 열기",
+    openWorkspaceTab: "작업 공간 탭 열기",
+    workspaceConflict: "다른 창에서 대화가 변경됐습니다. 대화 목록을 확인한 뒤 다시 시도하세요.",
+    workspaceStorageFailed: "대화 기록을 저장하거나 읽을 수 없습니다.",
+    endpointInvalid: "유효한 HTTP 또는 HTTPS 엔드포인트를 입력하세요.",
+    endpointPermissionRequired: "저장하려면 이 엔드포인트의 호스트에 대한 접근을 허용하세요.",
     interfaceLanguage: "인터페이스 언어",
     answerLanguage: "기본 답변 언어",
     translationLanguage: "기본 번역 대상 언어",
@@ -1331,6 +1370,12 @@ Object.assign(UI_TEXT, {
     optional: "Facultatif",
     historyLimit: "Tours de contexte",
     thinkingMode: "Réflexion",
+    openSidePanel: "Ouvrir le panneau latéral",
+    openWorkspaceTab: "Ouvrir l’espace de travail",
+    workspaceConflict: "La conversation a changé dans une autre fenêtre. Consultez la liste et réessayez.",
+    workspaceStorageFailed: "Impossible d’enregistrer ou de lire l’historique.",
+    endpointInvalid: "Saisissez une adresse HTTP ou HTTPS valide.",
+    endpointPermissionRequired: "Autorisez l’accès à l’hôte de cette adresse avant d’enregistrer.",
     interfaceLanguage: "Langue de l’interface",
     answerLanguage: "Langue de réponse par défaut",
     translationLanguage: "Langue cible de traduction",
@@ -1513,6 +1558,12 @@ Object.assign(UI_TEXT, {
     optional: "Opcional",
     historyLimit: "Turnos de contexto",
     thinkingMode: "Pensar",
+    openSidePanel: "Abrir panel lateral",
+    openWorkspaceTab: "Abrir espacio de trabajo",
+    workspaceConflict: "La conversación cambió en otra ventana. Revisa la lista y vuelve a intentarlo.",
+    workspaceStorageFailed: "No se pudo guardar o leer el historial.",
+    endpointInvalid: "Introduce una URL HTTP o HTTPS válida.",
+    endpointPermissionRequired: "Permite el acceso al host de esta URL antes de guardar.",
     interfaceLanguage: "Idioma de interfaz",
     answerLanguage: "Idioma de respuesta predeterminado",
     translationLanguage: "Idioma destino de traducción",
@@ -1695,6 +1746,12 @@ Object.assign(UI_TEXT, {
     optional: "Optional",
     historyLimit: "Kontext-Runden",
     thinkingMode: "Denken",
+    openSidePanel: "Seitenleiste öffnen",
+    openWorkspaceTab: "Arbeitsbereich öffnen",
+    workspaceConflict: "Die Unterhaltung wurde in einem anderen Fenster geändert. Prüfe die Liste und versuche es erneut.",
+    workspaceStorageFailed: "Der Chatverlauf konnte nicht gespeichert oder gelesen werden.",
+    endpointInvalid: "Gib eine gültige HTTP- oder HTTPS-Adresse ein.",
+    endpointPermissionRequired: "Erlaube vor dem Speichern den Zugriff auf den Host dieser Adresse.",
     interfaceLanguage: "Oberflächensprache",
     answerLanguage: "Standard-Antwortsprache",
     translationLanguage: "Standard-Zielsprache",
@@ -1876,6 +1933,7 @@ const state = {
   activeConversationId: "",
   sending: false,
   activePort: null,
+  streamingMessage: null,
   sidebarCollapsed: false,
   conversationSearchOpen: false,
   conversationSearchQuery: "",
@@ -1892,6 +1950,7 @@ const state = {
 
 const els = {
   workspace: document.querySelector(".workspace"),
+  workspaceSurfaceToggle: document.querySelector("#workspaceSurfaceToggle"),
   chatTitle: document.querySelector("#chatTitle"),
   toolbarModelSelect: document.querySelector("#toolbarModelSelect"),
   healthStatus: document.querySelector("#healthStatus"),
@@ -2095,15 +2154,28 @@ function setIconContent(node, iconName, label = "") {
 }
 
 async function loadState() {
-  const stored = await extensionApi.storage.local.get(["settings", "messages", "conversations", "conversationFolders", "activeConversationId", "promptTemplates", "sidebarCollapsed"]);
+  if (extensionApi.sidePanel?.open) {
+    workspaceTab = await extensionApi.tabs.getCurrent();
+    isSidePanel = !workspaceTab;
+    document.body.classList.toggle("side-panel", isSidePanel);
+    els.workspaceSurfaceToggle.classList.remove("hidden");
+  }
+
+  const stored = await extensionApi.storage.local.get([...SHARED_WORKSPACE_KEYS, "messages", "sidebarCollapsed"]);
   state.settings = { ...DEFAULT_SETTINGS, ...(stored.settings || {}) };
   state.settings.modelConfigs = { ...(stored.settings?.modelConfigs || {}) };
-  state.sidebarCollapsed = Boolean(stored.sidebarCollapsed);
-  migrateOllamaSettings();
+  state.sidebarCollapsed = isSidePanel || Boolean(stored.sidebarCollapsed);
   state.conversations = Array.isArray(stored.conversations) ? stored.conversations : [];
   state.conversationFolders = Array.isArray(stored.conversationFolders) ? stored.conversationFolders : [];
   state.promptTemplates = Array.isArray(stored.promptTemplates) ? stored.promptTemplates : [];
   state.activeConversationId = stored.activeConversationId || "";
+  workspaceStorage.accept(Object.fromEntries(SHARED_WORKSPACE_KEYS.map((key) => [key, state[key]])));
+  migrateOllamaSettings();
+  try {
+    await saveSettings();
+  } catch {
+    pushSystemMessage(t("settingsSaveFailed"));
+  }
 
   if (!state.conversations.length && Array.isArray(stored.messages) && stored.messages.length) {
     const migrated = createConversation(t("importedChat"), stored.messages);
@@ -2119,6 +2191,8 @@ async function loadState() {
   syncSettingsToForm();
   enhanceSelects();
   render();
+  sharedWorkspaceReady = true;
+  refreshSharedWorkspace();
   requestAnimationFrame(() => {
     resizePromptInput({ keepCaretVisible: true });
     updateComposerSafeSpace();
@@ -2144,24 +2218,119 @@ function migrateOllamaSettings() {
       state.settings.customEndpoint = DIRECT_OLLAMA_ENDPOINT;
     }
   }
-
-  saveSettings();
 }
 
 async function saveSettings() {
-  await extensionApi.storage.local.set({ settings: state.settings });
+  await workspaceStorage.save({ settings: state.settings });
+  refreshSharedWorkspace();
 }
 
-async function saveConversations() {
-  await extensionApi.storage.local.set({
-    conversations: state.conversations,
-    conversationFolders: state.conversationFolders,
-    activeConversationId: state.activeConversationId
-  });
+async function saveConversations({ replaceHistory = false } = {}) {
+  const conversations = state.streamingMessage
+    ? state.conversations.map((item) => item.messages.includes(state.streamingMessage) ? {
+      ...item, messages: item.messages.filter((message) => message !== state.streamingMessage)
+    } : item)
+    : state.conversations;
+  try {
+    const conflict = await workspaceStorage.save({
+      conversations,
+      conversationFolders: state.conversationFolders,
+      activeConversationId: state.activeConversationId
+    }, { replace: replaceHistory ? ["conversations", "conversationFolders"] : [] });
+    failedHistoryWrite = false;
+    if (conflict) pushSystemMessage(t("workspaceConflict"));
+    await refreshSharedWorkspace();
+  } catch {
+    failedHistoryWrite = true;
+    pushSystemMessage(t("workspaceStorageFailed"));
+  }
 }
 
 async function savePromptTemplates() {
-  await extensionApi.storage.local.set({ promptTemplates: state.promptTemplates });
+  await workspaceStorage.save({ promptTemplates: state.promptTemplates });
+  refreshSharedWorkspace();
+}
+
+async function replaceSharedWorkspace() {
+  const values = Object.fromEntries(SHARED_WORKSPACE_KEYS.map((key) => [key, state[key]]));
+  await workspaceStorage.save(values, { replace: SHARED_WORKSPACE_KEYS });
+  failedHistoryWrite = false;
+  await extensionApi.storage.local.remove("messages");
+}
+
+async function refreshSharedWorkspace() {
+  if (!sharedWorkspaceReady || workspaceStorage.pending || state.sending || failedHistoryWrite) return;
+  const refreshId = ++sharedWorkspaceRefreshId;
+  const revision = workspaceStorage.revision;
+  try {
+    const stored = await extensionApi.storage.local.get(SHARED_WORKSPACE_KEYS);
+    if (refreshId !== sharedWorkspaceRefreshId || revision !== workspaceStorage.revision
+        || workspaceStorage.pending || state.sending || failedHistoryWrite) return;
+
+    const settings = { ...DEFAULT_SETTINGS, ...(stored.settings || {}), modelConfigs: stored.settings?.modelConfigs || {} };
+    const templates = Array.isArray(stored.promptTemplates) ? stored.promptTemplates : [];
+    const settingsChanged = !state.settingsPageOpen && !WorkspaceStorage.equal(state.settings, settings);
+    const templatesChanged = !state.promptTemplateDirty && !WorkspaceStorage.equal(state.promptTemplates, templates);
+    if (settingsChanged) {
+      state.settings = settings;
+      workspaceStorage.accept({ settings });
+    }
+    if (templatesChanged) {
+      state.promptTemplates = templates;
+      workspaceStorage.accept({ promptTemplates: templates });
+    }
+
+    const conversations = Array.isArray(stored.conversations) ? stored.conversations : [];
+    const conversationFolders = Array.isArray(stored.conversationFolders) ? stored.conversationFolders : [];
+    if (!conversations.length) {
+      if (settingsChanged) render();
+      else if (templatesChanged) renderPromptTemplates();
+      return;
+    }
+    const previousId = state.activeConversationId;
+    const previous = state.conversations.find((item) => item.id === previousId);
+    const incoming = conversations.find((item) => item.id === previousId);
+    const activeChanged = !incoming || !WorkspaceStorage.equal(previous, incoming);
+    const listChanged = !WorkspaceStorage.equal(state.conversations, conversations)
+      || !WorkspaceStorage.equal(state.conversationFolders, conversationFolders);
+    // Keep references captured by in-flight title requests and event handlers.
+    if (listChanged) {
+      const existing = new Map(state.conversations.map((item) => [item.id, item]));
+      state.conversations = conversations.map((item) => {
+        const previousItem = existing.get(item.id);
+        if (!previousItem) return item;
+        for (const key of Object.keys(previousItem)) {
+          if (!Object.hasOwn(item, key)) delete previousItem[key];
+        }
+        return Object.assign(previousItem, item);
+      });
+      state.conversationFolders = conversationFolders;
+    }
+    if (!incoming) {
+      state.activeConversationId = conversations.find((item) => item.id === stored.activeConversationId)?.id || conversations[0].id;
+      state.composerMode = getConversationMode(getActiveConversation());
+      clearComposerInput();
+    }
+    if (listChanged || !incoming) {
+      workspaceStorage.accept({ conversations, conversationFolders, activeConversationId: state.activeConversationId });
+    }
+    if (settingsChanged) {
+      render();
+    } else {
+      if (templatesChanged) {
+        renderPromptTemplates();
+        syncCustomSelects();
+      }
+      if (listChanged) renderConversations();
+      if (activeChanged) {
+        updateChatTitle();
+        renderMessages();
+        if (!incoming) syncComposerMode();
+      }
+    }
+  } catch {
+    pushSystemMessage(t("workspaceStorageFailed"));
+  }
 }
 
 function normalizeConversationMode(mode) {
@@ -2203,7 +2372,6 @@ function ensureActiveConversation() {
   if (!state.conversations.some((conversation) => conversation.id === state.activeConversationId)) {
     state.activeConversationId = state.conversations[0].id;
     state.composerMode = getConversationMode(state.conversations[0]);
-    saveConversations();
   }
 }
 
@@ -2412,6 +2580,10 @@ function applyLanguage() {
   }
   setTooltip(els.sidebarToggle, state.sidebarCollapsed ? t("showSidebar") : t("hideSidebar"));
   setIconOnly(els.sidebarToggle, "panelLeft");
+  if (extensionApi.sidePanel?.open) {
+    setIconButtonContent(els.workspaceSurfaceToggle,
+      t(isSidePanel ? "openWorkspaceTab" : "openSidePanel"), isSidePanel ? "monitor" : "panelLeft");
+  }
   syncSidebarActionTooltips();
   els.conversationSearchInput.placeholder = t("searchConversationsPlaceholder");
   els.conversationSearchInput.setAttribute("aria-label", t("searchConversations"));
@@ -2478,9 +2650,15 @@ function applySidebarState(persist = true) {
   if (state.sidebarCollapsed) {
     closeSettingsMenu();
   }
-  if (persist) {
+  if (persist && !isSidePanel) {
     extensionApi.storage.local.set({ sidebarCollapsed: state.sidebarCollapsed });
   }
+}
+
+function collapsePanelSidebar() {
+  if (!isSidePanel || state.sidebarCollapsed) return;
+  state.sidebarCollapsed = true;
+  applySidebarState(false);
 }
 
 function syncConversationSearchState({ focus = false } = {}) {
@@ -2594,6 +2772,7 @@ function requestCloseSettingsPage() {
     return false;
   }
   showSettingsPage(false);
+  refreshSharedWorkspace();
   return true;
 }
 
@@ -3395,13 +3574,11 @@ function renderMessages() {
     const actions = createMessageActions(index, message);
     const content = document.createElement("div");
     content.className = "message-content";
-    if (message.pending && !message.content) {
-      content.append(createThinkingIndicator(Boolean(message.thinkingEnabled)));
-    } else {
-      renderMessageContent(content, message.content, message.role);
-    }
+    renderMessageBody(content, message);
 
     const meta = createMessageMeta(message);
+    const reasoning = createMessageReasoning(message);
+    if (reasoning) item.append(reasoning);
     item.append(content);
     if (meta) {
       item.append(meta);
@@ -3420,6 +3597,49 @@ function renderMessages() {
       updateScrollToBottomButton();
     }
   });
+}
+
+function renderMessageBody(container, message, streaming = false) {
+  container.replaceChildren();
+  if (message.pending && !message.content) {
+    container.append(createThinkingIndicator(Boolean(message.thinkingEnabled)));
+  } else {
+    renderMessageContent(container, message.content, message.role, streaming);
+  }
+}
+
+function createMessageReasoning(message) {
+  if (message.role !== "assistant" || typeof message.reasoning !== "string" || !message.reasoning.trim()) return null;
+
+  const details = document.createElement("details");
+  details.className = "message-reasoning";
+  const summary = document.createElement("summary");
+  summary.textContent = t("thinkingMode");
+  const text = document.createElement("div");
+  text.className = "message-reasoning-text";
+  text.textContent = message.reasoning;
+  details.append(summary, text);
+  return details;
+}
+
+function renderStreamingMessage(conversation, message) {
+  if (getActiveConversation() !== conversation) return;
+  const index = conversation.messages.indexOf(message);
+  const item = els.messages.querySelector(`.message.assistant[data-index="${index}"]`);
+  if (!item) return;
+
+  const nearBottom = isMessagesNearBottom();
+  const content = item.querySelector(".message-content");
+  const reasoningText = item.querySelector(".message-reasoning-text");
+  if (reasoningText) {
+    reasoningText.textContent = message.reasoning;
+  } else {
+    const reasoning = createMessageReasoning(message);
+    if (reasoning) item.prepend(reasoning);
+  }
+  renderMessageBody(content, message, true);
+  if (nearBottom) els.messages.scrollTop = els.messages.scrollHeight;
+  updateScrollToBottomButton();
 }
 
 function createMessageMeta(message) {
@@ -3501,13 +3721,13 @@ function createThinkingIndicator(thinkingEnabled = false) {
   return indicator;
 }
 
-function renderMessageContent(container, rawContent, role) {
+function renderMessageContent(container, rawContent, role, streaming = false) {
   if (role !== "assistant") {
     container.textContent = rawContent;
     return;
   }
 
-  const parts = splitMarkdownCodeBlocks(rawContent);
+  const parts = splitMarkdownCodeBlocks(rawContent, streaming);
   for (const part of parts) {
     if (part.type === "code") {
       container.append(createCodeBlock(part.code, part.lang));
@@ -3517,7 +3737,7 @@ function renderMessageContent(container, rawContent, role) {
   }
 }
 
-function splitMarkdownCodeBlocks(text) {
+function splitMarkdownCodeBlocks(text, streaming = false) {
   const parts = [];
   const pattern = /```([^\n`]*)\n?([\s\S]*?)```/g;
   let lastIndex = 0;
@@ -3531,8 +3751,13 @@ function splitMarkdownCodeBlocks(text) {
     lastIndex = pattern.lastIndex;
   }
 
-  if (lastIndex < text.length) {
-    parts.push({ type: "text", text: text.slice(lastIndex) });
+  const trailing = text.slice(lastIndex);
+  const openFence = streaming && /^([\s\S]*?)(?:^|\n)```([^\n`]*)\n([\s\S]*)$/.exec(trailing);
+  if (openFence) {
+    if (openFence[1]) parts.push({ type: "text", text: openFence[1] });
+    parts.push({ type: "code", lang: openFence[2].trim(), code: openFence[3] });
+  } else if (trailing) {
+    parts.push({ type: "text", text: trailing });
   }
 
   return parts.length ? parts : [{ type: "text", text }];
@@ -3983,9 +4208,62 @@ function normalizeOllamaEndpoint(endpoint) {
   }
 }
 
-async function submitPrompt(prompt, options = {}) {
-  const config = getActiveConfig();
+function configuredEndpointHostPattern() {
+  const endpoint = els.endpointInput.value.trim() || DEFAULT_SETTINGS.customEndpoint;
+  let url;
+  try {
+    url = new URL(els.customFormatInput.value === "ollama" ? normalizeOllamaEndpoint(endpoint) : endpoint);
+  } catch {
+    return null;
+  }
+  if (!["http:", "https:"].includes(url.protocol) || url.username || url.password || url.hostname.includes("*")) {
+    return null;
+  }
+  return `${url.protocol}//${url.hostname}/*`;
+}
+
+async function requestConfiguredEndpointPermission() {
+  if (!extensionApi.permissions?.request) return true;
+  const origin = configuredEndpointHostPattern();
+  if (!origin) {
+    pushSystemMessage(t("endpointInvalid"));
+    return false;
+  }
+  try {
+    const granted = await extensionApi.permissions.request({ origins: [origin] });
+    if (granted && origin === configuredEndpointHostPattern()) return true;
+  } catch {
+    // Chrome may reject a request if the permission dialog cannot be opened.
+  }
+  pushSystemMessage(t("endpointPermissionRequired"));
+  return false;
+}
+
+async function withConversationEdit(edit, { checkMessages = false } = {}) {
+  if (state.sending) return;
   const conversation = getActiveConversation();
+  const messages = conversation.messages;
+  const run = async (lock) => {
+    if (lock) {
+      await refreshSharedWorkspace();
+      if (state.sending) return;
+      const current = state.conversations.find((item) => item.id === conversation.id);
+      if (current && current.id === state.activeConversationId
+          && (!checkMessages || WorkspaceStorage.equal(messages, current.messages))) {
+        return edit(current);
+      }
+    }
+    pushSystemMessage(t("workspaceConflict"));
+  };
+  if (navigator.locks) {
+    await navigator.locks.request(`lemon-cha.edit.${conversation.id}`, { ifAvailable: true }, run);
+  } else {
+    await run(true);
+  }
+}
+
+async function submitPrompt(conversation, prompt, options = {}) {
+  const config = getActiveConfig();
   const shouldGenerateTitle = conversation.messages.length === 0 || conversation.title === t("newChatTitle");
   const requestPrompt = options.requestPrompt || prompt;
 
@@ -3994,14 +4272,16 @@ async function submitPrompt(prompt, options = {}) {
     return;
   }
 
+  els.promptInput.value = "";
+  resizePromptInput();
   conversation.messages.push({ role: "user", content: prompt });
   conversation.title = titleFromPrompt(conversation, prompt);
   conversation.updatedAt = Date.now();
+  const requestMessages = getContextMessages(config, requestPrompt);
   state.sending = true;
   await saveConversations();
   render();
 
-  const requestMessages = getContextMessages(config, requestPrompt);
   await generateAssistantResponse(conversation, config, requestMessages);
   if (shouldGenerateTitle) {
     generateConversationTitle(conversation, config);
@@ -4032,19 +4312,32 @@ async function generateAssistantResponse(conversation, config, requestMessages) 
     thinkingEnabled: Boolean(config.thinkingEnabled),
     stats
   };
+  state.streamingMessage = assistantMessage;
   conversation.messages.push(assistantMessage);
   render();
 
+  let renderFrame = null;
   try {
-    const meta = await requestChatCompletionStream(config, requestMessages, (delta) => {
-      assistantMessage.pending = false;
+    const meta = await requestChatCompletionStream(config, requestMessages, (delta, type) => {
       if (stats.firstTokenMs === null) {
         stats.firstTokenMs = Date.now() - stats.startedAt;
       }
       stats.completionTokens += estimateTokens(delta);
-      assistantMessage.content += delta;
+      if (type === "reasoning") {
+        if (config.thinkingEnabled) {
+          assistantMessage.reasoning = (assistantMessage.reasoning || "") + delta;
+        }
+      } else {
+        assistantMessage.pending = false;
+        assistantMessage.content += delta;
+      }
       conversation.updatedAt = Date.now();
-      renderMessages();
+      if (renderFrame === null) {
+        renderFrame = requestAnimationFrame(() => {
+          renderFrame = null;
+          renderStreamingMessage(conversation, assistantMessage);
+        });
+      }
     });
 
     assistantMessage.pending = false;
@@ -4071,8 +4364,10 @@ async function generateAssistantResponse(conversation, config, requestMessages) 
       pushSystemMessage(error.message || t("requestFailed"), false);
     }
   } finally {
+    if (renderFrame !== null) cancelAnimationFrame(renderFrame);
     assistantMessage.stats.elapsedMs = Date.now() - stats.startedAt;
     conversation.updatedAt = Date.now();
+    state.streamingMessage = null;
     state.sending = false;
     await saveConversations();
     render();
@@ -4092,8 +4387,8 @@ function requestChatCompletionStream(config, messages, onDelta) {
     state.activePort = port;
 
     port.onMessage.addListener((message) => {
-      if (message?.type === "delta") {
-        onDelta(message.content || "");
+      if (message?.type === "delta" || message?.type === "reasoning") {
+        onDelta(message.content || "", message.type);
         return;
       }
 
@@ -4121,6 +4416,7 @@ function requestChatCompletionStream(config, messages, onDelta) {
     port.onDisconnect.addListener(() => {
       if (state.activePort === port) {
         state.activePort = null;
+        reject(new Error(t("backendFailed")));
       }
     });
 
@@ -4376,8 +4672,7 @@ async function copyMessage(index) {
   pushSystemMessage(t("copied"));
 }
 
-async function deleteMessage(index) {
-  const conversation = getActiveConversation();
+async function deleteMessage(conversation, index) {
   if (!conversation.messages[index]) return;
   conversation.messages.splice(index, 1);
   conversation.updatedAt = Date.now();
@@ -4385,9 +4680,7 @@ async function deleteMessage(index) {
   render();
 }
 
-async function regenerateFromMessage(index) {
-  if (state.sending) return;
-  const conversation = getActiveConversation();
+async function regenerateFromMessage(conversation, index) {
   const message = conversation.messages[index];
   if (!message || message.role === "system") return;
 
@@ -4407,9 +4700,7 @@ async function regenerateFromMessage(index) {
   await generateAssistantResponse(conversation, config, requestMessages);
 }
 
-async function continueFromMessage(index) {
-  if (state.sending) return;
-  const conversation = getActiveConversation();
+async function continueFromMessage(conversation, index) {
   const message = conversation.messages[index];
   if (!message || message.role === "system") return;
 
@@ -4494,15 +4785,29 @@ async function clearConversationHistory() {
   state.conversationFolders = [];
   state.activeConversationId = conversation.id;
   state.composerMode = getConversationMode(conversation);
+  await saveConversations({ replaceHistory: true });
   await extensionApi.storage.local.remove("messages");
-  await saveConversations();
   render();
   clearComposerInput({ focus: true });
   return true;
 }
 
 els.settingsToggle.addEventListener("click", () => {
+  collapsePanelSidebar();
   showSettingsPage(true);
+});
+
+els.workspaceSurfaceToggle.addEventListener("click", async () => {
+  try {
+    if (isSidePanel) {
+      const result = await extensionApi.runtime.sendMessage({ type: "workspace:open-tab" });
+      if (!result?.ok) pushSystemMessage(t("backendFailed"));
+    } else {
+      await extensionApi.sidePanel.open({ tabId: workspaceTab.id });
+    }
+  } catch {
+    pushSystemMessage(t("backendFailed"));
+  }
 });
 
 els.themeToggle.addEventListener("click", async () => {
@@ -4651,11 +4956,11 @@ els.messages.addEventListener("click", async (event) => {
   if (action === "copy") {
     await copyMessage(index);
   } else if (action === "regenerate") {
-    await regenerateFromMessage(index);
+    await withConversationEdit((conversation) => regenerateFromMessage(conversation, index), { checkMessages: true });
   } else if (action === "continue") {
-    await continueFromMessage(index);
+    await withConversationEdit((conversation) => continueFromMessage(conversation, index), { checkMessages: true });
   } else if (action === "delete") {
-    await deleteMessage(index);
+    await withConversationEdit((conversation) => deleteMessage(conversation, index), { checkMessages: true });
   }
 });
 
@@ -4818,6 +5123,10 @@ els.settingsForm.addEventListener("submit", async (event) => {
   if (activeSettingsTab === "general" || activeSettingsTab === "data") {
     return;
   }
+  if (activeSettingsTab === "model" && !await requestConfiguredEndpointPermission()) {
+    restoreSettingsKeys(MODEL_SETTINGS_KEYS);
+    return;
+  }
   persistCurrentProviderFields();
   await saveSettings();
   captureSettingsSnapshot({ resetPrompt: false });
@@ -4881,10 +5190,13 @@ els.factoryResetSettings.addEventListener("click", async () => {
   state.activeConversationId = conversation.id;
   state.composerMode = getConversationMode(conversation);
   state.promptTemplateDirty = false;
-  await extensionApi.storage.local.remove(["messages"]);
-  await saveSettings();
-  await saveConversations();
-  await savePromptTemplates();
+  try {
+    await replaceSharedWorkspace();
+  } catch {
+    pushSystemMessage(t("workspaceStorageFailed"));
+    await refreshSharedWorkspace();
+    return;
+  }
   captureSettingsSnapshot();
   render();
   clearComposerInput({ focus: true });
@@ -4902,6 +5214,7 @@ els.newChat.addEventListener("click", async () => {
   state.conversations.unshift(conversation);
   state.activeConversationId = conversation.id;
   state.composerMode = "chat";
+  collapsePanelSidebar();
   await saveConversations();
   render();
   clearComposerInput({ focus: true });
@@ -4918,6 +5231,7 @@ els.sidebarTranslateTool?.addEventListener("click", async () => {
   state.conversations.unshift(conversation);
   state.activeConversationId = conversation.id;
   state.composerMode = getConversationMode(conversation);
+  collapsePanelSidebar();
   await saveConversations();
   render();
   clearComposerInput({ focus: true });
@@ -5026,9 +5340,7 @@ els.importFile?.addEventListener("change", async () => {
     migrateOllamaSettings();
     ensureActiveConversation();
     state.composerMode = getConversationMode(getActiveConversation());
-    await saveSettings();
-    await saveConversations();
-    await savePromptTemplates();
+    await replaceSharedWorkspace();
     render();
     pushSystemMessage(t("importDone"));
   } catch (error) {
@@ -5124,6 +5436,7 @@ els.conversationList.addEventListener("click", async (event) => {
   state.activeConversationId = item.dataset.id;
   const conversation = state.conversations.find((entry) => entry.id === state.activeConversationId);
   state.composerMode = getConversationMode(conversation);
+  collapsePanelSidebar();
   await saveConversations();
   render();
   if (shouldClearComposer) {
@@ -5194,9 +5507,7 @@ els.chatForm.addEventListener("submit", async (event) => {
   const requestPrompt = state.composerMode === "translate"
     ? buildTranslationRequestPrompt(prompt)
     : prompt;
-  els.promptInput.value = "";
-  resizePromptInput();
-  await submitPrompt(prompt, { requestPrompt });
+  await withConversationEdit((conversation) => submitPrompt(conversation, prompt, { requestPrompt }));
 });
 
 els.composerModeToggle?.addEventListener("click", toggleComposerMode);
@@ -5242,6 +5553,11 @@ systemThemeQuery?.addEventListener("change", () => {
   }
 });
 
+extensionApi.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && SHARED_WORKSPACE_KEYS.some((key) => Object.hasOwn(changes, key))) {
+    refreshSharedWorkspace();
+  }
+});
 loadState();
 
 async function renameConversation(id) {

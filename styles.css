@@ -1317,6 +1317,18 @@ button:disabled {
   white-space: nowrap;
 }
 
+#workspaceSurfaceToggle {
+  flex: 0 0 var(--compact-control-height);
+  margin-left: auto;
+  padding: 0;
+}
+
+#workspaceSurfaceToggle[data-tooltip]::after {
+  right: 0;
+  left: auto;
+  transform: none;
+}
+
 .model-status {
   display: inline-flex;
   align-items: center;
@@ -1644,7 +1656,7 @@ button:disabled {
 .settings-page-header {
   display: flex;
   align-items: flex-start;
-  justify-content: flex-start;
+  justify-content: space-between;
   gap: var(--space-md);
   max-width: var(--content-width);
   width: min(100%, var(--content-width));
@@ -2240,6 +2252,23 @@ select:focus {
   font-size: 0.6875rem;
 }
 
+.message-reasoning {
+  grid-column: 1 / -1;
+  min-width: 0;
+  color: var(--color-secondary);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.message-reasoning summary {
+  cursor: pointer;
+}
+
+.message-reasoning-text {
+  margin-top: var(--space-xs);
+  white-space: pre-wrap;
+}
+
 .message-actions {
   display: flex;
   grid-column: 1 / -1;
@@ -2752,4 +2781,73 @@ select:focus {
     padding-right: var(--space-md);
     padding-left: var(--space-md);
   }
+}
+
+body.side-panel {
+  --app-min-width: 0px;
+  --composer-input-action-space: calc(2 * var(--compact-control-height) + var(--space-sm) + var(--composer-action-inset));
+  overflow-x: hidden;
+}
+
+.side-panel .app {
+  position: relative;
+  grid-template-columns: var(--sidebar-collapsed-width) minmax(0, 1fr);
+}
+
+.side-panel:not(.sidebar-collapsed) .sidebar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: min(292px, calc(100% - var(--space-lg)));
+}
+
+.side-panel .workspace {
+  grid-column: 2;
+  --rail-padding: var(--space-sm);
+}
+
+.side-panel .chat-status {
+  flex-direction: row;
+  align-items: center;
+  min-width: 0;
+}
+
+.side-panel .composer-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-xs);
+}
+
+.side-panel .composer-actions .custom-select-button {
+  width: 100%;
+}
+
+.side-panel .composer-actions .custom-select-menu {
+  min-width: 0;
+  width: max-content;
+  max-width: min(220px, calc(100vw - var(--sidebar-collapsed-width) - 2 * var(--space-lg)));
+}
+
+.side-panel .composer-actions .custom-select:has(#promptTemplateSelect, #translationTargetSelect) .custom-select-menu {
+  right: 0;
+  left: auto;
+}
+
+.side-panel .composer-send-actions {
+  grid-column: 1 / -1;
+  justify-self: end;
+}
+
+.side-panel .settings,
+.side-panel .settings-surface {
+  padding: var(--space-md);
+}
+
+.side-panel .settings-surface {
+  box-sizing: border-box;
+  height: 100%;
+  max-height: none;
+}
+
+.side-panel .settings-body {
+  grid-template-rows: auto minmax(0, 1fr);
 }

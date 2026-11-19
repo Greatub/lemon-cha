@@ -21,6 +21,9 @@ Recommended disclosure:
 - Stored locally: API keys, provider settings, prompts, responses, folders, and prompt presets.
 - Sent externally only on user action: chat requests to the user-selected provider or local Ollama endpoint.
 - lemon cha does not operate a cloud relay and does not receive a copy of user conversations.
+- An optional host grant is requested for the specific site of a user-configured endpoint when it is saved in Model Settings.
+- The Chrome side panel displays only the extension's workspace. It shares locally stored settings and history with the workspace tab.
+- `unlimitedStorage` supports longer conversation histories in Chrome's local extension storage.
 
 ## Limited use certification
 
