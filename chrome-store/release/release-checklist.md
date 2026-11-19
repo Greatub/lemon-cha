@@ -1,14 +1,19 @@
 # Release Checklist
 
+## Chrome Web Store status
+
+- Version 0.2.5 was submitted for review on November 19, 2026.
+- The submission includes the v2 store icon, small promotional image, and marquee image, plus the `sidePanel` and `unlimitedStorage` permission justifications.
+
 ## Build and package
 
-- [ ] `npm run lint:chrome`
-- [ ] `npm run typecheck`
-- [ ] `npm test`
-- [ ] `npm run build:chrome`
+- [x] `npm run lint:chrome`
+- [x] `npm run typecheck`
+- [x] `npm test`
+- [x] `npm run build:chrome`
 - [ ] Load `dist/lemon-cha` in `chrome://extensions/`
-- [ ] Package `dist/lemon-cha-extension-0.2.5.zip`
-- [ ] Run `unzip -t dist/lemon-cha-extension-0.2.5.zip`
+- [x] Package `dist/lemon-cha-extension-0.2.5.zip`
+- [x] Run `unzip -t dist/lemon-cha-extension-0.2.5.zip`
 
 ## Functional smoke test
 
@@ -30,8 +35,8 @@
 - [ ] Full description reviewed.
 - [ ] Category selected.
 - [ ] Required screenshots uploaded.
-- [ ] Small promotional image uploaded.
-- [ ] Optional marquee promotional image prepared if desired.
+- [x] Small promotional image uploaded.
+- [x] Marquee promotional image uploaded.
 
 ## Privacy and review
 
