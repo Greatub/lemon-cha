@@ -1,6 +1,8 @@
 # lemon cha Browser Extension
 
-[English](README.md)
+[English (primary)](README.md) · 简体中文
+
+项目文档和发布说明以英文为主，本页提供简体中文辅助说明。功能变化时请以英文 README 为准，并同步更新本页。
 
 一个轻量的 Chrome / Firefox 浏览器插件，用独立标签页聊天界面连接两类模型服务：
 

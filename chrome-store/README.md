@@ -4,7 +4,7 @@ This directory contains the store-facing materials for publishing **lemon cha**.
 
 ## Contents
 
-- `listing/`: Simplified Chinese and English store listing drafts.
+- `listing/`: English store listing copy (primary) and Simplified Chinese translation (supplementary).
 - `privacy/`: Privacy policy draft and dashboard disclosure notes.
 - `release/`: Review notes, permission justifications, and release checklist.
 - `assets/asset-requirements.md`: Required and recommended image assets for submission.
