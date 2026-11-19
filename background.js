@@ -1,6 +1,40 @@
-chrome.action.onClicked.addListener(() => {
-  chrome.tabs.create({ url: chrome.runtime.getURL("chat.html") });
+const extensionApi = globalThis.browser || globalThis.chrome;
+
+let workspaceOpenQueue = Promise.resolve();
+let lastCreatedWorkspace;
+
+extensionApi.action.onClicked.addListener((tab) => {
+  openChatWorkspace(tab.windowId).catch(console.error);
 });
+
+function openChatWorkspace(windowId) {
+  const url = extensionApi.runtime.getURL("chat.html");
+  const open = async () => {
+    if (extensionApi.runtime.getContexts) {
+      const contexts = await extensionApi.runtime.getContexts({ contextTypes: ["TAB"], documentUrls: [url] });
+      const workspace = contexts.find((context) => context.windowId === windowId) || contexts[0];
+      const tab = workspace || (!lastCreatedWorkspace
+        ? null
+        : await extensionApi.tabs.get(lastCreatedWorkspace.id).catch(() => null));
+      const stillLoading = !workspace && tab?.status === "loading" && !tab.url && !tab.pendingUrl
+        && Date.now() - lastCreatedWorkspace.createdAt < 2000;
+      if (tab && (workspace || tab.url === url || tab.pendingUrl === url || stillLoading)) {
+        try {
+          await extensionApi.tabs.update(workspace ? tab.tabId : tab.id, { active: true });
+          await extensionApi.windows.update(tab.windowId, { focused: true });
+          return;
+        } catch {
+          // The tab or window may have closed between lookup and activation.
+        }
+      }
+    }
+    const created = await extensionApi.tabs.create({ url });
+    lastCreatedWorkspace = { id: created.id, createdAt: Date.now() };
+  };
+  const pending = workspaceOpenQueue.then(open);
+  workspaceOpenQueue = pending.catch(() => {});
+  return pending;
+}
 
 const BG_TEXT = {
   "zh-CN": {
@@ -21,6 +55,8 @@ const BG_TEXT = {
     ollama403: "Ollama 拒绝了扩展来源。请设置 OLLAMA_ORIGINS=\"chrome-extension://*,moz-extension://*\" 后完全重启 Ollama。",
     ollamaFetchFailed: "无法连接 Ollama：{message}。请确认 Ollama 已启动，接口地址为 http://127.0.0.1:11434/api/chat，并允许扩展来源。",
     apiKeyInvalid: "API Key 包含非英文字符或备注文字，请重新粘贴纯 API Key 后保存。",
+    endpointInvalid: "请输入有效的 HTTP 或 HTTPS 接口地址。",
+    endpointPermissionRequired: "请在模型设置中保存接口地址并允许访问该域名。",
     answerLanguagePrompt: "除非用户明确要求其他语言，请默认使用{language}回答。",
     statusFailed: "请求失败 {status}：{message}"
   },
@@ -42,6 +78,8 @@ const BG_TEXT = {
     ollama403: "Ollama rejected the extension origin. Set OLLAMA_ORIGINS=\"chrome-extension://*,moz-extension://*\" and fully restart Ollama.",
     ollamaFetchFailed: "Could not connect to Ollama: {message}. Make sure Ollama is running, the endpoint is http://127.0.0.1:11434/api/chat, and the extension origin is allowed.",
     apiKeyInvalid: "The API key contains non-English characters or notes. Paste the raw API key and save again.",
+    endpointInvalid: "Enter a valid HTTP or HTTPS endpoint.",
+    endpointPermissionRequired: "Save the endpoint in Model Settings and allow access to its host.",
     answerLanguagePrompt: "Unless the user explicitly asks for another language, answer in {language} by default.",
     statusFailed: "Request failed {status}: {message}"
   }
@@ -65,6 +103,9 @@ Object.assign(BG_TEXT, {
     custom404: "自訂 API 回傳 404，目前位址不是聊天介面：{url}。OpenAI 相容服務通常需要 /v1/chat/completions；如果你的服務是 Ollama 格式，請在設定中把介面格式改為 Ollama /api/chat。",
     ollama403: "Ollama 拒絕了擴充功能來源。請設定 OLLAMA_ORIGINS=\"chrome-extension://*,moz-extension://*\" 後完整重新啟動 Ollama。",
     ollamaFetchFailed: "無法連線 Ollama：{message}。請確認 Ollama 已啟動，介面位址為 http://127.0.0.1:11434/api/chat，並允許擴充功能來源。",
+    apiKeyInvalid: "API 金鑰包含不支援的字元，請重新貼上原始金鑰後儲存。",
+    endpointInvalid: "請輸入有效的 HTTP 或 HTTPS 介面位址。",
+    endpointPermissionRequired: "請在模型設定中儲存介面位址並允許存取該網域。",
     answerLanguagePrompt: "除非使用者明確要求其他語言，請預設使用{language}回答。",
     statusFailed: "請求失敗 {status}：{message}"
   },
@@ -85,6 +126,9 @@ Object.assign(BG_TEXT, {
     custom404: "カスタム API が 404 を返しました。現在の URL はチャットエンドポイントではありません: {url}。OpenAI 互換サービスでは通常 /v1/chat/completions が必要です。Ollama 形式のサービスなら、設定で API 形式を Ollama /api/chat に変更してください。",
     ollama403: "Ollama が拡張機能の origin を拒否しました。OLLAMA_ORIGINS=\"chrome-extension://*,moz-extension://*\" を設定し、Ollama を完全に再起動してください。",
     ollamaFetchFailed: "Ollama に接続できません: {message}。Ollama が起動していること、エンドポイントが http://127.0.0.1:11434/api/chat であること、拡張機能の origin が許可されていることを確認してください。",
+    apiKeyInvalid: "API キーに使用できない文字が含まれています。API キーのみを貼り付けて保存してください。",
+    endpointInvalid: "有効な HTTP または HTTPS エンドポイントを入力してください。",
+    endpointPermissionRequired: "モデル設定でエンドポイントを保存し、ホストへのアクセスを許可してください。",
     answerLanguagePrompt: "ユーザーが明示的に別の言語を求めない限り、既定では{language}で回答してください。",
     statusFailed: "リクエスト失敗 {status}: {message}"
   },
@@ -105,7 +149,10 @@ Object.assign(BG_TEXT, {
     custom404: "사용자 지정 API가 404를 반환했습니다. 현재 URL은 채팅 엔드포인트가 아닙니다: {url}. OpenAI 호환 서비스는 보통 /v1/chat/completions가 필요합니다. Ollama 형식 서비스라면 설정에서 API 형식을 Ollama /api/chat으로 바꾸세요.",
     ollama403: "Ollama가 확장 프로그램 origin을 거부했습니다. OLLAMA_ORIGINS=\"chrome-extension://*,moz-extension://*\" 를 설정하고 Ollama를 완전히 다시 시작하세요.",
     ollamaFetchFailed: "Ollama에 연결할 수 없습니다: {message}. Ollama가 실행 중이고 엔드포인트가 http://127.0.0.1:11434/api/chat 이며 확장 프로그램 origin이 허용되었는지 확인하세요.",
-    answerLanguagePrompt: "사용자가 명시적으로 다른 언어를 요청하지 않는 한 기본적으로 {language}로 답변하세요.",
+    apiKeyInvalid: "API 키에 사용할 수 없는 문자가 포함되어 있습니다. API 키만 다시 붙여넣고 저장하세요.",
+    endpointInvalid: "유효한 HTTP 또는 HTTPS 엔드포인트를 입력하세요.",
+    endpointPermissionRequired: "모델 설정에서 엔드포인트를 저장하고 호스트에 대한 접근을 허용하세요.",
+    answerLanguagePrompt: "사용자가 명시적으로 다른 언어를 요청하지 않는 한 기본적으로 {language}로 답변하세요。",
     statusFailed: "요청 실패 {status}: {message}"
   },
   "fr-FR": {
@@ -125,6 +172,9 @@ Object.assign(BG_TEXT, {
     custom404: "L’API personnalisée a renvoyé 404. L’URL actuelle n’est pas un point d’accès de chat : {url}. Les services compatibles OpenAI utilisent généralement /v1/chat/completions. Si le service est au format Ollama, changez le format API en Ollama /api/chat dans les paramètres.",
     ollama403: "Ollama a rejeté l’origine de l’extension. Définissez OLLAMA_ORIGINS=\"chrome-extension://*,moz-extension://*\" puis redémarrez complètement Ollama.",
     ollamaFetchFailed: "Impossible de se connecter à Ollama : {message}. Vérifiez qu’Ollama est lancé, que le point d’accès est http://127.0.0.1:11434/api/chat et que l’origine de l’extension est autorisée.",
+    apiKeyInvalid: "La clé API contient des caractères non pris en charge. Collez uniquement la clé API, puis enregistrez.",
+    endpointInvalid: "Saisissez une adresse HTTP ou HTTPS valide.",
+    endpointPermissionRequired: "Enregistrez cette adresse dans les paramètres du modèle et autorisez l’accès à son hôte.",
     answerLanguagePrompt: "Sauf demande explicite d’une autre langue, réponds par défaut en {language}.",
     statusFailed: "Requête échouée {status} : {message}"
   },
@@ -145,6 +195,9 @@ Object.assign(BG_TEXT, {
     custom404: "La API personalizada devolvió 404. La URL actual no es un endpoint de chat: {url}. Los servicios compatibles con OpenAI suelen necesitar /v1/chat/completions. Si el servicio usa formato Ollama, cambia el Formato API a Ollama /api/chat en ajustes.",
     ollama403: "Ollama rechazó el origen de la extensión. Configura OLLAMA_ORIGINS=\"chrome-extension://*,moz-extension://*\" y reinicia Ollama por completo.",
     ollamaFetchFailed: "No se pudo conectar con Ollama: {message}. Comprueba que Ollama esté iniciado, que el endpoint sea http://127.0.0.1:11434/api/chat y que el origen de la extensión esté permitido.",
+    apiKeyInvalid: "La clave de API contiene caracteres no admitidos. Pega solo la clave de API y guarda.",
+    endpointInvalid: "Introduce una URL HTTP o HTTPS válida.",
+    endpointPermissionRequired: "Guarda esta URL en los ajustes del modelo y permite el acceso a su host.",
     answerLanguagePrompt: "A menos que el usuario pida explícitamente otro idioma, responde por defecto en {language}.",
     statusFailed: "Solicitud fallida {status}: {message}"
   },
@@ -165,6 +218,9 @@ Object.assign(BG_TEXT, {
     custom404: "Benutzerdefinierte API gab 404 zurück. Die aktuelle URL ist kein Chat-Endpunkt: {url}. OpenAI-kompatible Dienste benötigen meist /v1/chat/completions. Wenn dein Dienst Ollama-Format nutzt, stelle in den Einstellungen API-Format auf Ollama /api/chat.",
     ollama403: "Ollama hat den Ursprung der Erweiterung abgelehnt. Setze OLLAMA_ORIGINS=\"chrome-extension://*,moz-extension://*\" und starte Ollama vollständig neu.",
     ollamaFetchFailed: "Keine Verbindung zu Ollama: {message}. Prüfe, ob Ollama läuft, der Endpunkt http://127.0.0.1:11434/api/chat ist und der Ursprung der Erweiterung erlaubt ist.",
+    apiKeyInvalid: "Der API-Schlüssel enthält nicht unterstützte Zeichen. Füge nur den API-Schlüssel ein und speichere erneut.",
+    endpointInvalid: "Gib eine gültige HTTP- oder HTTPS-Adresse ein.",
+    endpointPermissionRequired: "Speichere die Adresse in den Modelleinstellungen und erlaube den Zugriff auf ihren Host.",
     answerLanguagePrompt: "Sofern der Nutzer nicht ausdrücklich eine andere Sprache verlangt, standardmäßig auf {language} antworten.",
     statusFailed: "Anfrage fehlgeschlagen {status}: {message}"
   }
@@ -176,15 +232,22 @@ let activeOllamaCorsOrigin = "";
 function bt(configOrLang, key, replacements = {}) {
   const lang = typeof configOrLang === "string"
     ? configOrLang
-    : configOrLang?.language || "zh-CN";
-  const template = BG_TEXT[lang]?.[key] || BG_TEXT["zh-CN"][key] || key;
+    : configOrLang?.language;
+  const template = BG_TEXT[lang]?.[key] || BG_TEXT["en-US"][key] || key;
   return Object.entries(replacements).reduce(
     (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
     template
   );
 }
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+extensionApi.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type === "workspace:open-tab") {
+    openChatWorkspace(sender.tab?.windowId)
+      .then(() => sendResponse({ ok: true }))
+      .catch(() => sendResponse({ ok: false }));
+    return true;
+  }
+
   if (message?.type === "llm:title") {
     generateChatTitle(message.payload)
       .then((title) => sendResponse({ ok: true, title }))
@@ -220,7 +283,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 
-chrome.runtime.onConnect.addListener((port) => {
+extensionApi.runtime.onConnect.addListener((port) => {
   if (port.name !== "llm-stream") {
     return;
   }
@@ -268,6 +331,7 @@ async function getOllamaTags(payload) {
     throw new Error(bt(payload?.language, "missingOllamaEndpoint"));
   }
 
+  await requireEndpointPermission(endpoint, payload);
   const tagsUrl = ollamaEndpointToTagsUrl(endpoint);
   const response = await fetchOllamaDirect(tagsUrl, {}, payload);
   const data = await readJsonResponse(response, "ollama", payload);
@@ -282,6 +346,7 @@ async function checkModelHealth(payload) {
     throw new Error(bt(config, "missingEndpointModelShort"));
   }
 
+  await requireEndpointPermission(config.endpoint, config);
   if (config.apiFormat === "ollama" || config.provider === "ollama") {
     const tagsUrl = ollamaEndpointToTagsUrl(config.endpoint);
     const response = await fetchOllamaDirect(tagsUrl, {}, config);
@@ -396,7 +461,7 @@ function normalizeConfig(config) {
     maxTokens: Math.max(1, Math.floor(Number(config.maxTokens) || 2048)),
     systemPrompt: String(config.systemPrompt || "").trim(),
     thinkingEnabled: Boolean(config.thinkingEnabled),
-    language: ["zh-CN", "zh-TW", "en-US", "ja-JP", "ko-KR", "fr-FR", "es-ES", "de-DE"].includes(config.language) ? config.language : "zh-CN",
+    language: Object.hasOwn(BG_TEXT, config.language) ? config.language : "en-US",
     answerLanguage: String(config.answerLanguage || "").trim(),
     translationLanguage: String(config.translationLanguage || "").trim()
   };
@@ -450,6 +515,7 @@ async function callCustomApi(config, messages) {
     return callOllama(config, messages);
   }
 
+  await requireEndpointPermission(config.endpoint, config);
   const headers = createJsonHeaders(config);
 
   const response = await fetch(config.endpoint, {
@@ -472,81 +538,81 @@ async function callCustomApi(config, messages) {
 }
 
 async function streamCustomApi(config, messages, port, signal, meta) {
+  await requireEndpointPermission(config.endpoint, config);
   const headers = createJsonHeaders(config);
-
-  const response = await fetch(config.endpoint, {
+  const body = {
+    model: config.model,
+    messages: prepareMessages(config, messages),
+    temperature: config.temperature,
+    max_tokens: config.maxTokens,
+    stream: true,
+    stream_options: { include_usage: true }
+  };
+  const send = () => fetch(config.endpoint, {
     method: "POST",
     headers,
-    body: JSON.stringify({
-      model: config.model,
-      messages: prepareMessages(config, messages),
-      temperature: config.temperature,
-      max_tokens: config.maxTokens,
-      stream: true
-    }),
+    body: JSON.stringify(body),
     signal
   });
 
+  let response = await send();
+  if (await rejectsRequestOption(response, /\b(?:stream_options|include_usage)\b/i)) {
+    delete body.stream_options;
+    response = await send();
+  }
   if (!response.ok) {
     await throwResponseError(response, "custom", config);
   }
 
+  let hasExactCompletionUsage = false;
   await readServerSentEvents(response, (data) => {
     if (data === "[DONE]") {
       return;
     }
 
     const parsed = safeParseJson(data);
-    const delta = parsed?.choices?.[0]?.delta?.content
-      || parsed?.choices?.[0]?.message?.content
-      || parsed?.choices?.[0]?.text
-      || "";
+    if (parsed?.error) {
+      throw new Error(parsed.error.message || parsed.error);
+    }
+    const choice = parsed?.choices?.[0];
+    const delta = choice?.delta?.content || choice?.message?.content || choice?.text;
+    const reasoning = choice?.delta?.reasoning_content;
 
-    if (parsed?.usage) {
-      meta.promptTokens = parsed.usage.prompt_tokens ?? meta.promptTokens;
-      meta.completionTokens = parsed.usage.completion_tokens ?? meta.completionTokens;
+    if (Number.isFinite(parsed?.usage?.prompt_tokens)) {
+      meta.promptTokens = parsed.usage.prompt_tokens;
+    }
+    if (Number.isFinite(parsed?.usage?.completion_tokens)) {
+      meta.completionTokens = parsed.usage.completion_tokens;
+      hasExactCompletionUsage = true;
     }
 
-    if (delta) {
-      meta.completionTokens += estimateTokens(delta);
-      port.postMessage({ type: "delta", content: delta });
+    if (!hasExactCompletionUsage) {
+      meta.completionTokens += estimateTokens(delta) + estimateTokens(reasoning);
     }
+    postStreamDelta(port, delta, reasoning);
   });
 }
 
 async function callOllama(config, messages) {
-  const response = await fetchOllamaDirect(ollamaEndpointToChatUrl(config.endpoint), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(createOllamaChatBody(config, messages, false))
-  });
-
+  const response = await sendOllamaChat(config, messages, false);
   const data = await readJsonResponse(response, "ollama", config);
   return data?.message?.content || data?.response || "";
 }
 
 async function streamOllama(config, messages, port, signal, meta) {
-  const response = await fetchOllamaDirect(ollamaEndpointToChatUrl(config.endpoint), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(createOllamaChatBody(config, messages, true)),
-    signal
-  });
-
+  const response = await sendOllamaChat(config, messages, true, signal);
   if (!response.ok) {
     await throwResponseError(response, "ollama", config);
   }
 
   await readNewlineJson(response, (data) => {
-    const delta = data?.message?.content || data?.response || "";
-    if (delta) {
-      meta.completionTokens += estimateTokens(delta);
-      port.postMessage({ type: "delta", content: delta });
+    if (data.error) {
+      throw new Error(data.error);
     }
+    const delta = data.message?.content || data.response;
+    const reasoning = data.message?.thinking;
+    meta.completionTokens += estimateTokens(delta) + estimateTokens(reasoning);
+    postStreamDelta(port, delta, reasoning);
     if (data.done) {
       meta.promptTokens = data.prompt_eval_count ?? meta.promptTokens;
       meta.completionTokens = data.eval_count ?? meta.completionTokens;
@@ -558,11 +624,63 @@ async function streamOllama(config, messages, port, signal, meta) {
   });
 }
 
+function postStreamDelta(port, content, reasoning) {
+  if (typeof reasoning === "string" && reasoning) {
+    port.postMessage({ type: "reasoning", content: reasoning });
+  }
+  if (typeof content === "string" && content) {
+    port.postMessage({ type: "delta", content });
+  }
+}
+
+async function sendOllamaChat(config, messages, stream, signal) {
+  await requireEndpointPermission(config.endpoint, config);
+  const url = ollamaEndpointToChatUrl(config.endpoint);
+  const body = createOllamaChatBody(config, messages, stream);
+  const send = () => fetchOllamaDirect(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    signal
+  }, config);
+
+  const response = await send();
+  if (body.think && await rejectsRequestOption(response, /\bthink(?:ing)?\b/i)) {
+    delete body.think;
+    return send();
+  }
+  return response;
+}
+
+async function rejectsRequestOption(response, option) {
+  if (response.status !== 400 && response.status !== 422) return false;
+  const text = await response.clone().text();
+  return option.test(text) && /(?:unsupported|unknown|unexpected|unrecognized|not (?:supported|permitted|allowed)|does not support|extra[_ ](?:inputs|fields))/i.test(text);
+}
+
+async function requireEndpointPermission(endpoint, config) {
+  if (!extensionApi.permissions?.contains) return;
+  let url;
+  try {
+    url = new URL(endpoint);
+  } catch {
+    throw new Error(bt(config, "endpointInvalid"));
+  }
+  if (!["http:", "https:"].includes(url.protocol) || url.username || url.password || url.hostname.includes("*")) {
+    throw new Error(bt(config, "endpointInvalid"));
+  }
+  const origin = `${url.protocol}//${url.hostname}/*`;
+  if (!await extensionApi.permissions.contains({ origins: [origin] })) {
+    throw new Error(bt(config, "endpointPermissionRequired"));
+  }
+}
+
 async function fetchOllamaDirect(url, options = {}, config = {}) {
   try {
     await ensureOllamaCorsRule(url);
     return await fetch(url, options);
   } catch (error) {
+    if (error.name === "AbortError") throw error;
     return createJsonResponse(502, {
       error: bt(config, "ollamaFetchFailed", { message: error.message })
     });
@@ -571,7 +689,7 @@ async function fetchOllamaDirect(url, options = {}, config = {}) {
 
 async function ensureOllamaCorsRule(url) {
   const origin = getLocalOllamaOrigin(url);
-  if (!origin || activeOllamaCorsOrigin === origin || !chrome.declarativeNetRequest?.updateDynamicRules) {
+  if (!origin || activeOllamaCorsOrigin === origin || !extensionApi.declarativeNetRequest?.updateDynamicRules) {
     return;
   }
 
@@ -617,8 +735,13 @@ function getLocalOllamaOrigin(url) {
 
 function updateDynamicRules(options) {
   return new Promise((resolve, reject) => {
-    chrome.declarativeNetRequest.updateDynamicRules(options, () => {
-      const error = chrome.runtime.lastError;
+    if (globalThis.browser?.declarativeNetRequest) {
+      extensionApi.declarativeNetRequest.updateDynamicRules(options).then(resolve, reject);
+      return;
+    }
+
+    extensionApi.declarativeNetRequest.updateDynamicRules(options, () => {
+      const error = extensionApi.runtime.lastError;
       if (error) {
         reject(new Error(error.message));
         return;
@@ -642,7 +765,7 @@ function createJsonResponse(status, payload) {
 function createOllamaChatBody(config, messages, stream) {
   const body = {
     model: config.model,
-    messages,
+    messages: prepareMessages(config, messages),
     stream,
     options: {
       temperature: config.temperature,
@@ -687,7 +810,7 @@ function prepareMessages(config, messages) {
     });
   }
 
-  if (!config.thinkingEnabled || config.apiFormat === "ollama") {
+  if (!config.thinkingEnabled || config.apiFormat === "ollama" || config.provider === "ollama") {
     return prepared;
   }
 
@@ -759,53 +882,51 @@ function throwFormattedResponseError(response, data, provider, config = {}) {
 }
 
 async function readServerSentEvents(response, onData) {
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-
-    const events = buffer.split("\n\n");
-    buffer = events.pop() || "";
-
-    for (const event of events) {
-      for (const line of event.split("\n")) {
-        const trimmed = line.trim();
-        if (trimmed.startsWith("data:")) {
-          onData(trimmed.slice(5).trim());
-        }
-      }
+  let data = [];
+  for await (const line of readStreamLines(response)) {
+    if (!line) {
+      if (data.length) onData(data.join("\n").trim());
+      data = [];
+    } else if (line.startsWith("data:")) {
+      data.push(line.slice(5).replace(/^ /, ""));
     }
   }
+  // Some chat endpoints close the stream without writing the final blank line.
+  if (data.length) onData(data.join("\n").trim());
 }
 
 async function readNewlineJson(response, onData) {
+  for await (const line of readStreamLines(response)) {
+    const parsed = safeParseJson(line);
+    if (parsed) onData(parsed);
+  }
+}
+
+async function* readStreamLines(response) {
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
+  let finished = false;
 
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      finished = done;
+      buffer += decoder.decode(value, { stream: !done });
+      // Hold a trailing CR until the next read can distinguish it from CRLF.
+      const endsInCr = !done && buffer.endsWith("\r");
+      const lines = (endsInCr ? buffer.slice(0, -1) : buffer).split(/\r\n|\r|\n/);
+      buffer = lines.pop() + (endsInCr ? "\r" : "");
 
-    const lines = buffer.split("\n");
-    buffer = lines.pop() || "";
-
-    for (const line of lines) {
-      const parsed = safeParseJson(line);
-      if (parsed) {
-        onData(parsed);
+      yield* lines;
+      if (done) {
+        if (buffer) yield buffer;
+        return;
       }
     }
-  }
-
-  const trailing = safeParseJson(buffer);
-  if (trailing) {
-    onData(trailing);
+  } finally {
+    if (!finished) reader.cancel().catch(() => {});
+    reader.releaseLock();
   }
 }
 

@@ -10,6 +10,11 @@
 - At least one screenshot of the product UI.
 - One small promotional image.
 
+## v2 artwork for the store listing
+
+- Small promotional image: `chrome-store/assets/promo-small-440x280.png`
+- Marquee promotional image: `chrome-store/assets/promo-marquee-1400x560.png`
+
 Recommended screenshot topics:
 
 1. Main chat page with model selector and composer.

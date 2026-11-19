@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" fill="none">
+  <title>lemon cha (128x128 store specification)</title>
+  <!--
+    Chrome Web Store 128x128 specification:
+    - 96x96 artwork centered inside a 128x128 canvas with 16px transparent margin on all four sides (bounding box: 16..112).
+    - Warm amber outer contour (#C48B00) for clear edge contrast on light and dark backgrounds.
+    - 6 rounded lemon pulp segments and bottom-right chat ellipsis.
+  -->
+
+  <!-- 1. Concentric outer boundary + lemon rind + inner cream pith -->
+  <g stroke-linejoin="round" stroke-linecap="round">
+    <!-- Warm amber outer boundary -->
+    <path
+      d="M 44.61 98.98 C 39.40 100.30 32.00 100.70 29.65 98.35 C 27.30 96.00 27.70 88.60 29.02 83.39 A 40.00 40.00 0 1 1 44.61 98.98 Z"
+      fill="#C48B00"
+      stroke="#C48B00"
+      stroke-width="16"
+    />
+    <!-- Primary lemon yellow rind -->
+    <path
+      d="M 44.61 98.98 C 39.40 100.30 32.00 100.70 29.65 98.35 C 27.30 96.00 27.70 88.60 29.02 83.39 A 40.00 40.00 0 1 1 44.61 98.98 Z"
+      fill="#FCD000"
+      stroke="#FCD000"
+      stroke-width="12.5"
+    />
+    <!-- Inner warm cream chat bubble surface -->
+    <path
+      d="M 44.61 98.98 C 39.40 100.30 32.00 100.70 29.65 98.35 C 27.30 96.00 27.70 88.60 29.02 83.39 A 40.00 40.00 0 1 1 44.61 98.98 Z"
+      fill="#FFFCC4"
+      stroke="#E8B400"
+      stroke-width="1.1"
+    />
+  </g>
+
+  <!-- 2. Six rounded lemon pulp wedges (centered at 64, 64) -->
+  <g fill="#FCD000" stroke="#E8B400" stroke-width="0.65" stroke-linejoin="round">
+    <path d="M 51.93 61.75 L 33.15 61.75 A 2.75 2.75 0 0 1 30.44 58.56 A 34.00 34.00 0 0 1 36.42 44.11 A 2.75 2.75 0 0 1 40.60 43.78 L 53.87 57.06 A 2.75 2.75 0 0 1 51.93 61.75 Z" />
+    <path d="M 57.06 53.87 L 43.78 40.60 A 2.75 2.75 0 0 1 44.11 36.42 A 34.00 34.00 0 0 1 58.56 30.44 A 2.75 2.75 0 0 1 61.75 33.15 L 61.75 51.93 A 2.75 2.75 0 0 1 57.06 53.87 Z" />
+    <path d="M 66.25 51.93 L 66.25 33.15 A 2.75 2.75 0 0 1 69.44 30.44 A 34.00 34.00 0 0 1 83.89 36.42 A 2.75 2.75 0 0 1 84.22 40.60 L 70.94 53.87 A 2.75 2.75 0 0 1 66.25 51.93 Z" />
+    <path d="M 74.13 57.06 L 87.40 43.78 A 2.75 2.75 0 0 1 91.58 44.11 A 34.00 34.00 0 0 1 97.56 58.56 A 2.75 2.75 0 0 1 94.85 61.75 L 76.07 61.75 A 2.75 2.75 0 0 1 74.13 57.06 Z" />
+    <path d="M 61.75 76.07 L 61.75 94.85 A 2.75 2.75 0 0 1 58.56 97.56 A 34.00 34.00 0 0 1 44.11 91.58 A 2.75 2.75 0 0 1 43.78 87.40 L 57.06 74.13 A 2.75 2.75 0 0 1 61.75 76.07 Z" />
+    <path d="M 53.87 70.94 L 40.60 84.22 A 2.75 2.75 0 0 1 36.42 83.89 A 34.00 34.00 0 0 1 30.44 69.44 A 2.75 2.75 0 0 1 33.15 66.25 L 51.93 66.25 A 2.75 2.75 0 0 1 53.87 70.94 Z" />
+  </g>
+
+  <!-- 3. Chat ellipsis in bottom-right quadrant -->
+  <g fill="#2F2C28">
+    <circle cx="72" cy="79.5" r="2.9" />
+    <circle cx="80.5" cy="79.5" r="2.9" />
+    <circle cx="89" cy="79.5" r="2.9" />
+  </g>
+</svg>

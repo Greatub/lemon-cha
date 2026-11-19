@@ -10,7 +10,8 @@ const runtimeFiles = [
   "background.js",
   "popup.js",
   "local-ollama-proxy.js",
-  "src/components/AppIcon.js"
+  "src/components/AppIcon.js",
+  "src/workspace-storage.js"
 ];
 
 const requiredExtensionFiles = [
@@ -87,6 +88,8 @@ function createManifestForTarget(baseManifest, browserTarget) {
   const manifest = structuredClone(baseManifest);
 
   if (browserTarget === "firefox") {
+    delete manifest.side_panel;
+    manifest.permissions = manifest.permissions.filter((permission) => permission !== "sidePanel");
     manifest.background = {
       scripts: [baseManifest.background?.service_worker].filter(Boolean)
     };
@@ -94,6 +97,9 @@ function createManifestForTarget(baseManifest, browserTarget) {
       ...(manifest.browser_specific_settings || {}),
       gecko: {
         id: "lemon-cha@georgehuang.local",
+        data_collection_permissions: {
+          required: ["none"]
+        },
         strict_min_version: "113.0",
         ...(manifest.browser_specific_settings?.gecko || {})
       }
@@ -125,6 +131,7 @@ function validateManifest(browserTarget) {
     } else {
       checkFileExists(background);
     }
+    if (manifest.side_panel?.default_path) checkFileExists(manifest.side_panel.default_path);
   }
 
   if (browserTarget === "firefox") {
@@ -140,6 +147,9 @@ function validateManifest(browserTarget) {
     }
     if (!manifest.browser_specific_settings?.gecko?.id) {
       fail("firefox manifest must define browser_specific_settings.gecko.id");
+    }
+    if (!manifest.browser_specific_settings?.gecko?.data_collection_permissions?.required?.includes("none")) {
+      fail("firefox manifest must declare browser_specific_settings.gecko.data_collection_permissions.required");
     }
   }
 
@@ -173,6 +183,18 @@ function validateCssInteractionStates() {
     const declarations = match[2];
     if (selector.includes(":hover") && /\bbox-shadow\s*:/.test(declarations)) {
       fail(`hover styles must not use box-shadow; use background/border changes instead: ${selector}`);
+    }
+
+    const isContextualCustomSelect = /(?:^|[\s,])(?:\.settings|\.composer-actions)\s+\.custom-select/.test(selector);
+    const isCustomSelectState = /(?::hover|:focus-visible|\.open|\[aria-selected=)/.test(selector);
+    if (isContextualCustomSelect && isCustomSelectState) {
+      fail(`custom select interaction states must be defined globally, not per area: ${selector}`);
+    }
+
+    const isContextualSettingsState = /(?:^|[\s,])\.settings\s+\.(?:settings-tab|secondary|danger|settings-actions\b[^,{]*)/.test(selector)
+      && /(?::hover|:focus-visible|\.active)/.test(selector);
+    if (isContextualSettingsState) {
+      fail(`settings component interaction states must use the shared component rules: ${selector}`);
     }
   }
 }

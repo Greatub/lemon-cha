@@ -1,6 +1,6 @@
 # lemon cha Privacy Policy
 
-Last updated: May 13, 2026
+Last updated: November 19, 2026
 
 ## Overview
 
@@ -19,14 +19,18 @@ lemon cha stores the following data in browser extension local storage:
 
 This information remains in the user's browser unless the user exports it manually or removes it through the extension controls.
 
+The workspace tab and Chrome side panel share this local data. The side panel displays only the extension's own chat and settings. The storage permission allows long conversation histories to remain on the device beyond Chrome's standard extension storage quota.
+
 ## Information transmitted
 
 When a user sends a message, lemon cha transmits the content needed to fulfill that request to the model endpoint selected by the user. This may be:
 
 - A third-party OpenAI-compatible API provider chosen by the user
-- A local Ollama endpoint running on the user's machine
+- An Ollama endpoint running on the user's machine or local network
 
 lemon cha does not proxy these requests through a lemon cha-owned server.
+
+When a user saves a model endpoint outside the preconfigured hosts, Chrome may ask for access to that endpoint's site. The user can revoke site access in Chrome's extension controls.
 
 ## API keys
 

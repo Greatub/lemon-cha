@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>lemon cha</title>
+    <link rel="icon" href="assets/icon-32.png">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
@@ -20,16 +21,28 @@
 
         <div class="sidebar-primary">
           <button id="newChat" type="button" class="sidebar-text-button new-chat-button">
-            <span class="icon-slot" data-icon="plus" aria-hidden="true"></span>
+            <span class="icon-slot" data-icon="messagePlus" aria-hidden="true"></span>
             <span class="menu-label">新建对话</span>
           </button>
+          <button id="sidebarTranslateTool" type="button" class="sidebar-text-button sidebar-translate-button">
+            <span class="icon-slot" data-icon="languages" aria-hidden="true"></span>
+            <span class="menu-label">翻译</span>
+          </button>
+          <button id="conversationSearchToggle" type="button" class="sidebar-text-button conversation-search-button" aria-expanded="false" aria-controls="conversationSearchPanel">
+            <span class="icon-slot" data-icon="search" aria-hidden="true"></span>
+            <span class="menu-label">搜索对话</span>
+          </button>
+          <div id="conversationSearchPanel" class="conversation-search-panel hidden">
+            <label class="visually-hidden" for="conversationSearchInput">搜索对话</label>
+            <input id="conversationSearchInput" class="conversation-search-input" type="text" role="searchbox" placeholder="搜索标题或内容" autocomplete="off">
+          </div>
         </div>
 
         <nav class="conversation-list" aria-label="对话列表">
           <div class="sidebar-actions conversation-tools" aria-label="对话管理">
             <div class="conversation-tools-label" data-i18n="foldersLabel">文件夹</div>
-            <button id="newFolder" type="button" class="sidebar-text-button menu-item">
-              <span class="menu-icon icon-slot" data-icon="folderPlus" aria-hidden="true"></span>
+            <button id="newFolder" type="button" class="sidebar-text-button">
+              <span class="icon-slot" data-icon="folderPlus" aria-hidden="true"></span>
               <span class="menu-label">新建文件夹</span>
             </button>
           </div>
@@ -37,11 +50,12 @@
         </nav>
 
         <div class="sidebar-footer">
+          <button id="settingsToggle" type="button" class="sidebar-text-button sidebar-settings-button" aria-expanded="false">
+            <span class="icon-slot" data-icon="settings" aria-hidden="true"></span>
+            <span class="menu-label">设置</span>
+          </button>
           <button id="themeToggle" class="icon-button" type="button" aria-label="夜间模式" aria-pressed="false">
             <span class="icon-slot" data-icon="moon" aria-hidden="true"></span>
-          </button>
-          <button id="settingsToggle" class="icon-button" type="button" aria-label="设置" aria-expanded="false">
-            <span class="icon-slot" data-icon="settings" aria-hidden="true"></span>
           </button>
         </div>
       </aside>
@@ -50,6 +64,7 @@
         <header class="chat-toolbar">
           <div class="chat-status">
             <h2 id="chatTitle" class="chat-title">新对话</h2>
+            <button id="workspaceSurfaceToggle" class="icon-button hidden" type="button"></button>
           </div>
         </header>
 
@@ -59,6 +74,7 @@
               <div>
                 <h2 id="settingsTitle" data-i18n="settingsTitle">设置</h2>
               </div>
+              <button id="closeSettings" class="secondary" type="button">返回对话</button>
             </div>
             <div class="settings-body">
               <div class="settings-tabs" role="tablist" aria-label="设置分类">
@@ -287,8 +303,14 @@
                 <option value="es-ES" data-i18n="languageSpanish">Español</option>
               </select>
               <div class="composer-send-actions">
-                <button id="composerModeToggle" class="secondary composer-mode-button" type="button" aria-pressed="false">对话</button>
-                <button id="thinkingToggle" class="secondary" type="button" aria-pressed="false">思考</button>
+                <button id="composerModeToggle" class="secondary composer-icon-button composer-mode-button" type="button" aria-pressed="false" aria-label="对话">
+                  <span class="icon-slot" data-icon="messageCircle" aria-hidden="true"></span>
+                  <span class="visually-hidden">对话</span>
+                </button>
+                <button id="thinkingToggle" class="secondary composer-icon-button" type="button" aria-pressed="false" aria-label="思考">
+                  <span class="icon-slot" data-icon="brain" aria-hidden="true"></span>
+                  <span class="visually-hidden">思考</span>
+                </button>
                 <button id="sendButton" type="submit">发送</button>
                 <button id="stopButton" class="danger hidden" type="button">停止</button>
               </div>
@@ -301,6 +323,7 @@
       <div id="toast" class="toast hidden" role="status"></div>
     </div>
     <script src="src/components/AppIcon.js"></script>
+    <script src="src/workspace-storage.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

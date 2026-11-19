@@ -50,8 +50,18 @@ const MODEL_PRESETS = {
   }
 };
 
+const extensionApi = globalThis.browser || globalThis.chrome;
+const workspaceStorage = WorkspaceStorage.create(extensionApi.storage.local, navigator.locks);
+const SHARED_WORKSPACE_KEYS = ["settings", "conversations", "conversationFolders", "promptTemplates", "activeConversationId"];
+let sharedWorkspaceReady = false;
+let sharedWorkspaceRefreshId = 0;
+let failedHistoryWrite = false;
+let workspaceTab = null;
+let isSidePanel = false;
+
 const DIRECT_OLLAMA_ENDPOINT = "http://127.0.0.1:11434/api/chat";
 const LEGACY_OLLAMA_PROXY_ENDPOINT = "http://127.0.0.1:8787/api/chat";
+const TRANSLATION_PROMPT_TEMPLATE = "You are a professional translator.\n\nYour goal is to accurately convey the meaning, tone, nuance, and context of the original text while following {defaultTranslationLanguage} grammar, vocabulary, idioms, and cultural conventions.\n\nTranslation style:\n{translationStyle}\n\nRequirements:\n- Translate the text into {defaultTranslationLanguage}.\n- Preserve the original meaning and intent.\n- Adapt wording naturally for {defaultTranslationLanguage}.\n- Do not add explanations, notes, summaries, markdown headings, or commentary.\n- Output only the translated text.\n\nText to translate:\n";
 
 const BUILT_IN_PROMPT_TEMPLATES = [
   {
@@ -63,10 +73,10 @@ const BUILT_IN_PROMPT_TEMPLATES = [
   },
   {
     id: "translate-polish",
-    name: "翻译润色",
-    nameEn: "Translate & Polish",
-    content: "请将以下内容翻译成自然、准确、专业的 {defaultTranslationLanguage}，并在不改变原意的前提下提升表达流畅度。请先给出译文，再列出 3 条关键措辞说明。\n\n内容：\n",
-    contentEn: "Translate the following content into natural, accurate, professional {defaultTranslationLanguage}, and improve fluency without changing the meaning. First provide the translation, then list 3 notes on key wording choices.\n\nContent:\n"
+    name: "专业翻译",
+    nameEn: "Professional Translation",
+    content: TRANSLATION_PROMPT_TEMPLATE,
+    contentEn: TRANSLATION_PROMPT_TEMPLATE
   },
   {
     id: "code-review",
@@ -123,32 +133,6 @@ const BUILT_IN_PROMPT_TEMPLATE_LOCALES = {
     "de-DE": {
       name: "Zusammenfassen",
       content: "Fasse den folgenden Inhalt zusammen und arbeite die wichtigsten Schlussfolgerungen, relevanten Details und konkreten nächsten Schritte heraus. Nutze diese Struktur:\n\n### Wichtigste Schlussfolgerungen\n- \n\n### Relevante Details\n- \n\n### Nächste Schritte\n- \n\nInhalt:\n"
-    }
-  },
-  "translate-polish": {
-    "zh-TW": {
-      name: "翻譯潤飾",
-      content: "請將以下內容翻譯成自然、準確且專業的 {defaultTranslationLanguage}，並在不改變原意的前提下讓表達更流暢。請先提供譯文，再列出 3 點關鍵用詞說明。\n\n內容：\n"
-    },
-    "ja-JP": {
-      name: "翻訳と推敲",
-      content: "以下の内容を自然で正確かつ専門的な {defaultTranslationLanguage} に翻訳し、意味を変えずに読みやすさを高めてください。まず訳文を示し、その後に重要な表現選びについて 3 点説明してください。\n\n内容：\n"
-    },
-    "ko-KR": {
-      name: "번역 및 다듬기",
-      content: "다음 내용을 자연스럽고 정확하며 전문적인 {defaultTranslationLanguage}(으)로 번역하고, 의미를 바꾸지 않는 범위에서 표현을 더 매끄럽게 다듬어 주세요. 먼저 번역문을 제시한 뒤, 핵심 표현 선택에 대한 설명 3가지를 적어 주세요.\n\n내용:\n"
-    },
-    "fr-FR": {
-      name: "Traduire et améliorer",
-      content: "Traduis le contenu suivant dans un {defaultTranslationLanguage} naturel, précis et professionnel, puis améliore la fluidité sans altérer le sens. Fournis d’abord la traduction, puis 3 remarques sur les choix de formulation importants.\n\nContenu :\n"
-    },
-    "es-ES": {
-      name: "Traducir y pulir",
-      content: "Traduce el siguiente contenido a un {defaultTranslationLanguage} natural, preciso y profesional, y mejora la fluidez sin alterar el significado. Primero ofrece la traducción y después incluye 3 notas sobre decisiones importantes de redacción.\n\nContenido:\n"
-    },
-    "de-DE": {
-      name: "Übersetzen und verbessern",
-      content: "Übersetze den folgenden Inhalt in natürliches, präzises und professionelles {defaultTranslationLanguage} und verbessere die sprachliche Wirkung, ohne die Bedeutung zu verändern. Gib zuerst die Übersetzung aus und nenne anschließend 3 Hinweise zu wichtigen Formulierungsentscheidungen.\n\nInhalt:\n"
     }
   },
   "code-review": {
@@ -257,6 +241,36 @@ const BUILT_IN_PROMPT_TEMPLATE_LOCALES = {
   }
 };
 
+const SUPPORTED_LANGUAGES = ["zh-CN", "zh-TW", "en-US", "ja-JP", "ko-KR", "fr-FR", "es-ES", "de-DE"];
+const BROWSER_LANGUAGE_FALLBACKS = {
+  en: "en-US",
+  ja: "ja-JP",
+  ko: "ko-KR",
+  fr: "fr-FR",
+  es: "es-ES",
+  de: "de-DE"
+};
+
+function normalizeBrowserLanguage(language = "") {
+  const normalized = String(language).replace("_", "-");
+  const exactMatch = SUPPORTED_LANGUAGES.find((item) => item.toLowerCase() === normalized.toLowerCase());
+  if (exactMatch) {
+    return exactMatch;
+  }
+
+  const [base, region = ""] = normalized.toLowerCase().split("-");
+  if (base === "zh") {
+    return ["tw", "hk", "mo"].includes(region) ? "zh-TW" : "zh-CN";
+  }
+
+  return BROWSER_LANGUAGE_FALLBACKS[base] || "";
+}
+
+function defaultInterfaceLanguage() {
+  const browserLanguage = extensionApi?.i18n?.getUILanguage?.() || globalThis.navigator?.language || "";
+  return normalizeBrowserLanguage(browserLanguage) || "en-US";
+}
+
 const DEFAULT_SETTINGS = {
   provider: "custom",
   preset: "deepseek",
@@ -274,7 +288,7 @@ const DEFAULT_SETTINGS = {
   defaultPresetId: "",
   memoryEnabled: true,
   thinkingEnabled: false,
-  language: "zh-CN",
+  language: defaultInterfaceLanguage(),
   answerLanguage: "zh-CN",
   translationLanguage: "en-US",
   translationStyle: "balanced",
@@ -286,7 +300,6 @@ const DEFAULT_SETTINGS = {
 const COLOR_SCHEMES = ["llmon", "leaf", "citrus", "blue", "gray"];
 const FONT_SIZES = ["small", "large"];
 const TRANSLATION_STYLES = ["balanced", "faithful", "polished", "professional"];
-const SUPPORTED_LANGUAGES = ["zh-CN", "zh-TW", "en-US", "ja-JP", "ko-KR", "fr-FR", "es-ES", "de-DE"];
 const NATIVE_LANGUAGE_NAMES = {
   "zh-CN": "简体中文",
   "zh-TW": "繁體中文",
@@ -302,11 +315,23 @@ const DEFAULT_TRANSLATION_LANGUAGE_VARIABLES = [
   "{targetLanguage}",
   "{目标语言}"
 ];
+const TRANSLATION_STYLE_VARIABLES = [
+  "{translationStyle}",
+  "{翻译风格}"
+];
+const HIDDEN_BUILT_IN_PROMPT_TEMPLATE_IDS = new Set(["translate-polish"]);
+const VISIBLE_BUILT_IN_PROMPT_TEMPLATES = BUILT_IN_PROMPT_TEMPLATES.filter(
+  (template) => !HIDDEN_BUILT_IN_PROMPT_TEMPLATE_IDS.has(template.id)
+);
 const LANGUAGE_UI_FALLBACK = {};
 
 const UI_TEXT = {
   "zh-CN": {
     newChat: "新建对话",
+    newTranslation: "新建翻译",
+    searchConversations: "搜索对话",
+    searchConversationsPlaceholder: "搜索标题或内容",
+    noSearchResults: "没有匹配的对话",
     newFolder: "新建文件夹",
     exportChats: "导出记录",
     exportMarkdown: "导出 Markdown",
@@ -388,9 +413,16 @@ const UI_TEXT = {
     optional: "可留空",
     historyLimit: "最大上下文轮数",
     thinkingMode: "思考",
+    openSidePanel: "打开侧边栏",
+    openWorkspaceTab: "打开工作台",
+    workspaceConflict: "对话已在另一窗口中更改，请查看会话列表后重试。",
+    workspaceStorageFailed: "无法保存或读取会话记录。",
+    endpointInvalid: "请输入有效的 HTTP 或 HTTPS 接口地址。",
+    endpointPermissionRequired: "请允许访问该接口域名后再保存。",
     interfaceLanguage: "界面语言",
     answerLanguage: "默认回答语言",
-    translationStyle: "翻译风格",
+    translationLanguage: "默认翻译目标语言",
+    translationStyle: "翻译工具风格",
     translationStyleBalanced: "自然准确",
     translationStyleFaithful: "忠实原文",
     translationStylePolished: "流畅润色",
@@ -493,6 +525,10 @@ const UI_TEXT = {
   },
   "en-US": {
     newChat: "New Chat",
+    newTranslation: "New Translation",
+    searchConversations: "Search Chats",
+    searchConversationsPlaceholder: "Search titles or messages",
+    noSearchResults: "No matching chats",
     newFolder: "New Folder",
     exportChats: "Export",
     importChats: "Import",
@@ -574,9 +610,16 @@ const UI_TEXT = {
     optional: "Optional",
     historyLimit: "Context Turns",
     thinkingMode: "Think",
+    openSidePanel: "Open side panel",
+    openWorkspaceTab: "Open workspace tab",
+    workspaceConflict: "This conversation changed in another window. Check your conversation list and try again.",
+    workspaceStorageFailed: "Could not save or read conversation history.",
+    endpointInvalid: "Enter a valid HTTP or HTTPS endpoint.",
+    endpointPermissionRequired: "Allow access to this endpoint’s host before saving.",
     interfaceLanguage: "Interface Language",
     answerLanguage: "Default Answer Language",
-    translationStyle: "Translation Style",
+    translationLanguage: "Default Translation Language",
+    translationStyle: "Translation Tool Style",
     translationStyleBalanced: "Natural & Accurate",
     translationStyleFaithful: "Faithful",
     translationStylePolished: "Polished",
@@ -682,6 +725,10 @@ const UI_TEXT = {
 Object.assign(UI_TEXT, {
   "zh-TW": {
     newChat: "新增對話",
+    newTranslation: "新增翻譯",
+    searchConversations: "搜尋對話",
+    searchConversationsPlaceholder: "搜尋標題或內容",
+    noSearchResults: "沒有符合的對話",
     newFolder: "新增資料夾",
     exportChats: "匯出記錄",
     exportMarkdown: "匯出 Markdown",
@@ -759,6 +806,12 @@ Object.assign(UI_TEXT, {
     optional: "可留空",
     historyLimit: "最大上下文輪數",
     thinkingMode: "思考",
+    openSidePanel: "開啟側邊欄",
+    openWorkspaceTab: "開啟工作台",
+    workspaceConflict: "對話已在另一個視窗中變更，請查看對話清單後再試一次。",
+    workspaceStorageFailed: "無法儲存或讀取對話記錄。",
+    endpointInvalid: "請輸入有效的 HTTP 或 HTTPS 介面位址。",
+    endpointPermissionRequired: "請允許存取此介面網域後再儲存。",
     interfaceLanguage: "介面語言",
     answerLanguage: "預設回答語言",
     translationLanguage: "預設翻譯目標語言",
@@ -860,6 +913,10 @@ Object.assign(UI_TEXT, {
   },
   "ja-JP": {
     newChat: "新規チャット",
+    newTranslation: "新規翻訳",
+    searchConversations: "チャットを検索",
+    searchConversationsPlaceholder: "タイトルまたは内容を検索",
+    noSearchResults: "一致するチャットはありません",
     newFolder: "新規フォルダー",
     exportChats: "履歴をエクスポート",
     exportMarkdown: "Markdown をエクスポート",
@@ -937,6 +994,12 @@ Object.assign(UI_TEXT, {
     optional: "任意",
     historyLimit: "コンテキストターン数",
     thinkingMode: "思考",
+    openSidePanel: "サイドパネルを開く",
+    openWorkspaceTab: "ワークスペースを開く",
+    workspaceConflict: "別のウィンドウで会話が変更されました。一覧を確認してからやり直してください。",
+    workspaceStorageFailed: "会話履歴を保存または読み込めませんでした。",
+    endpointInvalid: "有効な HTTP または HTTPS エンドポイントを入力してください。",
+    endpointPermissionRequired: "保存するには、このエンドポイントのホストへのアクセスを許可してください。",
     interfaceLanguage: "画面言語",
     answerLanguage: "既定の回答言語",
     translationLanguage: "既定の翻訳先言語",
@@ -1038,6 +1101,10 @@ Object.assign(UI_TEXT, {
   },
   "ko-KR": {
     newChat: "새 대화",
+    newTranslation: "새 번역",
+    searchConversations: "대화 검색",
+    searchConversationsPlaceholder: "제목 또는 내용 검색",
+    noSearchResults: "일치하는 대화가 없습니다",
     newFolder: "새 폴더",
     exportChats: "기록 내보내기",
     exportMarkdown: "Markdown 내보내기",
@@ -1115,6 +1182,12 @@ Object.assign(UI_TEXT, {
     optional: "선택 사항",
     historyLimit: "컨텍스트 턴 수",
     thinkingMode: "생각",
+    openSidePanel: "사이드 패널 열기",
+    openWorkspaceTab: "작업 공간 탭 열기",
+    workspaceConflict: "다른 창에서 대화가 변경됐습니다. 대화 목록을 확인한 뒤 다시 시도하세요.",
+    workspaceStorageFailed: "대화 기록을 저장하거나 읽을 수 없습니다.",
+    endpointInvalid: "유효한 HTTP 또는 HTTPS 엔드포인트를 입력하세요.",
+    endpointPermissionRequired: "저장하려면 이 엔드포인트의 호스트에 대한 접근을 허용하세요.",
     interfaceLanguage: "인터페이스 언어",
     answerLanguage: "기본 답변 언어",
     translationLanguage: "기본 번역 대상 언어",
@@ -1216,6 +1289,10 @@ Object.assign(UI_TEXT, {
   },
   "fr-FR": {
     newChat: "Nouvelle conversation",
+    newTranslation: "Nouvelle traduction",
+    searchConversations: "Rechercher",
+    searchConversationsPlaceholder: "Rechercher titres ou messages",
+    noSearchResults: "Aucune conversation trouvée",
     newFolder: "Nouveau dossier",
     exportChats: "Exporter l’historique",
     exportMarkdown: "Exporter en Markdown",
@@ -1293,6 +1370,12 @@ Object.assign(UI_TEXT, {
     optional: "Facultatif",
     historyLimit: "Tours de contexte",
     thinkingMode: "Réflexion",
+    openSidePanel: "Ouvrir le panneau latéral",
+    openWorkspaceTab: "Ouvrir l’espace de travail",
+    workspaceConflict: "La conversation a changé dans une autre fenêtre. Consultez la liste et réessayez.",
+    workspaceStorageFailed: "Impossible d’enregistrer ou de lire l’historique.",
+    endpointInvalid: "Saisissez une adresse HTTP ou HTTPS valide.",
+    endpointPermissionRequired: "Autorisez l’accès à l’hôte de cette adresse avant d’enregistrer.",
     interfaceLanguage: "Langue de l’interface",
     answerLanguage: "Langue de réponse par défaut",
     translationLanguage: "Langue cible de traduction",
@@ -1394,6 +1477,10 @@ Object.assign(UI_TEXT, {
   },
   "es-ES": {
     newChat: "Nuevo chat",
+    newTranslation: "Nueva traducción",
+    searchConversations: "Buscar chats",
+    searchConversationsPlaceholder: "Buscar títulos o mensajes",
+    noSearchResults: "No hay chats coincidentes",
     newFolder: "Nueva carpeta",
     exportChats: "Exportar historial",
     exportMarkdown: "Exportar Markdown",
@@ -1471,6 +1558,12 @@ Object.assign(UI_TEXT, {
     optional: "Opcional",
     historyLimit: "Turnos de contexto",
     thinkingMode: "Pensar",
+    openSidePanel: "Abrir panel lateral",
+    openWorkspaceTab: "Abrir espacio de trabajo",
+    workspaceConflict: "La conversación cambió en otra ventana. Revisa la lista y vuelve a intentarlo.",
+    workspaceStorageFailed: "No se pudo guardar o leer el historial.",
+    endpointInvalid: "Introduce una URL HTTP o HTTPS válida.",
+    endpointPermissionRequired: "Permite el acceso al host de esta URL antes de guardar.",
     interfaceLanguage: "Idioma de interfaz",
     answerLanguage: "Idioma de respuesta predeterminado",
     translationLanguage: "Idioma destino de traducción",
@@ -1572,6 +1665,10 @@ Object.assign(UI_TEXT, {
   },
   "de-DE": {
     newChat: "Neuer Chat",
+    newTranslation: "Neue Übersetzung",
+    searchConversations: "Chats suchen",
+    searchConversationsPlaceholder: "Titel oder Nachrichten suchen",
+    noSearchResults: "Keine passenden Chats",
     newFolder: "Neuer Ordner",
     exportChats: "Verlauf exportieren",
     exportMarkdown: "Markdown exportieren",
@@ -1649,6 +1746,12 @@ Object.assign(UI_TEXT, {
     optional: "Optional",
     historyLimit: "Kontext-Runden",
     thinkingMode: "Denken",
+    openSidePanel: "Seitenleiste öffnen",
+    openWorkspaceTab: "Arbeitsbereich öffnen",
+    workspaceConflict: "Die Unterhaltung wurde in einem anderen Fenster geändert. Prüfe die Liste und versuche es erneut.",
+    workspaceStorageFailed: "Der Chatverlauf konnte nicht gespeichert oder gelesen werden.",
+    endpointInvalid: "Gib eine gültige HTTP- oder HTTPS-Adresse ein.",
+    endpointPermissionRequired: "Erlaube vor dem Speichern den Zugriff auf den Host dieser Adresse.",
     interfaceLanguage: "Oberflächensprache",
     answerLanguage: "Standard-Antwortsprache",
     translationLanguage: "Standard-Zielsprache",
@@ -1755,7 +1858,7 @@ Object.assign(UI_TEXT["zh-TW"], {
   translateMode: "翻譯",
   inputModeAria: "輸入模式",
   targetLanguageAria: "目標語言",
-  translationStyle: "翻譯風格",
+  translationStyle: "翻譯工具風格",
   translationStyleBalanced: "自然準確",
   translationStyleFaithful: "忠於原文",
   translationStylePolished: "流暢潤飾",
@@ -1767,7 +1870,7 @@ Object.assign(UI_TEXT["ja-JP"], {
   translateMode: "翻訳",
   inputModeAria: "入力モード",
   targetLanguageAria: "翻訳先言語",
-  translationStyle: "翻訳スタイル",
+  translationStyle: "翻訳ツールのスタイル",
   translationStyleBalanced: "自然で正確",
   translationStyleFaithful: "原文に忠実",
   translationStylePolished: "読みやすく推敲",
@@ -1779,7 +1882,7 @@ Object.assign(UI_TEXT["ko-KR"], {
   translateMode: "번역",
   inputModeAria: "입력 모드",
   targetLanguageAria: "대상 언어",
-  translationStyle: "번역 스타일",
+  translationStyle: "번역 도구 스타일",
   translationStyleBalanced: "자연스럽고 정확하게",
   translationStyleFaithful: "원문에 충실하게",
   translationStylePolished: "매끄럽게 다듬기",
@@ -1791,7 +1894,7 @@ Object.assign(UI_TEXT["fr-FR"], {
   translateMode: "Traduction",
   inputModeAria: "Mode de saisie",
   targetLanguageAria: "Langue cible",
-  translationStyle: "Style de traduction",
+  translationStyle: "Style de l’outil de traduction",
   translationStyleBalanced: "Naturel et précis",
   translationStyleFaithful: "Fidèle au texte",
   translationStylePolished: "Fluide et révisé",
@@ -1803,7 +1906,7 @@ Object.assign(UI_TEXT["es-ES"], {
   translateMode: "Traducir",
   inputModeAria: "Modo de entrada",
   targetLanguageAria: "Idioma de destino",
-  translationStyle: "Estilo de traducción",
+  translationStyle: "Estilo de la herramienta de traducción",
   translationStyleBalanced: "Natural y preciso",
   translationStyleFaithful: "Fiel al original",
   translationStylePolished: "Fluido y pulido",
@@ -1815,7 +1918,7 @@ Object.assign(UI_TEXT["de-DE"], {
   translateMode: "Übersetzen",
   inputModeAria: "Eingabemodus",
   targetLanguageAria: "Zielsprache",
-  translationStyle: "Übersetzungsstil",
+  translationStyle: "Stil des Übersetzungswerkzeugs",
   translationStyleBalanced: "Natürlich und genau",
   translationStyleFaithful: "Quelltextnah",
   translationStylePolished: "Flüssig überarbeitet",
@@ -1830,7 +1933,10 @@ const state = {
   activeConversationId: "",
   sending: false,
   activePort: null,
+  streamingMessage: null,
   sidebarCollapsed: false,
+  conversationSearchOpen: false,
+  conversationSearchQuery: "",
   settingsPageOpen: false,
   settingsSnapshot: null,
   settingsDirtySections: {
@@ -1844,6 +1950,7 @@ const state = {
 
 const els = {
   workspace: document.querySelector(".workspace"),
+  workspaceSurfaceToggle: document.querySelector("#workspaceSurfaceToggle"),
   chatTitle: document.querySelector("#chatTitle"),
   toolbarModelSelect: document.querySelector("#toolbarModelSelect"),
   healthStatus: document.querySelector("#healthStatus"),
@@ -1889,6 +1996,10 @@ const els = {
   testOllama: document.querySelector("#testOllama"),
   conversationList: document.querySelector("#conversationList"),
   newChat: document.querySelector("#newChat"),
+  sidebarTranslateTool: document.querySelector("#sidebarTranslateTool"),
+  conversationSearchToggle: document.querySelector("#conversationSearchToggle"),
+  conversationSearchPanel: document.querySelector("#conversationSearchPanel"),
+  conversationSearchInput: document.querySelector("#conversationSearchInput"),
   clearHistory: document.querySelector("#clearHistory"),
   newFolder: document.querySelector("#newFolder"),
   exportChats: document.querySelector("#exportChats"),
@@ -1989,6 +2100,23 @@ function clearTooltip(node, label = "") {
   }
 }
 
+function syncSidebarActionTooltips() {
+  const actions = [
+    [els.newChat, t("newChat")],
+    [els.sidebarTranslateTool, t("newTranslation")],
+    [els.conversationSearchToggle, t("searchConversations")],
+    [els.settingsToggle, t("settingsTitle")]
+  ];
+
+  for (const [button, label] of actions) {
+    if (state.sidebarCollapsed) {
+      setTooltip(button, label);
+    } else {
+      clearTooltip(button, label);
+    }
+  }
+}
+
 function setButtonContent(button, label, iconName = "") {
   if (!button) return;
   button.textContent = "";
@@ -1999,6 +2127,17 @@ function setButtonContent(button, label, iconName = "") {
   text.className = "button-label";
   text.textContent = label;
   button.append(text);
+}
+
+function setIconButtonContent(button, label, iconName) {
+  if (!button) return;
+  button.textContent = "";
+  button.append(createIcon(iconName));
+  const text = document.createElement("span");
+  text.className = "visually-hidden";
+  text.textContent = label;
+  button.append(text);
+  setTooltip(button, label);
 }
 
 function setIconContent(node, iconName, label = "") {
@@ -2015,15 +2154,28 @@ function setIconContent(node, iconName, label = "") {
 }
 
 async function loadState() {
-  const stored = await chrome.storage.local.get(["settings", "messages", "conversations", "conversationFolders", "activeConversationId", "promptTemplates", "sidebarCollapsed"]);
+  if (extensionApi.sidePanel?.open) {
+    workspaceTab = await extensionApi.tabs.getCurrent();
+    isSidePanel = !workspaceTab;
+    document.body.classList.toggle("side-panel", isSidePanel);
+    els.workspaceSurfaceToggle.classList.remove("hidden");
+  }
+
+  const stored = await extensionApi.storage.local.get([...SHARED_WORKSPACE_KEYS, "messages", "sidebarCollapsed"]);
   state.settings = { ...DEFAULT_SETTINGS, ...(stored.settings || {}) };
   state.settings.modelConfigs = { ...(stored.settings?.modelConfigs || {}) };
-  state.sidebarCollapsed = Boolean(stored.sidebarCollapsed);
-  migrateOllamaSettings();
+  state.sidebarCollapsed = isSidePanel || Boolean(stored.sidebarCollapsed);
   state.conversations = Array.isArray(stored.conversations) ? stored.conversations : [];
   state.conversationFolders = Array.isArray(stored.conversationFolders) ? stored.conversationFolders : [];
   state.promptTemplates = Array.isArray(stored.promptTemplates) ? stored.promptTemplates : [];
   state.activeConversationId = stored.activeConversationId || "";
+  workspaceStorage.accept(Object.fromEntries(SHARED_WORKSPACE_KEYS.map((key) => [key, state[key]])));
+  migrateOllamaSettings();
+  try {
+    await saveSettings();
+  } catch {
+    pushSystemMessage(t("settingsSaveFailed"));
+  }
 
   if (!state.conversations.length && Array.isArray(stored.messages) && stored.messages.length) {
     const migrated = createConversation(t("importedChat"), stored.messages);
@@ -2033,11 +2185,14 @@ async function loadState() {
   }
 
   ensureActiveConversation();
+  state.composerMode = getConversationMode(getActiveConversation());
   applyTheme();
   applySidebarState(false);
   syncSettingsToForm();
   enhanceSelects();
   render();
+  sharedWorkspaceReady = true;
+  refreshSharedWorkspace();
   requestAnimationFrame(() => {
     resizePromptInput({ keepCaretVisible: true });
     updateComposerSafeSpace();
@@ -2063,31 +2218,131 @@ function migrateOllamaSettings() {
       state.settings.customEndpoint = DIRECT_OLLAMA_ENDPOINT;
     }
   }
-
-  saveSettings();
 }
 
 async function saveSettings() {
-  await chrome.storage.local.set({ settings: state.settings });
+  await workspaceStorage.save({ settings: state.settings });
+  refreshSharedWorkspace();
 }
 
-async function saveConversations() {
-  await chrome.storage.local.set({
-    conversations: state.conversations,
-    conversationFolders: state.conversationFolders,
-    activeConversationId: state.activeConversationId
-  });
+async function saveConversations({ replaceHistory = false } = {}) {
+  const conversations = state.streamingMessage
+    ? state.conversations.map((item) => item.messages.includes(state.streamingMessage) ? {
+      ...item, messages: item.messages.filter((message) => message !== state.streamingMessage)
+    } : item)
+    : state.conversations;
+  try {
+    const conflict = await workspaceStorage.save({
+      conversations,
+      conversationFolders: state.conversationFolders,
+      activeConversationId: state.activeConversationId
+    }, { replace: replaceHistory ? ["conversations", "conversationFolders"] : [] });
+    failedHistoryWrite = false;
+    if (conflict) pushSystemMessage(t("workspaceConflict"));
+    await refreshSharedWorkspace();
+  } catch {
+    failedHistoryWrite = true;
+    pushSystemMessage(t("workspaceStorageFailed"));
+  }
 }
 
 async function savePromptTemplates() {
-  await chrome.storage.local.set({ promptTemplates: state.promptTemplates });
+  await workspaceStorage.save({ promptTemplates: state.promptTemplates });
+  refreshSharedWorkspace();
 }
 
-function createConversation(title = t("newChatTitle"), messages = []) {
+async function replaceSharedWorkspace() {
+  const values = Object.fromEntries(SHARED_WORKSPACE_KEYS.map((key) => [key, state[key]]));
+  await workspaceStorage.save(values, { replace: SHARED_WORKSPACE_KEYS });
+  failedHistoryWrite = false;
+  await extensionApi.storage.local.remove("messages");
+}
+
+async function refreshSharedWorkspace() {
+  if (!sharedWorkspaceReady || workspaceStorage.pending || state.sending || failedHistoryWrite) return;
+  const refreshId = ++sharedWorkspaceRefreshId;
+  const revision = workspaceStorage.revision;
+  try {
+    const stored = await extensionApi.storage.local.get(SHARED_WORKSPACE_KEYS);
+    if (refreshId !== sharedWorkspaceRefreshId || revision !== workspaceStorage.revision
+        || workspaceStorage.pending || state.sending || failedHistoryWrite) return;
+
+    const settings = { ...DEFAULT_SETTINGS, ...(stored.settings || {}), modelConfigs: stored.settings?.modelConfigs || {} };
+    const templates = Array.isArray(stored.promptTemplates) ? stored.promptTemplates : [];
+    const settingsChanged = !state.settingsPageOpen && !WorkspaceStorage.equal(state.settings, settings);
+    const templatesChanged = !state.promptTemplateDirty && !WorkspaceStorage.equal(state.promptTemplates, templates);
+    if (settingsChanged) {
+      state.settings = settings;
+      workspaceStorage.accept({ settings });
+    }
+    if (templatesChanged) {
+      state.promptTemplates = templates;
+      workspaceStorage.accept({ promptTemplates: templates });
+    }
+
+    const conversations = Array.isArray(stored.conversations) ? stored.conversations : [];
+    const conversationFolders = Array.isArray(stored.conversationFolders) ? stored.conversationFolders : [];
+    if (!conversations.length) {
+      if (settingsChanged) render();
+      else if (templatesChanged) renderPromptTemplates();
+      return;
+    }
+    const previousId = state.activeConversationId;
+    const previous = state.conversations.find((item) => item.id === previousId);
+    const incoming = conversations.find((item) => item.id === previousId);
+    const activeChanged = !incoming || !WorkspaceStorage.equal(previous, incoming);
+    const listChanged = !WorkspaceStorage.equal(state.conversations, conversations)
+      || !WorkspaceStorage.equal(state.conversationFolders, conversationFolders);
+    // Keep references captured by in-flight title requests and event handlers.
+    if (listChanged) {
+      const existing = new Map(state.conversations.map((item) => [item.id, item]));
+      state.conversations = conversations.map((item) => {
+        const previousItem = existing.get(item.id);
+        if (!previousItem) return item;
+        for (const key of Object.keys(previousItem)) {
+          if (!Object.hasOwn(item, key)) delete previousItem[key];
+        }
+        return Object.assign(previousItem, item);
+      });
+      state.conversationFolders = conversationFolders;
+    }
+    if (!incoming) {
+      state.activeConversationId = conversations.find((item) => item.id === stored.activeConversationId)?.id || conversations[0].id;
+      state.composerMode = getConversationMode(getActiveConversation());
+      clearComposerInput();
+    }
+    if (listChanged || !incoming) {
+      workspaceStorage.accept({ conversations, conversationFolders, activeConversationId: state.activeConversationId });
+    }
+    if (settingsChanged) {
+      render();
+    } else {
+      if (templatesChanged) {
+        renderPromptTemplates();
+        syncCustomSelects();
+      }
+      if (listChanged) renderConversations();
+      if (activeChanged) {
+        updateChatTitle();
+        renderMessages();
+        if (!incoming) syncComposerMode();
+      }
+    }
+  } catch {
+    pushSystemMessage(t("workspaceStorageFailed"));
+  }
+}
+
+function normalizeConversationMode(mode) {
+  return mode === "translate" ? "translate" : "chat";
+}
+
+function createConversation(title = t("newChatTitle"), messages = [], mode = "chat") {
   const now = Date.now();
   return {
     id: `${now}-${Math.random().toString(16).slice(2)}`,
     title,
+    mode: normalizeConversationMode(mode),
     messages,
     createdAt: now,
     updatedAt: now
@@ -2109,19 +2364,24 @@ function ensureActiveConversation() {
     const conversation = createConversation();
     state.conversations = [conversation];
     state.activeConversationId = conversation.id;
+    state.composerMode = getConversationMode(conversation);
     saveConversations();
     return;
   }
 
   if (!state.conversations.some((conversation) => conversation.id === state.activeConversationId)) {
     state.activeConversationId = state.conversations[0].id;
-    saveConversations();
+    state.composerMode = getConversationMode(state.conversations[0]);
   }
 }
 
 function getActiveConversation() {
   ensureActiveConversation();
   return state.conversations.find((conversation) => conversation.id === state.activeConversationId);
+}
+
+function getConversationMode(conversation) {
+  return normalizeConversationMode(conversation?.mode);
 }
 
 function getActiveMessages() {
@@ -2256,8 +2516,7 @@ function syncSettingsToForm() {
   els.systemPromptInput.value = config.systemPrompt;
   els.defaultPresetInput.value = config.defaultPresetId || "";
   els.memoryEnabledInput.checked = config.memoryEnabled;
-  els.thinkingToggle.classList.toggle("active", Boolean(state.settings.thinkingEnabled));
-  els.thinkingToggle.setAttribute("aria-pressed", String(Boolean(state.settings.thinkingEnabled)));
+  syncThinkingToggle();
   els.languageInput.value = normalizeLanguage(state.settings.language);
   els.answerLanguageInput.value = normalizeLanguage(state.settings.answerLanguage);
   els.translationStyleInput.value = TRANSLATION_STYLES.includes(state.settings.translationStyle)
@@ -2305,6 +2564,10 @@ function applyLanguage() {
     node.placeholder = t(node.dataset.i18nPlaceholder);
   }
   setMenuLabel(els.newChat, t("newChat"));
+  setMenuLabel(els.sidebarTranslateTool, t("newTranslation"));
+  setMenuLabel(els.conversationSearchToggle, t("searchConversations"));
+  setMenuLabel(els.settingsToggle, t("settingsTitle"));
+  setIconOnly(els.settingsToggle, "settings");
   setMenuLabel(els.newFolder, t("newFolder"));
   setMenuLabel(els.clearHistory, t("clearHistory"));
   setMenuLabel(els.exportChats, t("exportChats"));
@@ -2316,13 +2579,15 @@ function applyLanguage() {
     setButtonContent(els.closeSettings, t("closeSettings"), "chevronLeft");
   }
   setTooltip(els.sidebarToggle, state.sidebarCollapsed ? t("showSidebar") : t("hideSidebar"));
-  setTooltip(els.settingsToggle, t("settingsTitle"));
   setIconOnly(els.sidebarToggle, "panelLeft");
-  if (state.sidebarCollapsed) {
-    setTooltip(els.newChat, t("newChat"));
-  } else {
-    clearTooltip(els.newChat, t("newChat"));
+  if (extensionApi.sidePanel?.open) {
+    setIconButtonContent(els.workspaceSurfaceToggle,
+      t(isSidePanel ? "openWorkspaceTab" : "openSidePanel"), isSidePanel ? "monitor" : "panelLeft");
   }
+  syncSidebarActionTooltips();
+  els.conversationSearchInput.placeholder = t("searchConversationsPlaceholder");
+  els.conversationSearchInput.setAttribute("aria-label", t("searchConversations"));
+  syncConversationSearchState();
   clearTooltip(els.newFolder, t("newFolder"));
   setTooltip(els.clearHistory, t("clearHistory"));
   setTooltip(els.exportChats, t("exportChats"));
@@ -2338,7 +2603,8 @@ function applyLanguage() {
   setButtonContent(els.resetCurrentPromptTemplate, t("resetCurrentSettings"), "refreshCw");
   setButtonContent(els.clearHistorySettings, t("clearHistorySettings"), "trash");
   setButtonContent(els.factoryResetSettings, t("factoryResetSettings"), "alertTriangle");
-  setButtonContent(els.thinkingToggle, t("thinkingMode"), "brain");
+  syncComposerMode();
+  syncThinkingToggle();
   setButtonContent(els.sendButton, t("send"), "send");
   setButtonContent(els.stopButton, t("stop"), "square");
   els.promptInput.placeholder = t("promptPlaceholder");
@@ -2378,19 +2644,69 @@ function setMenuLabel(button, label) {
 function applySidebarState(persist = true) {
   document.body.classList.toggle("sidebar-collapsed", state.sidebarCollapsed);
   setTooltip(els.sidebarToggle, state.sidebarCollapsed ? t("showSidebar") : t("hideSidebar"));
-  setTooltip(els.settingsToggle, t("settingsTitle"));
-  if (state.sidebarCollapsed) {
-    setTooltip(els.newChat, t("newChat"));
-  } else {
-    clearTooltip(els.newChat, t("newChat"));
-  }
+  syncSidebarActionTooltips();
+  syncConversationSearchState();
   setIconOnly(els.sidebarToggle, "panelLeft");
   if (state.sidebarCollapsed) {
     closeSettingsMenu();
   }
-  if (persist) {
-    chrome.storage.local.set({ sidebarCollapsed: state.sidebarCollapsed });
+  if (persist && !isSidePanel) {
+    extensionApi.storage.local.set({ sidebarCollapsed: state.sidebarCollapsed });
   }
+}
+
+function collapsePanelSidebar() {
+  if (!isSidePanel || state.sidebarCollapsed) return;
+  state.sidebarCollapsed = true;
+  applySidebarState(false);
+}
+
+function syncConversationSearchState({ focus = false } = {}) {
+  const isOpen = state.conversationSearchOpen && !state.sidebarCollapsed;
+  els.conversationSearchToggle.classList.toggle("hidden", isOpen);
+  els.conversationSearchPanel.classList.toggle("hidden", !isOpen);
+  els.conversationSearchToggle.classList.toggle("active", Boolean(state.conversationSearchQuery.trim()));
+  els.conversationSearchToggle.setAttribute("aria-expanded", String(isOpen));
+  els.conversationSearchInput.value = state.conversationSearchQuery;
+  if (focus && isOpen) {
+    requestAnimationFrame(() => els.conversationSearchInput.focus());
+  }
+}
+
+function setConversationSearchOpen(open, options = {}) {
+  state.conversationSearchOpen = Boolean(open);
+  syncConversationSearchState(options);
+}
+
+function isConversationSearchOpen() {
+  return state.conversationSearchOpen || !els.conversationSearchPanel.classList.contains("hidden");
+}
+
+function closeConversationSearch({ restoreFocus = false } = {}) {
+  if (!isConversationSearchOpen() && !state.conversationSearchQuery) {
+    return;
+  }
+  state.conversationSearchQuery = "";
+  setConversationSearchOpen(false);
+  renderConversations();
+  if (restoreFocus) {
+    els.conversationSearchToggle.focus();
+  } else {
+    els.conversationSearchInput.blur();
+  }
+}
+
+function normalizeSearchText(value = "") {
+  return value.toLocaleLowerCase().trim();
+}
+
+function conversationMatchesSearch(conversation, query) {
+  if (!query) return true;
+  const title = conversation.title || t("newChatTitle");
+  const messages = Array.isArray(conversation.messages)
+    ? conversation.messages.map((message) => message.content || "").join(" ")
+    : "";
+  return normalizeSearchText(`${title} ${messages}`).includes(query);
 }
 
 function applyTheme() {
@@ -2456,6 +2772,7 @@ function requestCloseSettingsPage() {
     return false;
   }
   showSettingsPage(false);
+  refreshSharedWorkspace();
   return true;
 }
 
@@ -2545,8 +2862,7 @@ function syncComposerMode() {
     const icon = mode === "translate" ? "languages" : "messageCircle";
     els.composerModeToggle.classList.toggle("active", mode === "translate");
     els.composerModeToggle.setAttribute("aria-pressed", String(mode === "translate"));
-    setButtonContent(els.composerModeToggle, label, icon);
-    clearTooltip(els.composerModeToggle, label);
+    setIconButtonContent(els.composerModeToggle, label, icon);
   }
 
   const promptShell = els.promptTemplateSelect ? customSelects.get(els.promptTemplateSelect)?.shell : null;
@@ -2556,6 +2872,14 @@ function syncComposerMode() {
   els.promptTemplateSelect?.classList.toggle("hidden", mode !== "chat");
   els.translationTargetSelect?.classList.toggle("hidden", mode !== "translate");
   closeCustomSelects();
+}
+
+function syncThinkingToggle() {
+  if (!els.thinkingToggle) return;
+  const enabled = Boolean(state.settings.thinkingEnabled);
+  els.thinkingToggle.classList.toggle("active", enabled);
+  els.thinkingToggle.setAttribute("aria-pressed", String(enabled));
+  setIconButtonContent(els.thinkingToggle, t("thinkingMode"), "brain");
 }
 
 function enhanceSelects() {
@@ -2669,7 +2993,6 @@ function iconForSelectOption(select, option) {
   if (select.id === "promptTemplateSelect" || select.id === "promptTemplateManageSelect" || select.id === "defaultPresetInput") {
     const promptIcons = {
       summarize: "fileText",
-      "translate-polish": "languages",
       "code-review": "bot",
       debug: "refreshCw",
       writing: "edit",
@@ -2736,12 +3059,12 @@ function renderPromptTemplates() {
     els.defaultPresetInput.append(defaultPlaceholder);
   }
 
-  appendPromptTemplateGroup(t("builtInTemplates"), BUILT_IN_PROMPT_TEMPLATES);
+  appendPromptTemplateGroup(t("builtInTemplates"), VISIBLE_BUILT_IN_PROMPT_TEMPLATES);
   appendPromptTemplateGroup(t("customTemplates"), state.promptTemplates);
-  appendPromptTemplateGroup(t("builtInTemplates"), BUILT_IN_PROMPT_TEMPLATES, els.promptTemplateManageSelect);
+  appendPromptTemplateGroup(t("builtInTemplates"), VISIBLE_BUILT_IN_PROMPT_TEMPLATES, els.promptTemplateManageSelect);
   appendPromptTemplateGroup(t("customTemplates"), state.promptTemplates, els.promptTemplateManageSelect);
   if (els.defaultPresetInput) {
-    appendPromptTemplateGroup(t("builtInTemplates"), BUILT_IN_PROMPT_TEMPLATES, els.defaultPresetInput);
+    appendPromptTemplateGroup(t("builtInTemplates"), VISIBLE_BUILT_IN_PROMPT_TEMPLATES, els.defaultPresetInput);
     appendPromptTemplateGroup(t("customTemplates"), state.promptTemplates, els.defaultPresetInput);
   }
 
@@ -2806,9 +3129,13 @@ function defaultTranslationLanguageName() {
 }
 
 function resolvePromptTemplateVariables(content) {
-  return DEFAULT_TRANSLATION_LANGUAGE_VARIABLES.reduce(
+  const withLanguage = DEFAULT_TRANSLATION_LANGUAGE_VARIABLES.reduce(
     (resolved, variable) => resolved.split(variable).join(defaultTranslationLanguageName()),
     content
+  );
+  return TRANSLATION_STYLE_VARIABLES.reduce(
+    (resolved, variable) => resolved.split(variable).join(translationStyleInstruction()),
+    withLanguage
   );
 }
 
@@ -2816,23 +3143,14 @@ function translationStyleInstruction() {
   const style = TRANSLATION_STYLES.includes(state.settings.translationStyle)
     ? state.settings.translationStyle
     : DEFAULT_SETTINGS.translationStyle;
-  const language = uiLanguage();
   const instructions = {
-    "zh-CN": {
-      balanced: "翻译风格：自然准确，兼顾原意和目标语言表达。",
-      faithful: "翻译风格：忠实原文，优先保留原文结构、术语和语气。",
-      polished: "翻译风格：流畅润色，在不改变原意的前提下提升表达自然度。",
-      professional: "翻译风格：专业正式，适合商务、研究或正式场景。"
-    },
-    "en-US": {
-      balanced: "Translation style: natural and accurate, balancing source meaning with target-language expression.",
-      faithful: "Translation style: faithful to the source, preserving structure, terms, and tone where possible.",
-      polished: "Translation style: polished and fluent, improving natural flow without changing meaning.",
-      professional: "Translation style: professional and formal, suitable for business, research, or formal contexts."
-    }
+    balanced: "Natural and accurate, balancing source meaning with target-language fluency.",
+    faithful: "Faithful to the source, preserving structure, terminology, tone, and nuance where possible.",
+    polished: "Polished and fluent, improving readability and flow without changing meaning.",
+    professional: "Professional and formal, suitable for business, academic, research, or other formal contexts."
   };
 
-  return (instructions[language] || instructions["en-US"])[style] || instructions["en-US"].balanced;
+  return instructions[style] || instructions.balanced;
 }
 
 function fillPromptTemplateEditor(template = null) {
@@ -3009,9 +3327,15 @@ async function savePromptTemplateDraft({ forceNew = false } = {}) {
 
 function renderConversations() {
   els.conversationList.innerHTML = "";
+  const searchQuery = normalizeSearchText(state.conversationSearchQuery);
+  let renderedCount = 0;
 
   for (const folder of state.conversationFolders) {
     const folderConversations = state.conversations.filter((conversation) => conversation.folderId === folder.id);
+    const visibleFolderConversations = folderConversations.filter((conversation) => conversationMatchesSearch(conversation, searchQuery));
+    if (searchQuery && !visibleFolderConversations.length) {
+      continue;
+    }
     const group = document.createElement("section");
     group.className = "conversation-folder";
     group.dataset.folderId = folder.id;
@@ -3055,14 +3379,17 @@ function renderConversations() {
 
     const items = document.createElement("div");
     items.className = "conversation-folder-items";
-    for (const conversation of folderConversations) {
+    for (const conversation of visibleFolderConversations) {
       items.append(createConversationItem(conversation, { inFolder: true }));
+      renderedCount += 1;
     }
     group.append(items);
     els.conversationList.append(group);
   }
 
-  const ungrouped = state.conversations.filter((conversation) => !conversation.folderId || !state.conversationFolders.some((folder) => folder.id === conversation.folderId));
+  const ungrouped = state.conversations
+    .filter((conversation) => !conversation.folderId || !state.conversationFolders.some((folder) => folder.id === conversation.folderId))
+    .filter((conversation) => conversationMatchesSearch(conversation, searchQuery));
   const ungroupedGroup = document.createElement("section");
   ungroupedGroup.className = "conversation-ungrouped";
   ungroupedGroup.setAttribute("aria-label", t("ungroupedChats"));
@@ -3079,10 +3406,18 @@ function renderConversations() {
     }
 
     ungroupedGroup.append(createConversationItem(conversation));
+    renderedCount += 1;
   }
 
-  if (state.conversationFolders.length || ungrouped.length) {
+  if ((!searchQuery && state.conversationFolders.length) || ungrouped.length) {
     els.conversationList.append(ungroupedGroup);
+  }
+
+  if (searchQuery && renderedCount === 0) {
+    const empty = document.createElement("div");
+    empty.className = "conversation-empty";
+    empty.textContent = t("noSearchResults");
+    els.conversationList.append(empty);
   }
 }
 
@@ -3095,7 +3430,7 @@ function createConversationItem(conversation, options = {}) {
 
   const icon = document.createElement("span");
   icon.className = "conversation-icon";
-  icon.append(createIcon("messageCircle", { size: 16 }));
+  icon.append(createIcon(getConversationMode(conversation) === "translate" ? "languages" : "messageCircle", { size: 16 }));
 
   const title = document.createElement("span");
   title.className = "conversation-title";
@@ -3239,13 +3574,11 @@ function renderMessages() {
     const actions = createMessageActions(index, message);
     const content = document.createElement("div");
     content.className = "message-content";
-    if (message.pending && !message.content) {
-      content.append(createThinkingIndicator(Boolean(message.thinkingEnabled)));
-    } else {
-      renderMessageContent(content, message.content, message.role);
-    }
+    renderMessageBody(content, message);
 
     const meta = createMessageMeta(message);
+    const reasoning = createMessageReasoning(message);
+    if (reasoning) item.append(reasoning);
     item.append(content);
     if (meta) {
       item.append(meta);
@@ -3264,6 +3597,49 @@ function renderMessages() {
       updateScrollToBottomButton();
     }
   });
+}
+
+function renderMessageBody(container, message, streaming = false) {
+  container.replaceChildren();
+  if (message.pending && !message.content) {
+    container.append(createThinkingIndicator(Boolean(message.thinkingEnabled)));
+  } else {
+    renderMessageContent(container, message.content, message.role, streaming);
+  }
+}
+
+function createMessageReasoning(message) {
+  if (message.role !== "assistant" || typeof message.reasoning !== "string" || !message.reasoning.trim()) return null;
+
+  const details = document.createElement("details");
+  details.className = "message-reasoning";
+  const summary = document.createElement("summary");
+  summary.textContent = t("thinkingMode");
+  const text = document.createElement("div");
+  text.className = "message-reasoning-text";
+  text.textContent = message.reasoning;
+  details.append(summary, text);
+  return details;
+}
+
+function renderStreamingMessage(conversation, message) {
+  if (getActiveConversation() !== conversation) return;
+  const index = conversation.messages.indexOf(message);
+  const item = els.messages.querySelector(`.message.assistant[data-index="${index}"]`);
+  if (!item) return;
+
+  const nearBottom = isMessagesNearBottom();
+  const content = item.querySelector(".message-content");
+  const reasoningText = item.querySelector(".message-reasoning-text");
+  if (reasoningText) {
+    reasoningText.textContent = message.reasoning;
+  } else {
+    const reasoning = createMessageReasoning(message);
+    if (reasoning) item.prepend(reasoning);
+  }
+  renderMessageBody(content, message, true);
+  if (nearBottom) els.messages.scrollTop = els.messages.scrollHeight;
+  updateScrollToBottomButton();
 }
 
 function createMessageMeta(message) {
@@ -3345,13 +3721,13 @@ function createThinkingIndicator(thinkingEnabled = false) {
   return indicator;
 }
 
-function renderMessageContent(container, rawContent, role) {
+function renderMessageContent(container, rawContent, role, streaming = false) {
   if (role !== "assistant") {
     container.textContent = rawContent;
     return;
   }
 
-  const parts = splitMarkdownCodeBlocks(rawContent);
+  const parts = splitMarkdownCodeBlocks(rawContent, streaming);
   for (const part of parts) {
     if (part.type === "code") {
       container.append(createCodeBlock(part.code, part.lang));
@@ -3361,7 +3737,7 @@ function renderMessageContent(container, rawContent, role) {
   }
 }
 
-function splitMarkdownCodeBlocks(text) {
+function splitMarkdownCodeBlocks(text, streaming = false) {
   const parts = [];
   const pattern = /```([^\n`]*)\n?([\s\S]*?)```/g;
   let lastIndex = 0;
@@ -3375,8 +3751,13 @@ function splitMarkdownCodeBlocks(text) {
     lastIndex = pattern.lastIndex;
   }
 
-  if (lastIndex < text.length) {
-    parts.push({ type: "text", text: text.slice(lastIndex) });
+  const trailing = text.slice(lastIndex);
+  const openFence = streaming && /^([\s\S]*?)(?:^|\n)```([^\n`]*)\n([\s\S]*)$/.exec(trailing);
+  if (openFence) {
+    if (openFence[1]) parts.push({ type: "text", text: openFence[1] });
+    parts.push({ type: "code", lang: openFence[2].trim(), code: openFence[3] });
+  } else if (trailing) {
+    parts.push({ type: "text", text: trailing });
   }
 
   return parts.length ? parts : [{ type: "text", text }];
@@ -3604,7 +3985,7 @@ async function loadOllamaModels() {
       els.testOllama.disabled = true;
       setButtonContent(els.testOllama, t("testing"), "bot");
     }
-    const response = await chrome.runtime.sendMessage({
+    const response = await extensionApi.runtime.sendMessage({
       type: "ollama:tags",
       payload: {
         endpoint: config.endpoint,
@@ -3674,6 +4055,16 @@ function renderToolbarModelOptions(config = getActiveConfig()) {
   const currentValue = toolbarModelValueFor(config);
   const presetGroup = document.createElement("optgroup");
   presetGroup.label = t("modelPreset");
+  const customConfig = getModelConfigForPreset("custom");
+  const customModel = customConfig.model || state.settings.customModel || "";
+  const customOption = document.createElement("option");
+  customOption.value = "preset:custom";
+  customOption.textContent = customModel
+    ? `${t("presetCustom")} · ${customModel}`
+    : t("presetCustom");
+  customOption.selected = customOption.value === currentValue;
+  presetGroup.append(customOption);
+
   if (!currentValue && currentModel) {
     const option = document.createElement("option");
     option.value = `current:${currentModel}`;
@@ -3719,6 +4110,10 @@ function renderToolbarModelOptions(config = getActiveConfig()) {
 function toolbarModelValueFor(config) {
   if (config.apiFormat === "ollama") {
     return config.model ? `model:${config.model}` : `preset:ollama-proxy`;
+  }
+
+  if (state.settings.preset === "custom") {
+    return "preset:custom";
   }
 
   const preset = MODEL_PRESETS[state.settings.preset];
@@ -3813,9 +4208,62 @@ function normalizeOllamaEndpoint(endpoint) {
   }
 }
 
-async function submitPrompt(prompt, options = {}) {
-  const config = getActiveConfig();
+function configuredEndpointHostPattern() {
+  const endpoint = els.endpointInput.value.trim() || DEFAULT_SETTINGS.customEndpoint;
+  let url;
+  try {
+    url = new URL(els.customFormatInput.value === "ollama" ? normalizeOllamaEndpoint(endpoint) : endpoint);
+  } catch {
+    return null;
+  }
+  if (!["http:", "https:"].includes(url.protocol) || url.username || url.password || url.hostname.includes("*")) {
+    return null;
+  }
+  return `${url.protocol}//${url.hostname}/*`;
+}
+
+async function requestConfiguredEndpointPermission() {
+  if (!extensionApi.permissions?.request) return true;
+  const origin = configuredEndpointHostPattern();
+  if (!origin) {
+    pushSystemMessage(t("endpointInvalid"));
+    return false;
+  }
+  try {
+    const granted = await extensionApi.permissions.request({ origins: [origin] });
+    if (granted && origin === configuredEndpointHostPattern()) return true;
+  } catch {
+    // Chrome may reject a request if the permission dialog cannot be opened.
+  }
+  pushSystemMessage(t("endpointPermissionRequired"));
+  return false;
+}
+
+async function withConversationEdit(edit, { checkMessages = false } = {}) {
+  if (state.sending) return;
   const conversation = getActiveConversation();
+  const messages = conversation.messages;
+  const run = async (lock) => {
+    if (lock) {
+      await refreshSharedWorkspace();
+      if (state.sending) return;
+      const current = state.conversations.find((item) => item.id === conversation.id);
+      if (current && current.id === state.activeConversationId
+          && (!checkMessages || WorkspaceStorage.equal(messages, current.messages))) {
+        return edit(current);
+      }
+    }
+    pushSystemMessage(t("workspaceConflict"));
+  };
+  if (navigator.locks) {
+    await navigator.locks.request(`lemon-cha.edit.${conversation.id}`, { ifAvailable: true }, run);
+  } else {
+    await run(true);
+  }
+}
+
+async function submitPrompt(conversation, prompt, options = {}) {
+  const config = getActiveConfig();
   const shouldGenerateTitle = conversation.messages.length === 0 || conversation.title === t("newChatTitle");
   const requestPrompt = options.requestPrompt || prompt;
 
@@ -3824,14 +4272,16 @@ async function submitPrompt(prompt, options = {}) {
     return;
   }
 
+  els.promptInput.value = "";
+  resizePromptInput();
   conversation.messages.push({ role: "user", content: prompt });
   conversation.title = titleFromPrompt(conversation, prompt);
   conversation.updatedAt = Date.now();
+  const requestMessages = getContextMessages(config, requestPrompt);
   state.sending = true;
   await saveConversations();
   render();
 
-  const requestMessages = getContextMessages(config, requestPrompt);
   await generateAssistantResponse(conversation, config, requestMessages);
   if (shouldGenerateTitle) {
     generateConversationTitle(conversation, config);
@@ -3842,8 +4292,8 @@ function buildTranslationRequestPrompt(input) {
   const template = getPromptTemplate("translate-polish");
   const templateContent = template
     ? localizedTemplateContent(template)
-    : "Translate the following content into natural, accurate {defaultTranslationLanguage}.\n\nContent:\n";
-  return `${translationStyleInstruction()}\n\n${resolvePromptTemplateVariables(templateContent)}${input}`;
+    : TRANSLATION_PROMPT_TEMPLATE;
+  return `${resolvePromptTemplateVariables(templateContent)}${input}`;
 }
 
 async function generateAssistantResponse(conversation, config, requestMessages) {
@@ -3862,19 +4312,32 @@ async function generateAssistantResponse(conversation, config, requestMessages) 
     thinkingEnabled: Boolean(config.thinkingEnabled),
     stats
   };
+  state.streamingMessage = assistantMessage;
   conversation.messages.push(assistantMessage);
   render();
 
+  let renderFrame = null;
   try {
-    const meta = await requestChatCompletionStream(config, requestMessages, (delta) => {
-      assistantMessage.pending = false;
+    const meta = await requestChatCompletionStream(config, requestMessages, (delta, type) => {
       if (stats.firstTokenMs === null) {
         stats.firstTokenMs = Date.now() - stats.startedAt;
       }
       stats.completionTokens += estimateTokens(delta);
-      assistantMessage.content += delta;
+      if (type === "reasoning") {
+        if (config.thinkingEnabled) {
+          assistantMessage.reasoning = (assistantMessage.reasoning || "") + delta;
+        }
+      } else {
+        assistantMessage.pending = false;
+        assistantMessage.content += delta;
+      }
       conversation.updatedAt = Date.now();
-      renderMessages();
+      if (renderFrame === null) {
+        renderFrame = requestAnimationFrame(() => {
+          renderFrame = null;
+          renderStreamingMessage(conversation, assistantMessage);
+        });
+      }
     });
 
     assistantMessage.pending = false;
@@ -3901,8 +4364,10 @@ async function generateAssistantResponse(conversation, config, requestMessages) 
       pushSystemMessage(error.message || t("requestFailed"), false);
     }
   } finally {
+    if (renderFrame !== null) cancelAnimationFrame(renderFrame);
     assistantMessage.stats.elapsedMs = Date.now() - stats.startedAt;
     conversation.updatedAt = Date.now();
+    state.streamingMessage = null;
     state.sending = false;
     await saveConversations();
     render();
@@ -3918,12 +4383,12 @@ function titleFromPrompt(conversation, prompt) {
 
 function requestChatCompletionStream(config, messages, onDelta) {
   return new Promise((resolve, reject) => {
-    const port = chrome.runtime.connect({ name: "llm-stream" });
+    const port = extensionApi.runtime.connect({ name: "llm-stream" });
     state.activePort = port;
 
     port.onMessage.addListener((message) => {
-      if (message?.type === "delta") {
-        onDelta(message.content || "");
+      if (message?.type === "delta" || message?.type === "reasoning") {
+        onDelta(message.content || "", message.type);
         return;
       }
 
@@ -3951,6 +4416,7 @@ function requestChatCompletionStream(config, messages, onDelta) {
     port.onDisconnect.addListener(() => {
       if (state.activePort === port) {
         state.activePort = null;
+        reject(new Error(t("backendFailed")));
       }
     });
 
@@ -3984,7 +4450,7 @@ function estimateTokens(text) {
 async function generateConversationTitle(conversation, config) {
   const titleMessages = serializeContextMessages(conversation.messages, 4);
   try {
-    const response = await chrome.runtime.sendMessage({
+    const response = await extensionApi.runtime.sendMessage({
       type: "llm:title",
       payload: {
         config,
@@ -4206,8 +4672,7 @@ async function copyMessage(index) {
   pushSystemMessage(t("copied"));
 }
 
-async function deleteMessage(index) {
-  const conversation = getActiveConversation();
+async function deleteMessage(conversation, index) {
   if (!conversation.messages[index]) return;
   conversation.messages.splice(index, 1);
   conversation.updatedAt = Date.now();
@@ -4215,9 +4680,7 @@ async function deleteMessage(index) {
   render();
 }
 
-async function regenerateFromMessage(index) {
-  if (state.sending) return;
-  const conversation = getActiveConversation();
+async function regenerateFromMessage(conversation, index) {
   const message = conversation.messages[index];
   if (!message || message.role === "system") return;
 
@@ -4237,9 +4700,7 @@ async function regenerateFromMessage(index) {
   await generateAssistantResponse(conversation, config, requestMessages);
 }
 
-async function continueFromMessage(index) {
-  if (state.sending) return;
-  const conversation = getActiveConversation();
+async function continueFromMessage(conversation, index) {
   const message = conversation.messages[index];
   if (!message || message.role === "system") return;
 
@@ -4262,7 +4723,7 @@ async function checkModelHealth() {
   setHealthStatus("checking");
 
   try {
-    const response = await chrome.runtime.sendMessage({
+    const response = await extensionApi.runtime.sendMessage({
       type: "llm:health",
       payload: { config }
     });
@@ -4323,15 +4784,30 @@ async function clearConversationHistory() {
   state.conversations = [conversation];
   state.conversationFolders = [];
   state.activeConversationId = conversation.id;
-  await chrome.storage.local.remove("messages");
-  await saveConversations();
+  state.composerMode = getConversationMode(conversation);
+  await saveConversations({ replaceHistory: true });
+  await extensionApi.storage.local.remove("messages");
   render();
   clearComposerInput({ focus: true });
   return true;
 }
 
 els.settingsToggle.addEventListener("click", () => {
+  collapsePanelSidebar();
   showSettingsPage(true);
+});
+
+els.workspaceSurfaceToggle.addEventListener("click", async () => {
+  try {
+    if (isSidePanel) {
+      const result = await extensionApi.runtime.sendMessage({ type: "workspace:open-tab" });
+      if (!result?.ok) pushSystemMessage(t("backendFailed"));
+    } else {
+      await extensionApi.sidePanel.open({ tabId: workspaceTab.id });
+    }
+  } catch {
+    pushSystemMessage(t("backendFailed"));
+  }
 });
 
 els.themeToggle.addEventListener("click", async () => {
@@ -4343,8 +4819,21 @@ els.themeToggle.addEventListener("click", async () => {
   );
 });
 
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && isConversationSearchOpen()) {
+    closeConversationSearch({ restoreFocus: true });
+  }
+});
+
 document.addEventListener("click", (event) => {
   closeCustomSelects();
+  if (
+    isConversationSearchOpen() &&
+    !event.target.closest("#conversationSearchPanel") &&
+    !event.target.closest("#conversationSearchToggle")
+  ) {
+    closeConversationSearch();
+  }
   if (!event.target.closest(".conversation-actions") && !event.target.closest(".folder-actions")) {
     closeConversationMenus();
   }
@@ -4395,7 +4884,7 @@ els.toolbarModelSelect.addEventListener("change", async () => {
     return;
   }
 
-  if (kind === "preset" && MODEL_PRESETS[value]) {
+  if (kind === "preset" && (value === "custom" || MODEL_PRESETS[value])) {
     applyPreset(value);
     if (value === "ollama-proxy") {
       await loadOllamaModels();
@@ -4467,11 +4956,11 @@ els.messages.addEventListener("click", async (event) => {
   if (action === "copy") {
     await copyMessage(index);
   } else if (action === "regenerate") {
-    await regenerateFromMessage(index);
+    await withConversationEdit((conversation) => regenerateFromMessage(conversation, index), { checkMessages: true });
   } else if (action === "continue") {
-    await continueFromMessage(index);
+    await withConversationEdit((conversation) => continueFromMessage(conversation, index), { checkMessages: true });
   } else if (action === "delete") {
-    await deleteMessage(index);
+    await withConversationEdit((conversation) => deleteMessage(conversation, index), { checkMessages: true });
   }
 });
 
@@ -4634,6 +5123,10 @@ els.settingsForm.addEventListener("submit", async (event) => {
   if (activeSettingsTab === "general" || activeSettingsTab === "data") {
     return;
   }
+  if (activeSettingsTab === "model" && !await requestConfiguredEndpointPermission()) {
+    restoreSettingsKeys(MODEL_SETTINGS_KEYS);
+    return;
+  }
   persistCurrentProviderFields();
   await saveSettings();
   captureSettingsSnapshot({ resetPrompt: false });
@@ -4695,11 +5188,15 @@ els.factoryResetSettings.addEventListener("click", async () => {
   state.conversationFolders = [];
   state.promptTemplates = [];
   state.activeConversationId = conversation.id;
+  state.composerMode = getConversationMode(conversation);
   state.promptTemplateDirty = false;
-  await chrome.storage.local.remove(["messages"]);
-  await saveSettings();
-  await saveConversations();
-  await savePromptTemplates();
+  try {
+    await replaceSharedWorkspace();
+  } catch {
+    pushSystemMessage(t("workspaceStorageFailed"));
+    await refreshSharedWorkspace();
+    return;
+  }
   captureSettingsSnapshot();
   render();
   clearComposerInput({ focus: true });
@@ -4711,12 +5208,61 @@ els.newChat.addEventListener("click", async () => {
   if (!requestCloseSettingsPage()) {
     return;
   }
-  const conversation = createConversation();
+  state.conversationSearchQuery = "";
+  setConversationSearchOpen(false);
+  const conversation = createConversation(t("newChatTitle"), [], "chat");
   state.conversations.unshift(conversation);
   state.activeConversationId = conversation.id;
+  state.composerMode = "chat";
+  collapsePanelSidebar();
   await saveConversations();
   render();
   clearComposerInput({ focus: true });
+});
+
+els.sidebarTranslateTool?.addEventListener("click", async () => {
+  closeSettingsMenu();
+  if (!requestCloseSettingsPage()) {
+    return;
+  }
+  state.conversationSearchQuery = "";
+  setConversationSearchOpen(false);
+  const conversation = createConversation(t("translateMode"), [], "translate");
+  state.conversations.unshift(conversation);
+  state.activeConversationId = conversation.id;
+  state.composerMode = getConversationMode(conversation);
+  collapsePanelSidebar();
+  await saveConversations();
+  render();
+  clearComposerInput({ focus: true });
+});
+
+els.conversationSearchToggle?.addEventListener("click", () => {
+  closeSettingsMenu();
+  if (state.sidebarCollapsed) {
+    state.sidebarCollapsed = false;
+    applySidebarState();
+    setConversationSearchOpen(true, { focus: true });
+    return;
+  }
+
+  const shouldOpen = !state.conversationSearchOpen;
+  if (!shouldOpen) {
+    closeConversationSearch({ restoreFocus: true });
+    return;
+  }
+  setConversationSearchOpen(shouldOpen, { focus: shouldOpen });
+});
+
+els.conversationSearchInput?.addEventListener("input", () => {
+  state.conversationSearchQuery = els.conversationSearchInput.value;
+  syncConversationSearchState();
+  renderConversations();
+});
+
+els.conversationSearchInput?.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  closeConversationSearch({ restoreFocus: true });
 });
 
 els.newFolder?.addEventListener("click", async () => {
@@ -4793,9 +5339,8 @@ els.importFile?.addEventListener("change", async () => {
     state.activeConversationId = imported.activeConversationId || state.conversations[0]?.id || "";
     migrateOllamaSettings();
     ensureActiveConversation();
-    await saveSettings();
-    await saveConversations();
-    await savePromptTemplates();
+    state.composerMode = getConversationMode(getActiveConversation());
+    await replaceSharedWorkspace();
     render();
     pushSystemMessage(t("importDone"));
   } catch (error) {
@@ -4889,6 +5434,9 @@ els.conversationList.addEventListener("click", async (event) => {
   }
   const shouldClearComposer = item.dataset.id !== state.activeConversationId;
   state.activeConversationId = item.dataset.id;
+  const conversation = state.conversations.find((entry) => entry.id === state.activeConversationId);
+  state.composerMode = getConversationMode(conversation);
+  collapsePanelSidebar();
   await saveConversations();
   render();
   if (shouldClearComposer) {
@@ -4959,9 +5507,7 @@ els.chatForm.addEventListener("submit", async (event) => {
   const requestPrompt = state.composerMode === "translate"
     ? buildTranslationRequestPrompt(prompt)
     : prompt;
-  els.promptInput.value = "";
-  resizePromptInput();
-  await submitPrompt(prompt, { requestPrompt });
+  await withConversationEdit((conversation) => submitPrompt(conversation, prompt, { requestPrompt }));
 });
 
 els.composerModeToggle?.addEventListener("click", toggleComposerMode);
@@ -5007,6 +5553,11 @@ systemThemeQuery?.addEventListener("change", () => {
   }
 });
 
+extensionApi.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && SHARED_WORKSPACE_KEYS.some((key) => Object.hasOwn(changes, key))) {
+    refreshSharedWorkspace();
+  }
+});
 loadState();
 
 async function renameConversation(id) {
@@ -5107,6 +5658,7 @@ async function deleteConversation(id) {
     state.activeConversationId = state.conversations[0]?.id || "";
   }
   ensureActiveConversation();
+  state.composerMode = getConversationMode(getActiveConversation());
   await saveConversations();
   render();
   if (wasActiveConversation) {

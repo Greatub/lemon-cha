@@ -27,6 +27,7 @@ for (const browserTarget of targets) {
     cpSync(from, to, {
       recursive: stats.isDirectory(),
       filter: (source) => path.basename(source) !== ".DS_Store"
+        && source !== path.join(root, "assets", "icons-v2")
     });
   }
 
@@ -63,6 +64,8 @@ function createManifest(browserTarget) {
   const manifest = JSON.parse(readFileSync(path.join(root, "manifest.json"), "utf8"));
 
   if (browserTarget === "firefox") {
+    delete manifest.side_panel;
+    manifest.permissions = manifest.permissions.filter((permission) => permission !== "sidePanel");
     manifest.background = {
       scripts: [manifest.background.service_worker]
     };
@@ -70,6 +73,9 @@ function createManifest(browserTarget) {
       ...(manifest.browser_specific_settings || {}),
       gecko: {
         id: "lemon-cha@georgehuang.local",
+        data_collection_permissions: {
+          required: ["none"]
+        },
         strict_min_version: "113.0",
         ...(manifest.browser_specific_settings?.gecko || {})
       }

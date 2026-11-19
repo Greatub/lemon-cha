@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none">
+  <title>lemon cha (small toolbar icon)</title>
+  <!--
+    Small-size optimized icon (16x16, 32x32)
+    - Stronger warm-amber outer stroke (#B87E00) for sharp boundaries on light browser toolbars.
+    - Symmetric 135-degree speech bubble tail.
+    - Simplified from 6 thin wedges to 3 bold 90-degree wedges whose inner edges align to the 16px/32px pixel grid.
+    - Well-spaced, pixel-aligned chat dots in the bottom-right quadrant.
+  -->
+
+  <!-- 1. Concentric outer boundary + lemon rind + cream interior (centered at 16, 16) -->
+  <g stroke-linejoin="round" stroke-linecap="round">
+    <!-- Crisp outer boundary -->
+    <path
+      d="M 10.67 25.63 C 9.20 26.00 7.05 26.15 6.35 25.45 C 5.65 24.75 5.80 22.60 6.17 21.13 A 11.00 11.00 0 1 1 10.67 25.63 Z"
+      fill="#B87E00"
+      stroke="#B87E00"
+      stroke-width="5.2"
+    />
+    <!-- Bright lemon yellow rind -->
+    <path
+      d="M 10.67 25.63 C 9.20 26.00 7.05 26.15 6.35 25.45 C 5.65 24.75 5.80 22.60 6.17 21.13 A 11.00 11.00 0 1 1 10.67 25.63 Z"
+      fill="#FCD000"
+      stroke="#FCD000"
+      stroke-width="3.6"
+    />
+    <!-- Warm cream chat bubble interior -->
+    <path
+      d="M 10.67 25.63 C 9.20 26.00 7.05 26.15 6.35 25.45 C 5.65 24.75 5.80 22.60 6.17 21.13 A 11.00 11.00 0 1 1 10.67 25.63 Z"
+      fill="#FFFCC4"
+      stroke="#E0AC00"
+      stroke-width="0.6"
+    />
+  </g>
+
+  <!-- 2. Three bold 90-degree lemon wedges (centered at 16, 16 with dividers on x=15..17 and y=15..17) -->
+  <g fill="#FCD000" stroke="#E0AC00" stroke-width="0.4" stroke-linejoin="round">
+    <!-- Top-left quadrant (-180 to -90 deg) -->
+    <path d="M 14.00 15.00 L 8.25 15.00 A 1.00 1.00 0 0 1 7.29 13.75 A 9.00 9.00 0 0 1 13.75 7.29 A 1.00 1.00 0 0 1 15.00 8.25 L 15.00 14.00 A 1.00 1.00 0 0 1 14.00 15.00 Z" />
+    <!-- Top-right quadrant (-90 to 0 deg) -->
+    <path d="M 17.00 14.00 L 17.00 8.25 A 1.00 1.00 0 0 1 18.25 7.29 A 9.00 9.00 0 0 1 24.71 13.75 A 1.00 1.00 0 0 1 23.75 15.00 L 18.00 15.00 A 1.00 1.00 0 0 1 17.00 14.00 Z" />
+    <!-- Bottom-left quadrant (90 to 180 deg) -->
+    <path d="M 15.00 18.00 L 15.00 23.75 A 1.00 1.00 0 0 1 13.75 24.71 A 9.00 9.00 0 0 1 7.29 18.25 A 1.00 1.00 0 0 1 8.25 17.00 L 14.00 17.00 A 1.00 1.00 0 0 1 15.00 18.00 Z" />
+  </g>
+
+  <!-- 3. Pixel-aligned chat dots in bottom-right quadrant -->
+  <g fill="#2F2C28">
+    <circle cx="17.5" cy="20.5" r="1.0" />
+    <circle cx="21.0" cy="20.5" r="1.0" />
+    <circle cx="24.5" cy="20.5" r="1.0" />
+  </g>
+</svg>

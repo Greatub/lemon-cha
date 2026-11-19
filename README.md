@@ -4,7 +4,7 @@
 
 English is the source of truth for project documentation and release notes. The Chinese README is a supplementary translation; update it when user-facing behavior changes.
 
-lemon cha is a lightweight Chrome and Firefox extension that opens a dedicated AI chat tab for two kinds of model providers:
+lemon cha is a lightweight Chrome and Firefox extension that opens a dedicated AI chat workspace for two kinds of model providers:
 
 - Custom LLM APIs that use an OpenAI Chat Completions-compatible format.
 - Local Ollama models, with `http://127.0.0.1:11434/api/chat` as the default endpoint.
@@ -18,7 +18,7 @@ lemon cha is a lightweight Chrome and Firefox extension that opens a dedicated A
 2. Enable Developer mode.
 3. Click "Load unpacked".
 4. Select `dist/lemon-cha` after running `npm run build:chrome`.
-5. Click the extension action to open lemon cha in a dedicated browser tab.
+5. Click the extension action to open or focus the lemon cha workspace tab. Use the side panel button in the workspace header to chat alongside a page.
 
 ## Install locally in Firefox
 
@@ -60,6 +60,8 @@ Choose the custom API workflow and configure:
 If the API format is OpenAI-compatible and the endpoint only contains the domain or `/v1`, lemon cha completes it to `/v1/chat/completions`. Provider-specific paths can still be entered manually.
 
 Built-in provider presets include DeepSeek, OpenAI, Qwen DashScope, Kimi, SiliconFlow, OpenRouter, Groq, and local Ollama.
+
+When you save an endpoint outside the built-in hosts in Chrome, grant access to its site in the Chrome prompt. If you later remove the grant, save the endpoint again to restore access.
 
 ## Conversation management
 
