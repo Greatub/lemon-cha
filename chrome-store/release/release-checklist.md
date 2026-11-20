@@ -12,8 +12,8 @@
 - [x] `npm test`
 - [x] `npm run build:chrome`
 - [ ] Load `dist/lemon-cha` in `chrome://extensions/`
-- [x] Package `dist/lemon-cha-extension-0.2.5.zip`
-- [x] Run `unzip -t dist/lemon-cha-extension-0.2.5.zip`
+- [x] Package `dist/lemon-cha-extension-0.2.6.zip`
+- [x] Run `unzip -t dist/lemon-cha-extension-0.2.6.zip`
 
 ## Functional smoke test
 
@@ -50,5 +50,5 @@
 
 ```bash
 npm run build:chrome
-(cd dist/lemon-cha && zip -r -X ../lemon-cha-extension-0.2.5.zip .)
+(cd dist/lemon-cha && zip -r -X ../lemon-cha-extension-0.2.6.zip .)
 ```

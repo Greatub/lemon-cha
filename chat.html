@@ -14,7 +14,7 @@
           <div class="brand-lockup">
             <span class="brand-wordmark" aria-label="lemon cha">lemon cha</span>
           </div>
-          <button id="sidebarToggle" class="icon-button" type="button" aria-label="隐藏侧栏">
+          <button id="sidebarToggle" class="icon-button header-icon-button" type="button" aria-label="隐藏侧栏" aria-controls="historyNavigation" aria-expanded="true">
             <span class="icon-slot" data-icon="panelLeft" aria-hidden="true"></span>
           </button>
         </div>
@@ -38,7 +38,7 @@
           </div>
         </div>
 
-        <nav class="conversation-list" aria-label="对话列表">
+        <nav id="historyNavigation" class="conversation-list" aria-label="对话列表">
           <div class="sidebar-actions conversation-tools" aria-label="对话管理">
             <div class="conversation-tools-label" data-i18n="foldersLabel">文件夹</div>
             <button id="newFolder" type="button" class="sidebar-text-button">
@@ -59,12 +59,13 @@
           </button>
         </div>
       </aside>
+      <div id="panelSidebarBackdrop" class="panel-sidebar-backdrop hidden" aria-hidden="true"></div>
 
       <section class="workspace">
         <header class="chat-toolbar">
           <div class="chat-status">
             <h2 id="chatTitle" class="chat-title">新对话</h2>
-            <button id="workspaceSurfaceToggle" class="icon-button hidden" type="button"></button>
+            <button id="workspaceSurfaceToggle" class="icon-button header-icon-button hidden" type="button"></button>
           </div>
         </header>
 

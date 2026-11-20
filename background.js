@@ -7,6 +7,18 @@ extensionApi.action.onClicked.addListener((tab) => {
   openChatWorkspace(tab.windowId).catch(console.error);
 });
 
+extensionApi.sidePanel?.onOpened?.addListener(({ windowId, tabId }) => {
+  if (tabId === undefined) {
+    extensionApi.storage.session.set({ [`workspaceSidePanel:${windowId}`]: true }).catch(console.error);
+  }
+});
+
+extensionApi.sidePanel?.onClosed?.addListener(({ windowId, tabId }) => {
+  if (tabId === undefined) {
+    extensionApi.storage.session.remove(`workspaceSidePanel:${windowId}`).catch(console.error);
+  }
+});
+
 function openChatWorkspace(windowId) {
   const url = extensionApi.runtime.getURL("chat.html");
   const open = async () => {

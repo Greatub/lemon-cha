@@ -58,6 +58,9 @@ let sharedWorkspaceRefreshId = 0;
 let failedHistoryWrite = false;
 let workspaceTab = null;
 let isSidePanel = false;
+let workspacePanelOpen = false;
+let workspacePanelRevision = 0;
+let workspacePanelBusy = false;
 
 const DIRECT_OLLAMA_ENDPOINT = "http://127.0.0.1:11434/api/chat";
 const LEGACY_OLLAMA_PROXY_ENDPOINT = "http://127.0.0.1:8787/api/chat";
@@ -413,7 +416,6 @@ const UI_TEXT = {
     optional: "可留空",
     historyLimit: "最大上下文轮数",
     thinkingMode: "思考",
-    openSidePanel: "打开侧边栏",
     openWorkspaceTab: "打开工作台",
     workspaceConflict: "对话已在另一窗口中更改，请查看会话列表后重试。",
     workspaceStorageFailed: "无法保存或读取会话记录。",
@@ -610,7 +612,6 @@ const UI_TEXT = {
     optional: "Optional",
     historyLimit: "Context Turns",
     thinkingMode: "Think",
-    openSidePanel: "Open side panel",
     openWorkspaceTab: "Open workspace tab",
     workspaceConflict: "This conversation changed in another window. Check your conversation list and try again.",
     workspaceStorageFailed: "Could not save or read conversation history.",
@@ -806,7 +807,6 @@ Object.assign(UI_TEXT, {
     optional: "可留空",
     historyLimit: "最大上下文輪數",
     thinkingMode: "思考",
-    openSidePanel: "開啟側邊欄",
     openWorkspaceTab: "開啟工作台",
     workspaceConflict: "對話已在另一個視窗中變更，請查看對話清單後再試一次。",
     workspaceStorageFailed: "無法儲存或讀取對話記錄。",
@@ -994,7 +994,6 @@ Object.assign(UI_TEXT, {
     optional: "任意",
     historyLimit: "コンテキストターン数",
     thinkingMode: "思考",
-    openSidePanel: "サイドパネルを開く",
     openWorkspaceTab: "ワークスペースを開く",
     workspaceConflict: "別のウィンドウで会話が変更されました。一覧を確認してからやり直してください。",
     workspaceStorageFailed: "会話履歴を保存または読み込めませんでした。",
@@ -1182,7 +1181,6 @@ Object.assign(UI_TEXT, {
     optional: "선택 사항",
     historyLimit: "컨텍스트 턴 수",
     thinkingMode: "생각",
-    openSidePanel: "사이드 패널 열기",
     openWorkspaceTab: "작업 공간 탭 열기",
     workspaceConflict: "다른 창에서 대화가 변경됐습니다. 대화 목록을 확인한 뒤 다시 시도하세요.",
     workspaceStorageFailed: "대화 기록을 저장하거나 읽을 수 없습니다.",
@@ -1370,7 +1368,6 @@ Object.assign(UI_TEXT, {
     optional: "Facultatif",
     historyLimit: "Tours de contexte",
     thinkingMode: "Réflexion",
-    openSidePanel: "Ouvrir le panneau latéral",
     openWorkspaceTab: "Ouvrir l’espace de travail",
     workspaceConflict: "La conversation a changé dans une autre fenêtre. Consultez la liste et réessayez.",
     workspaceStorageFailed: "Impossible d’enregistrer ou de lire l’historique.",
@@ -1558,7 +1555,6 @@ Object.assign(UI_TEXT, {
     optional: "Opcional",
     historyLimit: "Turnos de contexto",
     thinkingMode: "Pensar",
-    openSidePanel: "Abrir panel lateral",
     openWorkspaceTab: "Abrir espacio de trabajo",
     workspaceConflict: "La conversación cambió en otra ventana. Revisa la lista y vuelve a intentarlo.",
     workspaceStorageFailed: "No se pudo guardar o leer el historial.",
@@ -1746,7 +1742,6 @@ Object.assign(UI_TEXT, {
     optional: "Optional",
     historyLimit: "Kontext-Runden",
     thinkingMode: "Denken",
-    openSidePanel: "Seitenleiste öffnen",
     openWorkspaceTab: "Arbeitsbereich öffnen",
     workspaceConflict: "Die Unterhaltung wurde in einem anderen Fenster geändert. Prüfe die Liste und versuche es erneut.",
     workspaceStorageFailed: "Der Chatverlauf konnte nicht gespeichert oder gelesen werden.",
@@ -1928,6 +1923,7 @@ Object.assign(UI_TEXT["de-DE"], {
 const state = {
   settings: { ...DEFAULT_SETTINGS },
   conversations: [],
+  draftConversation: null,
   conversationFolders: [],
   promptTemplates: [],
   activeConversationId: "",
@@ -1950,6 +1946,8 @@ const state = {
 
 const els = {
   workspace: document.querySelector(".workspace"),
+  sidebar: document.querySelector(".sidebar"),
+  panelSidebarBackdrop: document.querySelector("#panelSidebarBackdrop"),
   workspaceSurfaceToggle: document.querySelector("#workspaceSurfaceToggle"),
   chatTitle: document.querySelector("#chatTitle"),
   toolbarModelSelect: document.querySelector("#toolbarModelSelect"),
@@ -2158,6 +2156,9 @@ async function loadState() {
     workspaceTab = await extensionApi.tabs.getCurrent();
     isSidePanel = !workspaceTab;
     document.body.classList.toggle("side-panel", isSidePanel);
+    if (workspaceTab && extensionApi.sidePanel.close) {
+      await watchWorkspaceSidePanel();
+    }
     els.workspaceSurfaceToggle.classList.remove("hidden");
   }
 
@@ -2165,7 +2166,7 @@ async function loadState() {
   state.settings = { ...DEFAULT_SETTINGS, ...(stored.settings || {}) };
   state.settings.modelConfigs = { ...(stored.settings?.modelConfigs || {}) };
   state.sidebarCollapsed = isSidePanel || Boolean(stored.sidebarCollapsed);
-  state.conversations = Array.isArray(stored.conversations) ? stored.conversations : [];
+  state.conversations = readStoredConversations(stored.conversations);
   state.conversationFolders = Array.isArray(stored.conversationFolders) ? stored.conversationFolders : [];
   state.promptTemplates = Array.isArray(stored.promptTemplates) ? stored.promptTemplates : [];
   state.activeConversationId = stored.activeConversationId || "";
@@ -2177,14 +2178,14 @@ async function loadState() {
     pushSystemMessage(t("settingsSaveFailed"));
   }
 
-  if (!state.conversations.length && Array.isArray(stored.messages) && stored.messages.length) {
+  if (!stored.conversations?.length && stored.activeConversationId !== ""
+      && Array.isArray(stored.messages) && stored.messages.length) {
     const migrated = createConversation(t("importedChat"), stored.messages);
     state.conversations = [migrated];
     state.activeConversationId = migrated.id;
     await saveConversations();
   }
 
-  ensureActiveConversation();
   state.composerMode = getConversationMode(getActiveConversation());
   applyTheme();
   applySidebarState(false);
@@ -2232,11 +2233,16 @@ async function saveConversations({ replaceHistory = false } = {}) {
     } : item)
     : state.conversations;
   try {
-    const conflict = await workspaceStorage.save({
+    const values = {
       conversations,
-      conversationFolders: state.conversationFolders,
-      activeConversationId: state.activeConversationId
-    }, { replace: replaceHistory ? ["conversations", "conversationFolders"] : [] });
+      conversationFolders: state.conversationFolders
+    };
+    if (state.activeConversationId || replaceHistory || !conversations.length) {
+      values.activeConversationId = state.activeConversationId;
+    }
+    const conflict = await workspaceStorage.save(values, {
+      replace: replaceHistory ? ["conversations", "conversationFolders", "activeConversationId"] : []
+    });
     failedHistoryWrite = false;
     if (conflict) pushSystemMessage(t("workspaceConflict"));
     await refreshSharedWorkspace();
@@ -2280,17 +2286,14 @@ async function refreshSharedWorkspace() {
       workspaceStorage.accept({ promptTemplates: templates });
     }
 
-    const conversations = Array.isArray(stored.conversations) ? stored.conversations : [];
+    const conversations = readStoredConversations(stored.conversations);
     const conversationFolders = Array.isArray(stored.conversationFolders) ? stored.conversationFolders : [];
-    if (!conversations.length) {
-      if (settingsChanged) render();
-      else if (templatesChanged) renderPromptTemplates();
-      return;
-    }
     const previousId = state.activeConversationId;
     const previous = state.conversations.find((item) => item.id === previousId);
     const incoming = conversations.find((item) => item.id === previousId);
-    const activeChanged = !incoming || !WorkspaceStorage.equal(previous, incoming);
+    const viewingDraft = !previousId && Boolean(state.draftConversation);
+    const activeRemoved = !viewingDraft && !incoming;
+    const activeChanged = activeRemoved || (incoming && !WorkspaceStorage.equal(previous, incoming));
     const listChanged = !WorkspaceStorage.equal(state.conversations, conversations)
       || !WorkspaceStorage.equal(state.conversationFolders, conversationFolders);
     // Keep references captured by in-flight title requests and event handlers.
@@ -2306,13 +2309,17 @@ async function refreshSharedWorkspace() {
       });
       state.conversationFolders = conversationFolders;
     }
-    if (!incoming) {
-      state.activeConversationId = conversations.find((item) => item.id === stored.activeConversationId)?.id || conversations[0].id;
+    if (activeRemoved) {
+      state.activeConversationId = stored.activeConversationId || "";
       state.composerMode = getConversationMode(getActiveConversation());
       clearComposerInput();
     }
-    if (listChanged || !incoming) {
-      workspaceStorage.accept({ conversations, conversationFolders, activeConversationId: state.activeConversationId });
+    if (listChanged || activeRemoved) {
+      workspaceStorage.accept({
+        conversations,
+        conversationFolders,
+        activeConversationId: state.activeConversationId || stored.activeConversationId || ""
+      });
     }
     if (settingsChanged) {
       render();
@@ -2325,7 +2332,7 @@ async function refreshSharedWorkspace() {
       if (activeChanged) {
         updateChatTitle();
         renderMessages();
-        if (!incoming) syncComposerMode();
+        if (activeRemoved) syncComposerMode();
       }
     }
   } catch {
@@ -2359,25 +2366,34 @@ function createConversationFolder(name = t("folderName")) {
   };
 }
 
-function ensureActiveConversation() {
-  if (!state.conversations.length) {
-    const conversation = createConversation();
-    state.conversations = [conversation];
-    state.activeConversationId = conversation.id;
-    state.composerMode = getConversationMode(conversation);
-    saveConversations();
-    return;
-  }
+function readStoredConversations(conversations) {
+  if (!Array.isArray(conversations)) return [];
+  return conversations.filter((conversation) => {
+    if (conversation.messages?.length !== 0 || conversation.folderId
+        || conversation.createdAt !== conversation.updatedAt) return true;
+    // Older versions wrote an untouched placeholder as soon as a blank chat opened.
+    return !Object.values(UI_TEXT).some(({ newChatTitle, translateMode }) =>
+      conversation.title === newChatTitle || conversation.title === translateMode);
+  });
+}
 
-  if (!state.conversations.some((conversation) => conversation.id === state.activeConversationId)) {
-    state.activeConversationId = state.conversations[0].id;
-    state.composerMode = getConversationMode(state.conversations[0]);
-  }
+function startConversationDraft(mode = "chat") {
+  const title = t(mode === "translate" ? "translateMode" : "newChatTitle");
+  state.draftConversation = createConversation(title, [], mode);
+  state.activeConversationId = "";
+  state.composerMode = mode;
+  return state.draftConversation;
 }
 
 function getActiveConversation() {
-  ensureActiveConversation();
-  return state.conversations.find((conversation) => conversation.id === state.activeConversationId);
+  if (!state.activeConversationId && state.draftConversation) return state.draftConversation;
+  const active = state.conversations.find((conversation) => conversation.id === state.activeConversationId);
+  if (active) return active;
+  const latest = state.conversations[0];
+  if (!latest) return startConversationDraft();
+  state.activeConversationId = latest.id;
+  state.composerMode = getConversationMode(latest);
+  return latest;
 }
 
 function getConversationMode(conversation) {
@@ -2581,8 +2597,7 @@ function applyLanguage() {
   setTooltip(els.sidebarToggle, state.sidebarCollapsed ? t("showSidebar") : t("hideSidebar"));
   setIconOnly(els.sidebarToggle, "panelLeft");
   if (extensionApi.sidePanel?.open) {
-    setIconButtonContent(els.workspaceSurfaceToggle,
-      t(isSidePanel ? "openWorkspaceTab" : "openSidePanel"), isSidePanel ? "monitor" : "panelLeft");
+    renderWorkspaceSurfaceToggle();
   }
   syncSidebarActionTooltips();
   els.conversationSearchInput.placeholder = t("searchConversationsPlaceholder");
@@ -2631,6 +2646,71 @@ function applyLanguage() {
   mountStaticIcons();
 }
 
+function renderWorkspaceSurfaceToggle() {
+  const button = els.workspaceSurfaceToggle;
+  const label = isSidePanel ? "openWorkspaceTab" : workspacePanelOpen ? "hideSidebar" : "showSidebar";
+  setIconButtonContent(button, t(label), isSidePanel ? "monitor" : "panelRight");
+  if (!isSidePanel) {
+    button.setAttribute("aria-description", "Chrome Side Panel");
+    if (extensionApi.sidePanel.close) button.setAttribute("aria-expanded", String(workspacePanelOpen));
+  }
+}
+
+function updateWorkspaceSidePanel(open) {
+  workspacePanelRevision += 1;
+  workspacePanelOpen = open;
+  renderWorkspaceSurfaceToggle();
+}
+
+async function refreshWorkspaceSidePanel() {
+  const revision = ++workspacePanelRevision;
+  const key = `workspaceSidePanel:${workspaceTab.windowId}`;
+  try {
+    const values = await extensionApi.storage.session.get(key);
+    let open = Boolean(values[key]);
+    if (open && !extensionApi.sidePanel.onClosed) {
+      const contexts = await extensionApi.runtime.getContexts({ contextTypes: ["SIDE_PANEL"] });
+      open = contexts.length > 0;
+    }
+    if (revision === workspacePanelRevision) updateWorkspaceSidePanel(open);
+  } catch {
+    // A context lookup can race with the tab moving to a different window.
+  }
+}
+
+function watchWorkspaceSidePanel() {
+  const { sidePanel, tabs } = extensionApi;
+  tabs.onAttached.addListener((tabId, { newWindowId }) => {
+    if (tabId !== workspaceTab.id) return;
+    workspaceTab.windowId = newWindowId;
+    refreshWorkspaceSidePanel();
+  });
+  if (!sidePanel.onClosed) window.addEventListener("focus", refreshWorkspaceSidePanel);
+  return refreshWorkspaceSidePanel();
+}
+
+async function toggleWorkspaceSidePanel() {
+  if (workspacePanelBusy) return;
+  workspacePanelBusy = true;
+  const revision = ++workspacePanelRevision;
+  const open = !workspacePanelOpen;
+  try {
+    // The extension uses a global panel, which Chrome closes by window ID.
+    const { sidePanel } = extensionApi;
+    const target = { windowId: workspaceTab.windowId };
+    if (open) await sidePanel.open(target);
+    else {
+      await sidePanel.close(target);
+      if (!sidePanel.onClosed) await extensionApi.storage.session.remove(`workspaceSidePanel:${target.windowId}`);
+    }
+    if (sidePanel.close && workspacePanelRevision === revision) updateWorkspaceSidePanel(open);
+  } catch {
+    pushSystemMessage(t("backendFailed"));
+  } finally {
+    workspacePanelBusy = false;
+  }
+}
+
 function setMenuLabel(button, label) {
   if (!button) return;
   const labelNode = button.querySelector(".menu-label");
@@ -2643,6 +2723,10 @@ function setMenuLabel(button, label) {
 
 function applySidebarState(persist = true) {
   document.body.classList.toggle("sidebar-collapsed", state.sidebarCollapsed);
+  const panelDrawerOpen = isSidePanel && !state.sidebarCollapsed;
+  els.workspace.inert = panelDrawerOpen;
+  els.panelSidebarBackdrop.classList.toggle("hidden", !panelDrawerOpen);
+  els.sidebarToggle.setAttribute("aria-expanded", String(!state.sidebarCollapsed));
   setTooltip(els.sidebarToggle, state.sidebarCollapsed ? t("showSidebar") : t("hideSidebar"));
   syncSidebarActionTooltips();
   syncConversationSearchState();
@@ -2655,10 +2739,11 @@ function applySidebarState(persist = true) {
   }
 }
 
-function collapsePanelSidebar() {
+function collapsePanelSidebar({ restoreFocus = false } = {}) {
   if (!isSidePanel || state.sidebarCollapsed) return;
   state.sidebarCollapsed = true;
   applySidebarState(false);
+  if (restoreFocus) els.sidebarToggle.focus();
 }
 
 function syncConversationSearchState({ focus = false } = {}) {
@@ -2757,7 +2842,8 @@ function closeSettingsMenu() {
 }
 
 function showSettingsPage(show) {
-  if (show && !state.settingsPageOpen) {
+  const wasOpen = state.settingsPageOpen;
+  if (show && !wasOpen) {
     captureSettingsSnapshot();
   }
   state.settingsPageOpen = show;
@@ -2765,6 +2851,13 @@ function showSettingsPage(show) {
   els.workspace.classList.toggle("settings-open", show);
   document.body.classList.toggle("settings-open", show);
   els.settingsToggle.setAttribute("aria-expanded", String(show));
+  if (isSidePanel && show !== wasOpen) {
+    els.sidebar.inert = show;
+    els.chatForm.inert = show;
+    els.messages.inert = show;
+    els.workspaceSurfaceToggle.inert = show;
+    (show ? els.closeSettings : els.settingsToggle).focus();
+  }
 }
 
 function requestCloseSettingsPage() {
@@ -2950,12 +3043,23 @@ function closeCustomSelects(except = null) {
 
 function positionCustomSelectMenu(custom) {
   custom.shell.classList.remove("open-up");
+  const settingsPanel = isSidePanel ? custom.shell.closest(".settings-tab-panel") : null;
+  if (settingsPanel) {
+    custom.menu.style.maxHeight = "";
+    custom.button.scrollIntoView({ block: "nearest" });
+  }
   const rect = custom.button.getBoundingClientRect();
   const menuHeight = Math.min(custom.menu.scrollHeight || 280, 280);
-  const spaceBelow = window.innerHeight - rect.bottom;
-  const spaceAbove = rect.top;
-  const shouldOpenUp = spaceBelow < menuHeight + 12 && spaceAbove > spaceBelow;
+  const bounds = settingsPanel?.getBoundingClientRect();
+  const gap = bounds ? custom.menu.getBoundingClientRect().top - rect.bottom : 12;
+  const spaceBelow = (bounds?.bottom ?? window.innerHeight) - rect.bottom;
+  const spaceAbove = rect.top - (bounds?.top ?? 0);
+  const shouldOpenUp = spaceBelow < menuHeight + gap && spaceAbove > spaceBelow;
   custom.shell.classList.toggle("open-up", shouldOpenUp);
+  if (bounds) {
+    const availableHeight = (shouldOpenUp ? spaceAbove : spaceBelow) - gap;
+    custom.menu.style.maxHeight = `${Math.min(280, Math.max(0, Math.floor(availableHeight)))}px`;
+  }
 }
 
 function rebuildCustomSelect(select) {
@@ -4247,8 +4351,8 @@ async function withConversationEdit(edit, { checkMessages = false } = {}) {
     if (lock) {
       await refreshSharedWorkspace();
       if (state.sending) return;
-      const current = state.conversations.find((item) => item.id === conversation.id);
-      if (current && current.id === state.activeConversationId
+      const current = getActiveConversation();
+      if (current.id === conversation.id
           && (!checkMessages || WorkspaceStorage.equal(messages, current.messages))) {
         return edit(current);
       }
@@ -4275,6 +4379,12 @@ async function submitPrompt(conversation, prompt, options = {}) {
   els.promptInput.value = "";
   resizePromptInput();
   conversation.messages.push({ role: "user", content: prompt });
+  if (conversation === state.draftConversation) {
+    conversation.mode = state.composerMode;
+    state.conversations.unshift(conversation);
+    state.activeConversationId = conversation.id;
+    state.draftConversation = null;
+  }
   conversation.title = titleFromPrompt(conversation, prompt);
   conversation.updatedAt = Date.now();
   const requestMessages = getContextMessages(config, requestPrompt);
@@ -4780,11 +4890,9 @@ async function clearConversationHistory() {
     return false;
   }
 
-  const conversation = createConversation();
-  state.conversations = [conversation];
+  state.conversations = [];
   state.conversationFolders = [];
-  state.activeConversationId = conversation.id;
-  state.composerMode = getConversationMode(conversation);
+  startConversationDraft();
   await saveConversations({ replaceHistory: true });
   await extensionApi.storage.local.remove("messages");
   render();
@@ -4798,13 +4906,13 @@ els.settingsToggle.addEventListener("click", () => {
 });
 
 els.workspaceSurfaceToggle.addEventListener("click", async () => {
+  if (!isSidePanel) {
+    await toggleWorkspaceSidePanel();
+    return;
+  }
   try {
-    if (isSidePanel) {
-      const result = await extensionApi.runtime.sendMessage({ type: "workspace:open-tab" });
-      if (!result?.ok) pushSystemMessage(t("backendFailed"));
-    } else {
-      await extensionApi.sidePanel.open({ tabId: workspaceTab.id });
-    }
+    const result = await extensionApi.runtime.sendMessage({ type: "workspace:open-tab" });
+    if (!result?.ok) pushSystemMessage(t("backendFailed"));
   } catch {
     pushSystemMessage(t("backendFailed"));
   }
@@ -4820,8 +4928,23 @@ els.themeToggle.addEventListener("click", async () => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && isConversationSearchOpen()) {
+  if (event.key !== "Escape" || event.defaultPrevented) return;
+  if (isSidePanel) {
+    const openSelect = [...customSelects.values()].find(({ shell }) => shell.classList.contains("open"));
+    if (openSelect) {
+      closeCustomSelects();
+      openSelect.button.focus();
+      return;
+    }
+    if (state.settingsPageOpen) {
+      requestCloseSettingsPage();
+      return;
+    }
+  }
+  if (isConversationSearchOpen()) {
     closeConversationSearch({ restoreFocus: true });
+  } else if (isSidePanel && !state.sidebarCollapsed) {
+    collapsePanelSidebar({ restoreFocus: true });
   }
 });
 
@@ -4866,6 +4989,10 @@ for (const button of els.settingsTabButtons) {
 els.sidebarToggle.addEventListener("click", () => {
   state.sidebarCollapsed = !state.sidebarCollapsed;
   applySidebarState();
+});
+
+els.panelSidebarBackdrop.addEventListener("click", () => {
+  collapsePanelSidebar({ restoreFocus: true });
 });
 
 els.presetInput.addEventListener("change", async () => {
@@ -5182,13 +5309,11 @@ els.factoryResetSettings.addEventListener("click", async () => {
   if (!confirm(t("confirmFactoryResetFirst")) || !confirm(t("confirmFactoryResetSecond"))) {
     return;
   }
-  const conversation = createConversation();
   state.settings = { ...DEFAULT_SETTINGS, modelConfigs: {} };
-  state.conversations = [conversation];
+  state.conversations = [];
   state.conversationFolders = [];
   state.promptTemplates = [];
-  state.activeConversationId = conversation.id;
-  state.composerMode = getConversationMode(conversation);
+  startConversationDraft();
   state.promptTemplateDirty = false;
   try {
     await replaceSharedWorkspace();
@@ -5203,39 +5328,21 @@ els.factoryResetSettings.addEventListener("click", async () => {
   pushSystemMessage(t("factoryResetDone"));
 });
 
-els.newChat.addEventListener("click", async () => {
+function openNewConversation(mode) {
   closeSettingsMenu();
   if (!requestCloseSettingsPage()) {
     return;
   }
   state.conversationSearchQuery = "";
   setConversationSearchOpen(false);
-  const conversation = createConversation(t("newChatTitle"), [], "chat");
-  state.conversations.unshift(conversation);
-  state.activeConversationId = conversation.id;
-  state.composerMode = "chat";
+  startConversationDraft(mode);
   collapsePanelSidebar();
-  await saveConversations();
   render();
   clearComposerInput({ focus: true });
-});
+}
 
-els.sidebarTranslateTool?.addEventListener("click", async () => {
-  closeSettingsMenu();
-  if (!requestCloseSettingsPage()) {
-    return;
-  }
-  state.conversationSearchQuery = "";
-  setConversationSearchOpen(false);
-  const conversation = createConversation(t("translateMode"), [], "translate");
-  state.conversations.unshift(conversation);
-  state.activeConversationId = conversation.id;
-  state.composerMode = getConversationMode(conversation);
-  collapsePanelSidebar();
-  await saveConversations();
-  render();
-  clearComposerInput({ focus: true });
-});
+els.newChat.addEventListener("click", () => openNewConversation("chat"));
+els.sidebarTranslateTool?.addEventListener("click", () => openNewConversation("translate"));
 
 els.conversationSearchToggle?.addEventListener("click", () => {
   closeSettingsMenu();
@@ -5262,6 +5369,7 @@ els.conversationSearchInput?.addEventListener("input", () => {
 
 els.conversationSearchInput?.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
+  event.preventDefault();
   closeConversationSearch({ restoreFocus: true });
 });
 
@@ -5333,12 +5441,12 @@ els.importFile?.addEventListener("change", async () => {
     }
 
     state.settings = { ...DEFAULT_SETTINGS, ...(imported.settings || {}) };
-    state.conversations = imported.conversations;
+    state.conversations = readStoredConversations(imported.conversations);
+    state.draftConversation = null;
     state.conversationFolders = Array.isArray(imported.conversationFolders) ? imported.conversationFolders : [];
     state.promptTemplates = Array.isArray(imported.promptTemplates) ? imported.promptTemplates : [];
     state.activeConversationId = imported.activeConversationId || state.conversations[0]?.id || "";
     migrateOllamaSettings();
-    ensureActiveConversation();
     state.composerMode = getConversationMode(getActiveConversation());
     await replaceSharedWorkspace();
     render();
@@ -5434,6 +5542,7 @@ els.conversationList.addEventListener("click", async (event) => {
   }
   const shouldClearComposer = item.dataset.id !== state.activeConversationId;
   state.activeConversationId = item.dataset.id;
+  state.draftConversation = null;
   const conversation = state.conversations.find((entry) => entry.id === state.activeConversationId);
   state.composerMode = getConversationMode(conversation);
   collapsePanelSidebar();
@@ -5441,6 +5550,8 @@ els.conversationList.addEventListener("click", async (event) => {
   render();
   if (shouldClearComposer) {
     clearComposerInput({ focus: true });
+  } else if (isSidePanel) {
+    els.promptInput.focus();
   }
 });
 
@@ -5556,6 +5667,9 @@ systemThemeQuery?.addEventListener("change", () => {
 extensionApi.storage.onChanged.addListener((changes, area) => {
   if (area === "local" && SHARED_WORKSPACE_KEYS.some((key) => Object.hasOwn(changes, key))) {
     refreshSharedWorkspace();
+  } else if (area === "session" && workspaceTab && extensionApi.sidePanel?.close) {
+    const visibility = changes[`workspaceSidePanel:${workspaceTab.windowId}`];
+    if (visibility) updateWorkspaceSidePanel(Boolean(visibility.newValue));
   }
 });
 loadState();
@@ -5656,9 +5770,8 @@ async function deleteConversation(id) {
   state.conversations = state.conversations.filter((item) => item.id !== id);
   if (wasActiveConversation) {
     state.activeConversationId = state.conversations[0]?.id || "";
+    state.composerMode = getConversationMode(getActiveConversation());
   }
-  ensureActiveConversation();
-  state.composerMode = getConversationMode(getActiveConversation());
   await saveConversations();
   render();
   if (wasActiveConversation) {
