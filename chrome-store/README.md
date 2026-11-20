@@ -15,12 +15,12 @@ Build the extension and package it from the repository root:
 
 ```bash
 npm run build:chrome
-(cd dist/lemon-cha && zip -r -X ../lemon-cha-extension-0.2.5.zip .)
+(cd dist/lemon-cha && zip -r -X ../lemon-cha-extension-0.2.6.zip .)
 ```
 
 Expected upload file:
 
-`dist/lemon-cha-extension-0.2.5.zip`
+`dist/lemon-cha-extension-0.2.6.zip`
 
 ## Before submitting
 

@@ -528,7 +528,7 @@ button:disabled {
   overflow: visible;
 }
 
-.sidebar-collapsed [data-tooltip]::after {
+.sidebar-collapsed .sidebar [data-tooltip]::after {
   top: 50%;
   bottom: auto;
   left: calc(100% + var(--space-md));
@@ -536,12 +536,13 @@ button:disabled {
   transform: translate(4px, -50%);
 }
 
-.sidebar-collapsed [data-tooltip]:hover::after,
-.sidebar-collapsed [data-tooltip]:focus-visible::after {
+.sidebar-collapsed .sidebar [data-tooltip]:hover::after,
+.sidebar-collapsed .sidebar [data-tooltip]:focus-visible::after {
   transform: translate(0, -50%);
 }
 
-#sidebarToggle[data-tooltip]::after {
+#sidebarToggle[data-tooltip]::after,
+#workspaceSurfaceToggle[data-tooltip]::after {
   top: calc(100% + var(--space-xs));
   bottom: auto;
   left: auto;
@@ -550,20 +551,16 @@ button:disabled {
 }
 
 #sidebarToggle[data-tooltip]:hover::after,
-#sidebarToggle[data-tooltip]:focus-visible::after {
+#sidebarToggle[data-tooltip]:focus-visible::after,
+#workspaceSurfaceToggle[data-tooltip]:hover::after,
+#workspaceSurfaceToggle[data-tooltip]:focus-visible::after {
   transform: translate(0, 0);
 }
 
-.sidebar-collapsed #sidebarToggle[data-tooltip]::after {
-  top: calc(100% + var(--space-xs));
+.sidebar-collapsed #sidebarToggle[data-tooltip]::after,
+.side-panel #sidebarToggle[data-tooltip]::after {
   left: calc(100% + var(--space-md));
   right: auto;
-  transform: translate(var(--space-xs), 0);
-}
-
-.sidebar-collapsed #sidebarToggle[data-tooltip]:hover::after,
-.sidebar-collapsed #sidebarToggle[data-tooltip]:focus-visible::after {
-  transform: translate(0, 0);
 }
 
 .sidebar-collapsed .new-chat-button[data-tooltip]::after,
@@ -648,6 +645,7 @@ button:disabled {
 }
 
 .sidebar .icon-button:active,
+.header-icon-button:active,
 .sidebar .sidebar-text-button:active {
   transform: none;
 }
@@ -688,7 +686,8 @@ button:disabled {
 }
 
 .sidebar .icon-button:hover,
-.sidebar .icon-button[aria-pressed="true"]:hover {
+.sidebar .icon-button[aria-pressed="true"]:hover,
+.header-icon-button:hover {
   background: var(--scheme-sidebar-item-hover);
 }
 
@@ -705,7 +704,8 @@ button:disabled {
   background: var(--state-selected);
 }
 
-.sidebar .icon-button {
+.sidebar .icon-button,
+.header-icon-button {
   width: var(--sidebar-collapsed-action-size);
   height: var(--sidebar-collapsed-action-size);
   min-height: var(--sidebar-collapsed-action-size);
@@ -1258,7 +1258,7 @@ button:disabled {
   align-items: center;
   justify-content: center;
   gap: var(--space-md);
-  min-height: 56px;
+  min-height: var(--sidebar-header-height);
   padding: var(--space-control-y) var(--scrollbar-reserve) var(--space-control-y) 0;
   border-bottom: 0;
   background: var(--scheme-chat-surface);
@@ -1275,7 +1275,7 @@ button:disabled {
     linear-gradient(
       to bottom,
       var(--scheme-chat-surface) 0,
-      var(--scheme-chat-surface) 56px,
+      var(--scheme-chat-surface) var(--sidebar-header-height),
       color-mix(in srgb, var(--scheme-chat-surface) 0%, transparent) 100%
     );
 }
@@ -1285,13 +1285,6 @@ button:disabled {
   z-index: 1;
   width: var(--rail-width);
   margin-inline: auto;
-}
-
-.chat-toolbar button {
-  height: 32px;
-  min-height: 32px;
-  padding: 0 12px;
-  font-size: 0.75rem;
 }
 
 .chat-status {
@@ -1318,15 +1311,8 @@ button:disabled {
 }
 
 #workspaceSurfaceToggle {
-  flex: 0 0 var(--compact-control-height);
+  flex: 0 0 var(--sidebar-collapsed-action-size);
   margin-left: auto;
-  padding: 0;
-}
-
-#workspaceSurfaceToggle[data-tooltip]::after {
-  right: 0;
-  left: auto;
-  transform: none;
 }
 
 .model-status {
@@ -1335,18 +1321,6 @@ button:disabled {
   flex: 0 0 auto;
   gap: var(--space-sm);
   min-width: 0;
-}
-
-@media (max-width: 760px) {
-  .chat-status {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .chat-status .custom-select {
-    width: 100%;
-    flex-basis: auto;
-  }
 }
 
 .health-status {
@@ -2800,6 +2774,22 @@ body.side-panel {
   width: min(292px, calc(100% - var(--space-lg)));
 }
 
+.side-panel:not(.sidebar-collapsed) .brand {
+  flex-direction: row-reverse;
+  padding-inline: var(--collapsed-sidebar-inline-padding) var(--space-md);
+}
+
+.panel-sidebar-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 110;
+  background: color-mix(in srgb, var(--color-tertiary) 18%, transparent);
+}
+
+.side-panel .workspace[inert] [data-tooltip]::after {
+  visibility: hidden;
+}
+
 .side-panel .workspace {
   grid-column: 2;
   --rail-padding: var(--space-sm);
@@ -2850,4 +2840,19 @@ body.side-panel {
 
 .side-panel .settings-body {
   grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--space-sm);
+}
+
+.side-panel .settings-form,
+.side-panel .settings-tab-panel {
+  gap: var(--space-sm);
+}
+
+.side-panel .settings-tab-panel .custom-select-menu {
+  overscroll-behavior: contain;
+}
+
+.side-panel .settings-page-header {
+  margin-bottom: var(--space-sm);
+  padding-bottom: var(--space-sm);
 }
