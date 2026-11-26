@@ -4,7 +4,7 @@
 
 - Release notes: [0.2.7.md](0.2.7.md).
 - No changes to permissions, host permissions, data destinations, or remote-code behavior.
-- Chrome submission is pending account reauthentication and upload.
+- Chrome Web Store accepted the 0.2.7 ZIP and confirmed submission for review on November 26, 2026. Automatic publication after approval is enabled. The currently published version remains 0.2.6 until approval.
 
 ## Previous Chrome Web Store status
 
