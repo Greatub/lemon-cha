@@ -69,10 +69,12 @@ const TRANSLATION_PROMPT_TEMPLATE = "You are a professional translator.\n\nYour 
 const BUILT_IN_PROMPT_TEMPLATES = [
   {
     id: "summarize",
-    name: "总结提炼",
+    name: "总结",
     nameEn: "Summarize",
-    content: "请总结以下内容，提炼关键结论、重要细节和可执行事项。输出结构：\n\n### 关键结论\n- \n\n### 重要细节\n- \n\n### 后续行动\n- \n\n内容：\n",
-    contentEn: "Summarize the following content, extracting key conclusions, important details, and actionable next steps. Use this structure:\n\n### Key Conclusions\n- \n\n### Important Details\n- \n\n### Next Actions\n- \n\nContent:\n"
+    hint: "粘贴需要总结的内容",
+    hintEn: "Paste the content to summarize",
+    content: "提炼核心观点和关键事实，保留重要数字、限制条件与分歧。仅在原文包含行动事项时整理后续行动，不补充未经证实的信息。按内容长度选择简洁的段落或列表。 优先遵循用户要求的输出语言；未指定时使用输入内容的主要语言。",
+    contentEn: "Extract the main ideas and key facts, preserving important numbers, constraints, and disagreements. Include next actions only when supported by the source. Do not invent information. Use concise paragraphs or lists suited to the content. Follow the user’s requested output language; otherwise use the main language of the input."
   },
   {
     id: "translate-polish",
@@ -84,162 +86,200 @@ const BUILT_IN_PROMPT_TEMPLATES = [
   {
     id: "code-review",
     name: "代码审查",
-    nameEn: "Code Review",
-    content: "请以资深工程师视角审查以下代码，优先指出 bug、边界条件、可维护性和测试缺口。输出结构：\n\n### 高优先级问题\n- \n\n### 中低优先级建议\n- \n\n### 测试建议\n- \n\n代码：\n```语言\n\n```",
-    contentEn: "Review the following code from a senior engineer's perspective. Prioritize bugs, edge cases, maintainability, and test gaps. Use this structure:\n\n### High Priority Issues\n- \n\n### Medium/Low Priority Suggestions\n- \n\n### Test Suggestions\n- \n\nCode:\n```language\n\n```"
+    nameEn: "Code review",
+    hint: "粘贴代码，可补充用途和关注点",
+    hintEn: "Paste code and any context or concerns",
+    content: "审查代码中的实际缺陷，优先检查正确性、安全性和边界条件。按严重程度说明问题、触发条件、影响和最小修复建议，并建议针对性测试。区分已确认的问题与待验证的风险；没有发现明确问题时如实说明。 优先遵循用户要求的输出语言；未指定时使用输入内容的主要语言。",
+    contentEn: "Review the code for concrete defects, prioritizing correctness, security, and edge cases. Order findings by severity and explain triggers, impact, minimal fixes, and targeted tests. Distinguish confirmed defects from risks requiring verification. Say clearly when no definite issues are found. Follow the user’s requested output language; otherwise use the main language of the input."
   },
   {
     id: "debug",
     name: "问题排查",
-    nameEn: "Troubleshooting",
-    content: "请帮助我排查以下问题。请先列出最可能原因，再给出逐步验证方法和修复建议。\n\n现象：\n\n环境：\n\n已尝试：\n\n报错/日志：\n",
-    contentEn: "Help me troubleshoot the following issue. First list the most likely causes, then provide step-by-step verification methods and fixes.\n\nSymptoms:\n\nEnvironment:\n\nAlready tried:\n\nErrors/logs:\n"
+    nameEn: "Troubleshoot",
+    hint: "描述问题，可补充环境和报错",
+    hintEn: "Describe the issue, environment, and any errors",
+    content: "根据现象、环境和日志，按可能性整理原因。区分已知事实与假设，提供逐步验证方法、预期结果和对应修复建议。先从低风险检查开始；缺少关键信息时只询问最必要的细节。 优先遵循用户要求的输出语言；未指定时使用输入内容的主要语言。",
+    contentEn: "Use the symptoms, environment, and logs to rank likely causes. Separate facts from hypotheses. Give step-by-step checks, expected results, and corresponding fixes, starting with low-risk checks. Ask only for essential missing details. Follow the user’s requested output language; otherwise use the main language of the input."
   },
   {
     id: "writing",
-    name: "写作改稿",
+    name: "润色改写",
     nameEn: "Rewrite",
-    content: "请帮我改写以下内容，使其更清晰、有说服力、语气自然。请给出：\n\n1. 改写版本\n2. 主要改动说明\n3. 可选的更简洁版本\n\n原文：\n",
-    contentEn: "Rewrite the following content to make it clearer, more persuasive, and natural in tone. Provide:\n\n1. Rewritten version\n2. Main changes explained\n3. Optional shorter version\n\nOriginal:\n"
+    hint: "粘贴原文，可说明语气和用途",
+    hintEn: "Paste your text and optionally describe the tone",
+    content: "在保留原意、事实和作者立场的前提下，让表达清晰、自然、简洁。遵循用户指定的语气和用途，不添加没有依据的承诺或信息。先给出可直接使用的改写稿，仅在有帮助时简述主要改动。 优先遵循用户要求的输出语言；未指定时使用输入内容的主要语言。",
+    contentEn: "Make the text clear, natural, and concise while preserving its meaning, facts, and author’s intent. Respect the requested tone and purpose. Do not add unsupported claims or promises. Give a ready-to-use revision first; explain key changes only when useful. Follow the user’s requested output language; otherwise use the main language of the input."
   },
   {
     id: "plan",
-    name: "任务规划",
-    nameEn: "Task Planning",
-    content: "请把以下目标拆解成可执行计划。输出结构：\n\n### 目标理解\n\n### 里程碑\n- \n\n### 具体任务\n- \n\n### 风险与依赖\n- \n\n目标：\n",
-    contentEn: "Break the following goal into an actionable plan. Use this structure:\n\n### Goal Understanding\n\n### Milestones\n- \n\n### Tasks\n- \n\n### Risks and Dependencies\n- \n\nGoal:\n"
+    name: "制定计划",
+    nameEn: "Make a plan",
+    hint: "描述目标，可补充时间和限制",
+    hintEn: "Describe your goal, timeframe, and constraints",
+    content: "将目标拆成可执行步骤，说明优先顺序、依赖关系和完成标准。根据已有信息安排里程碑，标明关键假设、风险和待确认事项。不虚构资源、期限或承诺；信息不足时给出合理的起步方案。 优先遵循用户要求的输出语言；未指定时使用输入内容的主要语言。",
+    contentEn: "Break the goal into actionable steps with priorities, dependencies, and completion criteria. Suggest milestones using the available information and identify assumptions, risks, and open questions. Do not invent resources, deadlines, or commitments. Offer a practical starting plan when details are limited. Follow the user’s requested output language; otherwise use the main language of the input."
   }
 ];
 
 const BUILT_IN_PROMPT_TEMPLATE_LOCALES = {
-  summarize: {
+  "summarize": {
     "zh-TW": {
-      name: "總結提煉",
-      content: "請整理以下內容，提煉重點結論、關鍵細節與可執行的後續事項。請使用以下結構：\n\n### 重點結論\n- \n\n### 關鍵細節\n- \n\n### 後續行動\n- \n\n內容：\n"
+      "name": "摘要整理",
+      "hint": "貼上需要整理的內容",
+      "content": "整理核心觀點與關鍵事實，保留重要數字、限制條件及不同意見。僅在原文包含待辦事項時列出後續行動，不補充未經證實的資訊。依內容長度選用精簡段落或清單。 優先遵循使用者指定的輸出語言；未指定時使用輸入內容的主要語言。"
     },
     "ja-JP": {
-      name: "要約",
-      content: "以下の内容を整理し、重要な結論、押さえるべき詳細、実行に移せる次のアクションを抽出してください。次の構成で出力してください。\n\n### 重要な結論\n- \n\n### 押さえるべき詳細\n- \n\n### 次のアクション\n- \n\n内容：\n"
+      "name": "要約",
+      "hint": "要約したい内容を貼り付けてください",
+      "content": "要点と重要な事実を整理し、数値、制約、意見の相違を残してください。次の行動は原文に根拠がある場合のみ示し、情報を補わないでください。内容に合わせて簡潔な段落や箇条書きを使ってください。 出力言語の指定を優先し、指定がなければ入力内容の主な言語で回答してください。"
     },
     "ko-KR": {
-      name: "요약 정리",
-      content: "다음 내용을 요약하고 핵심 결론, 중요한 세부 사항, 실행 가능한 다음 단계를 추려 주세요. 다음 구조로 출력하세요:\n\n### 핵심 결론\n- \n\n### 중요한 세부 사항\n- \n\n### 다음 행동\n- \n\n내용:\n"
+      "name": "요약",
+      "hint": "요약할 내용을 붙여 넣으세요",
+      "content": "핵심 관점과 주요 사실을 정리하고 중요한 수치, 제약, 의견 차이를 보존해 주세요. 후속 행동은 원문에 근거가 있을 때만 포함하고 정보를 지어내지 마세요. 내용에 맞게 간결한 문단이나 목록을 사용해 주세요. 사용자가 지정한 출력 언어를 따르고, 지정이 없으면 입력 내용의 주된 언어로 답해 주세요."
     },
     "fr-FR": {
-      name: "Résumer",
-      content: "Synthétise le contenu suivant en faisant ressortir les conclusions essentielles, les points importants et les actions concrètes à mener. Utilise cette structure :\n\n### Conclusions essentielles\n- \n\n### Points importants\n- \n\n### Actions à mener\n- \n\nContenu :\n"
+      "name": "Résumer",
+      "hint": "Collez le contenu à résumer",
+      "content": "Dégage les idées principales et les faits clés en conservant les chiffres, contraintes et désaccords importants. N’indique des actions à suivre que si le texte les justifie. N’invente aucune information. Choisis des paragraphes courts ou une liste selon le contenu. Respecte la langue de réponse demandée ; sinon, utilise la langue principale du contenu fourni."
     },
     "es-ES": {
-      name: "Resumir",
-      content: "Sintetiza el siguiente contenido y destaca las conclusiones esenciales, los puntos importantes y las acciones concretas que conviene realizar. Usa esta estructura:\n\n### Conclusiones esenciales\n- \n\n### Puntos importantes\n- \n\n### Acciones siguientes\n- \n\nContenido:\n"
+      "name": "Resumir",
+      "hint": "Pega el contenido que quieras resumir",
+      "content": "Extrae las ideas principales y los hechos clave, conservando cifras, restricciones y desacuerdos importantes. Incluye acciones siguientes solo si el texto las respalda. No inventes información. Usa párrafos breves o listas según el contenido. Respeta el idioma de respuesta solicitado; si no se indica, usa el idioma principal del contenido."
     },
     "de-DE": {
-      name: "Zusammenfassen",
-      content: "Fasse den folgenden Inhalt zusammen und arbeite die wichtigsten Schlussfolgerungen, relevanten Details und konkreten nächsten Schritte heraus. Nutze diese Struktur:\n\n### Wichtigste Schlussfolgerungen\n- \n\n### Relevante Details\n- \n\n### Nächste Schritte\n- \n\nInhalt:\n"
+      "name": "Zusammenfassen",
+      "hint": "Inhalt zum Zusammenfassen einfügen",
+      "content": "Fasse die Kernaussagen und wichtigsten Fakten zusammen. Erhalte wichtige Zahlen, Einschränkungen und abweichende Positionen. Nenne nächste Schritte nur, wenn der Ausgangstext sie begründet. Erfinde keine Informationen. Verwende je nach Inhalt kurze Absätze oder Listen. Beachte die gewünschte Ausgabesprache; verwende sonst die Hauptsprache der Eingabe."
     }
   },
   "code-review": {
     "zh-TW": {
-      name: "程式碼審查",
-      content: "請以資深工程師的角度審查以下程式碼，優先指出 bug、邊界條件、可維護性問題與測試缺口。請使用以下結構：\n\n### 高優先級問題\n- \n\n### 中低優先級建議\n- \n\n### 測試建議\n- \n\n程式碼：\n```language\n\n```"
+      "name": "程式碼審查",
+      "hint": "貼上程式碼，可補充用途與關注重點",
+      "content": "檢查程式碼的實際缺陷，優先關注正確性、安全性及邊界條件。依嚴重程度說明問題、觸發條件、影響與最小修正建議，並提出針對性測試。區分已確認問題與待驗證風險；未發現明確問題時請如實說明。 優先遵循使用者指定的輸出語言；未指定時使用輸入內容的主要語言。"
     },
     "ja-JP": {
-      name: "コードレビュー",
-      content: "シニアエンジニアの視点で以下のコードをレビューしてください。バグ、境界条件、保守性の問題、テスト不足を優先して指摘してください。次の構成で出力してください。\n\n### 優先度の高い問題\n- \n\n### 中〜低優先度の提案\n- \n\n### テストの提案\n- \n\nコード：\n```language\n\n```"
+      "name": "コードレビュー",
+      "hint": "コードと、用途や確認したい点を入力してください",
+      "content": "コードの具体的な不具合を確認し、正確性、安全性、境界条件を優先してください。深刻度順に発生条件、影響、最小限の修正案、必要なテストを示してください。確認済みの問題と検証が必要なリスクを区別し、明確な問題がなければその旨を伝えてください。 出力言語の指定を優先し、指定がなければ入力内容の主な言語で回答してください。"
     },
     "ko-KR": {
-      name: "코드 리뷰",
-      content: "시니어 엔지니어 관점에서 다음 코드를 리뷰해 주세요. 버그, 경계 조건, 유지보수성, 테스트 공백을 우선적으로 지적하세요. 다음 구조로 출력하세요:\n\n### 높은 우선순위 문제\n- \n\n### 중간/낮은 우선순위 제안\n- \n\n### 테스트 제안\n- \n\n코드:\n```language\n\n```"
+      "name": "코드 리뷰",
+      "hint": "코드와 용도, 확인할 사항을 입력하세요",
+      "content": "정확성, 보안, 경계 조건을 우선으로 실제 결함을 검토해 주세요. 심각도 순으로 발생 조건, 영향, 최소 수정안과 필요한 테스트를 설명해 주세요. 확인된 결함과 검증이 필요한 위험을 구분하고, 명확한 문제가 없으면 그대로 알려 주세요. 사용자가 지정한 출력 언어를 따르고, 지정이 없으면 입력 내용의 주된 언어로 답해 주세요."
     },
     "fr-FR": {
-      name: "Revue de code",
-      content: "Relis le code suivant avec le regard d’un ingénieur senior. Priorise les bugs, les cas limites, les problèmes de maintenabilité et les manques de tests. Utilise cette structure :\n\n### Problèmes prioritaires\n- \n\n### Suggestions de priorité moyenne ou faible\n- \n\n### Suggestions de tests\n- \n\nCode :\n```language\n\n```"
+      "name": "Revue de code",
+      "hint": "Collez le code et précisez le contexte si utile",
+      "content": "Recherche les défauts concrets du code en privilégiant la correction, la sécurité et les cas limites. Classe les constats par gravité et explique les conditions de déclenchement, les conséquences, les corrections minimales et les tests ciblés. Distingue les défauts confirmés des risques à vérifier. Indique clairement si aucun problème certain n’est trouvé. Respecte la langue de réponse demandée ; sinon, utilise la langue principale du contenu fourni."
     },
     "es-ES": {
-      name: "Revisión de código",
-      content: "Revisa el siguiente código desde la perspectiva de un ingeniero senior. Prioriza bugs, casos límite, mantenibilidad y faltas de pruebas. Usa esta estructura:\n\n### Problemas de alta prioridad\n- \n\n### Sugerencias de prioridad media/baja\n- \n\n### Sugerencias de pruebas\n- \n\nCódigo:\n```language\n\n```"
+      "name": "Revisar código",
+      "hint": "Pega el código y añade contexto si lo necesitas",
+      "content": "Busca defectos concretos en el código, priorizando corrección, seguridad y casos límite. Ordena los hallazgos por gravedad y explica las condiciones que los activan, su impacto, las correcciones mínimas y las pruebas necesarias. Distingue los defectos confirmados de los riesgos pendientes de verificación. Indica si no encuentras problemas claros. Respeta el idioma de respuesta solicitado; si no se indica, usa el idioma principal del contenido."
     },
     "de-DE": {
-      name: "Code Review",
-      content: "Prüfe den folgenden Code aus der Perspektive eines Senior Engineers. Priorisiere Bugs, Randfälle, Wartbarkeitsprobleme und Testlücken. Nutze diese Struktur:\n\n### Probleme mit hoher Priorität\n- \n\n### Vorschläge mit mittlerer oder niedriger Priorität\n- \n\n### Testvorschläge\n- \n\nCode:\n```language\n\n```"
+      "name": "Code prüfen",
+      "hint": "Code und bei Bedarf Kontext einfügen",
+      "content": "Prüfe den Code auf konkrete Fehler, insbesondere Korrektheit, Sicherheit und Randfälle. Ordne die Befunde nach Schwere und erläutere Auslöser, Auswirkungen, minimale Korrekturen und gezielte Tests. Trenne bestätigte Fehler von noch zu prüfenden Risiken. Sage ausdrücklich, wenn keine eindeutigen Probleme erkennbar sind. Beachte die gewünschte Ausgabesprache; verwende sonst die Hauptsprache der Eingabe."
     }
   },
-  debug: {
+  "debug": {
     "zh-TW": {
-      name: "問題排查",
-      content: "請協助我排查以下問題。請先列出最可能的原因，再提供逐步驗證方法與修復建議。\n\n現象：\n\n環境：\n\n已嘗試：\n\n錯誤 / 日誌：\n"
+      "name": "問題排查",
+      "hint": "描述問題，可補充環境與錯誤訊息",
+      "content": "根據現象、環境與紀錄，依可能性整理原因。區分已知事實與假設，提供逐步驗證方式、預期結果及對應修正建議。先從低風險檢查開始；缺少關鍵資訊時僅詢問必要細節。 優先遵循使用者指定的輸出語言；未指定時使用輸入內容的主要語言。"
     },
     "ja-JP": {
-      name: "トラブルシューティング",
-      content: "以下の問題の切り分けを手伝ってください。まず可能性の高い原因を整理し、その後に段階的な確認方法と修正案を提示してください。\n\n現象：\n\n環境：\n\n試したこと：\n\nエラー / ログ：\n"
+      "name": "問題の切り分け",
+      "hint": "症状、環境、エラーを入力してください",
+      "content": "症状、環境、ログから原因を可能性の高い順に整理してください。事実と仮説を区別し、確認手順、期待される結果、対応する修正案を示してください。低リスクの確認から始め、情報が足りない場合は必要な点だけ質問してください。 出力言語の指定を優先し、指定がなければ入力内容の主な言語で回答してください。"
     },
     "ko-KR": {
-      name: "문제 해결",
-      content: "다음 문제를 진단할 수 있도록 도와주세요. 먼저 가장 가능성 높은 원인을 나열하고, 단계별 검증 방법과 수정 제안을 제시해 주세요.\n\n현상:\n\n환경:\n\n이미 시도한 것:\n\n오류 / 로그:\n"
+      "name": "문제 진단",
+      "hint": "증상, 환경, 오류 메시지를 입력하세요",
+      "content": "증상, 환경, 로그를 바탕으로 가능성 높은 원인부터 정리해 주세요. 사실과 가설을 구분하고 단계별 확인 방법, 예상 결과, 해당 수정안을 제시해 주세요. 위험이 낮은 확인부터 시작하고, 정보가 부족하면 꼭 필요한 내용만 질문해 주세요. 사용자가 지정한 출력 언어를 따르고, 지정이 없으면 입력 내용의 주된 언어로 답해 주세요."
     },
     "fr-FR": {
-      name: "Dépannage",
-      content: "Aide-moi à diagnostiquer le problème suivant. Commence par lister les causes les plus probables, puis propose une méthode de vérification étape par étape et des pistes de correction.\n\nSymptômes :\n\nEnvironnement :\n\nDéjà essayé :\n\nErreurs / journaux :\n"
+      "name": "Diagnostiquer",
+      "hint": "Décrivez le problème, le contexte et les erreurs",
+      "content": "Classe les causes probables à partir des symptômes, de l’environnement et des journaux. Distingue les faits des hypothèses. Propose des vérifications progressives, leurs résultats attendus et les corrections associées, en commençant par les vérifications peu risquées. Ne demande que les précisions indispensables. Respecte la langue de réponse demandée ; sinon, utilise la langue principale du contenu fourni."
     },
     "es-ES": {
-      name: "Diagnóstico",
-      content: "Ayúdame a diagnosticar el siguiente problema. Primero enumera las causas más probables y luego ofrece métodos de verificación paso a paso y propuestas de solución.\n\nSíntomas:\n\nEntorno:\n\nYa intentado:\n\nErrores / logs:\n"
+      "name": "Diagnosticar",
+      "hint": "Describe el problema, el entorno y los errores",
+      "content": "Ordena las causas probables según los síntomas, el entorno y los registros. Separa los hechos de las hipótesis. Propón comprobaciones paso a paso, resultados esperados y soluciones asociadas, empezando por las de bajo riesgo. Pregunta solo por los datos imprescindibles que falten. Respeta el idioma de respuesta solicitado; si no se indica, usa el idioma principal del contenido."
     },
     "de-DE": {
-      name: "Fehlersuche",
-      content: "Hilf mir, das folgende Problem zu untersuchen. Liste zuerst die wahrscheinlichsten Ursachen auf und gib danach schrittweise Prüfmethoden und Lösungsvorschläge.\n\nSymptome:\n\nUmgebung:\n\nBereits versucht:\n\nFehler / Logs:\n"
+      "name": "Fehler eingrenzen",
+      "hint": "Problem, Umgebung und Fehlermeldungen beschreiben",
+      "content": "Ordne mögliche Ursachen anhand der Symptome, Umgebung und Protokolle nach Wahrscheinlichkeit. Trenne Fakten von Annahmen. Nenne schrittweise Prüfungen, erwartete Ergebnisse und passende Lösungen. Beginne mit risikoarmen Prüfungen und frage nur nach unbedingt nötigen fehlenden Angaben. Beachte die gewünschte Ausgabesprache; verwende sonst die Hauptsprache der Eingabe."
     }
   },
-  writing: {
+  "writing": {
     "zh-TW": {
-      name: "寫作改稿",
-      content: "請幫我改寫以下內容，讓表達更清晰、更有說服力，語氣也更自然。請提供：\n\n1. 改寫版本\n2. 主要改動說明\n3. 可選的精簡版本\n\n原文：\n"
+      "name": "潤飾改寫",
+      "hint": "貼上原文，可說明語氣與用途",
+      "content": "保留原意、事實與作者立場，讓表達清晰、自然、精簡。遵循使用者指定的語氣與用途，不添加沒有根據的承諾或資訊。先提供可直接使用的改寫稿，有幫助時再簡述主要修改。 優先遵循使用者指定的輸出語言；未指定時使用輸入內容的主要語言。"
     },
     "ja-JP": {
-      name: "文章の推敲",
-      content: "以下の文章を、より明確で説得力があり、自然な語調になるように書き直してください。次を出力してください：\n\n1. 書き直し版\n2. 主な変更点の説明\n3. 任意のより短い版\n\n原文：\n"
+      "name": "文章を整える",
+      "hint": "原文と、希望する文体や用途を入力してください",
+      "content": "原意、事実、書き手の意図を保ちながら、明確で自然な簡潔な文章に整えてください。指定された文体や用途に合わせ、根拠のない情報や約束を加えないでください。まずそのまま使える修正版を示し、必要に応じて変更点を簡潔に説明してください。 出力言語の指定を優先し、指定がなければ入力内容の主な言語で回答してください。"
     },
     "ko-KR": {
-      name: "글 다듬기",
-      content: "다음 내용을 더 명확하고 설득력 있으며 자연스러운 톤으로 고쳐 써 주세요. 다음을 제공해 주세요:\n\n1. 수정본\n2. 주요 수정 사항 설명\n3. 선택 가능한 더 간결한 버전\n\n원문:\n"
+      "name": "글 다듬기",
+      "hint": "원문과 원하는 어조나 용도를 입력하세요",
+      "content": "원래 의미, 사실, 작성자의 의도를 유지하며 명확하고 자연스럽고 간결하게 다듬어 주세요. 요청한 어조와 용도에 맞추고 근거 없는 주장이나 약속을 추가하지 마세요. 바로 쓸 수 있는 수정본을 먼저 제시하고 필요할 때만 주요 변경점을 설명해 주세요. 사용자가 지정한 출력 언어를 따르고, 지정이 없으면 입력 내용의 주된 언어로 답해 주세요."
     },
     "fr-FR": {
-      name: "Réécriture",
-      content: "Réécris le contenu suivant pour le rendre plus clair, plus convaincant et plus naturel. Fournis :\n\n1. Une version réécrite\n2. Les principaux changements expliqués\n3. Une version plus courte, si utile\n\nTexte original :\n"
+      "name": "Reformuler",
+      "hint": "Collez le texte et précisez le ton souhaité",
+      "content": "Rends le texte clair, naturel et concis en conservant le sens, les faits et l’intention de l’auteur. Respecte le ton et l’usage demandés. N’ajoute ni affirmation ni promesse sans fondement. Fournis d’abord une version prête à l’emploi et explique les changements seulement si c’est utile. Respecte la langue de réponse demandée ; sinon, utilise la langue principale du contenu fourni."
     },
     "es-ES": {
-      name: "Reescritura",
-      content: "Reescribe el siguiente contenido para que resulte más claro, persuasivo y natural. Proporciona:\n\n1. Una versión reescrita\n2. Una explicación de los cambios principales\n3. Una versión más breve, si aporta valor\n\nOriginal:\n"
+      "name": "Reescribir",
+      "hint": "Pega el texto e indica el tono deseado",
+      "content": "Mejora la claridad, naturalidad y concisión del texto conservando el significado, los hechos y la intención del autor. Respeta el tono y el propósito solicitados. No añadas afirmaciones ni promesas sin fundamento. Presenta primero una versión lista para usar y explica los cambios solo si resulta útil. Respeta el idioma de respuesta solicitado; si no se indica, usa el idioma principal del contenido."
     },
     "de-DE": {
-      name: "Text überarbeiten",
-      content: "Überarbeite den folgenden Text, damit er klarer, überzeugender und natürlicher wirkt. Gib Folgendes aus:\n\n1. Überarbeitete Version\n2. Erklärung der wichtigsten Änderungen\n3. Kürzere Fassung, falls sinnvoll\n\nOriginal:\n"
+      "name": "Text überarbeiten",
+      "hint": "Text einfügen und gewünschten Ton angeben",
+      "content": "Formuliere den Text klar, natürlich und knapp. Bewahre Bedeutung, Fakten und Absicht des Verfassers. Beachte den gewünschten Ton und Zweck. Ergänze keine unbelegten Aussagen oder Zusagen. Gib zuerst eine direkt nutzbare Fassung aus und erläutere Änderungen nur, wenn es hilfreich ist. Beachte die gewünschte Ausgabesprache; verwende sonst die Hauptsprache der Eingabe."
     }
   },
-  plan: {
+  "plan": {
     "zh-TW": {
-      name: "任務規劃",
-      content: "請將以下目標拆解成可執行的計畫。請使用以下結構：\n\n### 目標理解\n\n### 里程碑\n- \n\n### 具體任務\n- \n\n### 風險與依賴\n- \n\n目標：\n"
+      "name": "擬定計畫",
+      "hint": "描述目標，可補充時程與限制",
+      "content": "將目標拆解成可執行步驟，說明優先順序、相依關係與完成標準。依現有資訊安排里程碑，標明重要假設、風險及待確認事項。不虛構資源、期限或承諾；資訊不足時提供合理的起步方案。 優先遵循使用者指定的輸出語言；未指定時使用輸入內容的主要語言。"
     },
     "ja-JP": {
-      name: "タスク計画",
-      content: "以下の目標を、実行に移せる計画へ分解してください。次の構成で出力してください。\n\n### 目標の理解\n\n### マイルストーン\n- \n\n### 具体的なタスク\n- \n\n### リスクと依存関係\n- \n\n目標：\n"
+      "name": "計画を立てる",
+      "hint": "目標、期限、制約を入力してください",
+      "content": "目標を実行可能な手順に分け、優先順位、依存関係、完了条件を示してください。既知の情報に基づいて節目を設定し、前提、リスク、確認事項を明記してください。資源や期限、約束を作り出さず、情報が少ない場合は着手できる計画を提案してください。 出力言語の指定を優先し、指定がなければ入力内容の主な言語で回答してください。"
     },
     "ko-KR": {
-      name: "작업 계획",
-      content: "다음 목표를 실행 가능한 계획으로 나누어 주세요. 다음 구조로 출력하세요:\n\n### 목표 이해\n\n### 마일스톤\n- \n\n### 구체적 작업\n- \n\n### 위험 및 의존성\n- \n\n목표:\n"
+      "name": "계획 세우기",
+      "hint": "목표, 일정, 제약을 입력하세요",
+      "content": "목표를 실행 가능한 단계로 나누고 우선순위, 의존 관계, 완료 기준을 제시해 주세요. 주어진 정보로 이정표를 정하고 가정, 위험, 확인할 사항을 밝혀 주세요. 자원, 기한, 약속을 임의로 만들지 말고 정보가 적으면 실행을 시작할 수 있는 계획을 제안해 주세요. 사용자가 지정한 출력 언어를 따르고, 지정이 없으면 입력 내용의 주된 언어로 답해 주세요."
     },
     "fr-FR": {
-      name: "Planification",
-      content: "Décompose l’objectif suivant en un plan d’action concret. Utilise cette structure :\n\n### Compréhension de l’objectif\n\n### Jalons\n- \n\n### Tâches concrètes\n- \n\n### Risques et dépendances\n- \n\nObjectif :\n"
+      "name": "Planifier",
+      "hint": "Décrivez l’objectif, les délais et les contraintes",
+      "content": "Décompose l’objectif en étapes concrètes avec priorités, dépendances et critères de réussite. Propose des jalons à partir des informations disponibles et précise les hypothèses, risques et points à confirmer. N’invente ni ressources, ni échéances, ni engagements. Si les détails manquent, propose un plan de départ réaliste. Respecte la langue de réponse demandée ; sinon, utilise la langue principale du contenu fourni."
     },
     "es-ES": {
-      name: "Planificación",
-      content: "Divide el siguiente objetivo en un plan accionable. Usa esta estructura:\n\n### Comprensión del objetivo\n\n### Hitos\n- \n\n### Tareas concretas\n- \n\n### Riesgos y dependencias\n- \n\nObjetivo:\n"
+      "name": "Crear un plan",
+      "hint": "Describe el objetivo, los plazos y las limitaciones",
+      "content": "Divide el objetivo en pasos concretos con prioridades, dependencias y criterios de finalización. Propón hitos con la información disponible e identifica supuestos, riesgos y dudas pendientes. No inventes recursos, fechas ni compromisos. Si faltan detalles, ofrece un plan inicial viable. Respeta el idioma de respuesta solicitado; si no se indica, usa el idioma principal del contenido."
     },
     "de-DE": {
-      name: "Aufgabenplanung",
-      content: "Zerlege das folgende Ziel in einen umsetzbaren Plan. Nutze diese Struktur:\n\n### Zielverständnis\n\n### Meilensteine\n- \n\n### Konkrete Aufgaben\n- \n\n### Risiken und Abhängigkeiten\n- \n\nZiel:\n"
+      "name": "Plan erstellen",
+      "hint": "Ziel, Zeitrahmen und Einschränkungen beschreiben",
+      "content": "Zerlege das Ziel in umsetzbare Schritte mit Prioritäten, Abhängigkeiten und Abschlusskriterien. Schlage Meilensteine anhand der vorhandenen Informationen vor und benenne Annahmen, Risiken und offene Fragen. Erfinde keine Ressourcen, Fristen oder Zusagen. Biete bei wenigen Angaben einen praktikablen Einstiegsplan. Beachte die gewünschte Ausgabesprache; verwende sonst die Hauptsprache der Eingabe."
     }
   }
 };
@@ -494,10 +534,8 @@ const UI_TEXT = {
     customTemplateOnly: "只能删除自定义 Prompt 模板。",
     confirmDeletePromptTemplate: "删除 Prompt 模板“{name}”？",
     promptTemplateDeleted: "Prompt 模板已删除。",
-    promptReplaceConfirm: "当前输入框已有内容，是否替换为提示词？",
     cancel: "取消",
     replace: "替换",
-    promptTemplateApplied: "提示词预设已应用。",
     settingsSaved: "设置已保存。",
     settingsAutoSaved: "已保存",
     settingsSaveFailed: "保存失败，请重试",
@@ -690,10 +728,8 @@ const UI_TEXT = {
     customTemplateOnly: "Only custom prompt templates can be deleted.",
     confirmDeletePromptTemplate: "Delete prompt template \"{name}\"?",
     promptTemplateDeleted: "Prompt template deleted.",
-    promptReplaceConfirm: "The input box already has content. Replace it with this prompt?",
     cancel: "Cancel",
     replace: "Replace",
-    promptTemplateApplied: "Prompt preset applied.",
     settingsSaved: "Settings saved.",
     settingsAutoSaved: "Saved",
     settingsSaveFailed: "Save failed. Please try again.",
@@ -880,10 +916,8 @@ Object.assign(UI_TEXT, {
     customTemplateOnly: "只能刪除自訂 Prompt 範本。",
     confirmDeletePromptTemplate: "刪除 Prompt 範本「{name}」？",
     promptTemplateDeleted: "Prompt 範本已刪除。",
-    promptReplaceConfirm: "目前輸入框已有內容，是否替換為提示詞？",
     cancel: "取消",
     replace: "替換",
-    promptTemplateApplied: "提示詞預設已套用。",
     settingsSaved: "設定已儲存。",
     settingsAutoSaved: "已儲存",
     settingsSaveFailed: "儲存失敗，請重試",
@@ -1067,10 +1101,8 @@ Object.assign(UI_TEXT, {
     customTemplateOnly: "削除できるのはカスタム Prompt テンプレートだけです。",
     confirmDeletePromptTemplate: "Prompt テンプレート「{name}」を削除しますか？",
     promptTemplateDeleted: "Prompt テンプレートを削除しました。",
-    promptReplaceConfirm: "入力欄にはすでに内容があります。このプロンプトに置き換えますか？",
     cancel: "キャンセル",
     replace: "置き換え",
-    promptTemplateApplied: "プロンプトプリセットを適用しました。",
     settingsSaved: "設定を保存しました。",
     settingsAutoSaved: "保存しました",
     settingsSaveFailed: "保存に失敗しました。もう一度お試しください。",
@@ -1254,10 +1286,8 @@ Object.assign(UI_TEXT, {
     customTemplateOnly: "사용자 지정 Prompt 템플릿만 삭제할 수 있습니다.",
     confirmDeletePromptTemplate: "Prompt 템플릿 “{name}”을 삭제할까요?",
     promptTemplateDeleted: "Prompt 템플릿을 삭제했습니다.",
-    promptReplaceConfirm: "입력창에 이미 내용이 있습니다. 이 프롬프트로 바꿀까요?",
     cancel: "취소",
     replace: "바꾸기",
-    promptTemplateApplied: "프롬프트 프리셋을 적용했습니다.",
     settingsSaved: "설정을 저장했습니다.",
     settingsAutoSaved: "저장됨",
     settingsSaveFailed: "저장에 실패했습니다. 다시 시도하세요.",
@@ -1441,10 +1471,8 @@ Object.assign(UI_TEXT, {
     customTemplateOnly: "Seuls les modèles Prompt personnalisés peuvent être supprimés.",
     confirmDeletePromptTemplate: "Supprimer le modèle Prompt « {name} » ?",
     promptTemplateDeleted: "Modèle Prompt supprimé.",
-    promptReplaceConfirm: "La zone de saisie contient déjà du texte. La remplacer par ce prompt ?",
     cancel: "Annuler",
     replace: "Remplacer",
-    promptTemplateApplied: "Preset de prompt appliqué.",
     settingsSaved: "Paramètres enregistrés.",
     settingsAutoSaved: "Enregistré",
     settingsSaveFailed: "Échec de l’enregistrement. Réessayez.",
@@ -1628,10 +1656,8 @@ Object.assign(UI_TEXT, {
     customTemplateOnly: "Solo se pueden eliminar plantillas Prompt personalizadas.",
     confirmDeletePromptTemplate: "¿Eliminar la plantilla Prompt “{name}”?",
     promptTemplateDeleted: "Plantilla Prompt eliminada.",
-    promptReplaceConfirm: "El cuadro de entrada ya tiene contenido. ¿Reemplazarlo por este prompt?",
     cancel: "Cancelar",
     replace: "Reemplazar",
-    promptTemplateApplied: "Preset de prompt aplicado.",
     settingsSaved: "Ajustes guardados.",
     settingsAutoSaved: "Guardado",
     settingsSaveFailed: "No se pudo guardar. Inténtalo de nuevo.",
@@ -1815,10 +1841,8 @@ Object.assign(UI_TEXT, {
     customTemplateOnly: "Nur benutzerdefinierte Prompt-Vorlagen können gelöscht werden.",
     confirmDeletePromptTemplate: "Prompt-Vorlage „{name}“ löschen?",
     promptTemplateDeleted: "Prompt-Vorlage gelöscht.",
-    promptReplaceConfirm: "Im Eingabefeld steht bereits Inhalt. Durch diesen Prompt ersetzen?",
     cancel: "Abbrechen",
     replace: "Ersetzen",
-    promptTemplateApplied: "Prompt-Preset angewendet.",
     settingsSaved: "Einstellungen gespeichert.",
     settingsAutoSaved: "Gespeichert",
     settingsSaveFailed: "Speichern fehlgeschlagen. Bitte erneut versuchen.",
@@ -1920,6 +1944,47 @@ Object.assign(UI_TEXT["de-DE"], {
   translationStyleProfessional: "Professionell"
 });
 
+Object.assign(UI_TEXT["zh-CN"], {
+  "viewPresetInstructions": "查看提示词",
+  "removePreset": "取消预设",
+  "presetInputHint": "输入需要处理的内容"
+});
+Object.assign(UI_TEXT["zh-TW"], {
+  "viewPresetInstructions": "查看提示詞",
+  "removePreset": "取消預設",
+  "presetInputHint": "輸入需要處理的內容"
+});
+Object.assign(UI_TEXT["en-US"], {
+  "viewPresetInstructions": "View instructions",
+  "removePreset": "Remove preset",
+  "presetInputHint": "Enter the content to work on"
+});
+Object.assign(UI_TEXT["ja-JP"], {
+  "viewPresetInstructions": "指示を表示",
+  "removePreset": "プリセットを解除",
+  "presetInputHint": "処理したい内容を入力してください"
+});
+Object.assign(UI_TEXT["ko-KR"], {
+  "viewPresetInstructions": "지침 보기",
+  "removePreset": "프리셋 해제",
+  "presetInputHint": "처리할 내용을 입력하세요"
+});
+Object.assign(UI_TEXT["fr-FR"], {
+  "viewPresetInstructions": "Voir les consignes",
+  "removePreset": "Retirer le préréglage",
+  "presetInputHint": "Saisissez le contenu à traiter"
+});
+Object.assign(UI_TEXT["es-ES"], {
+  "viewPresetInstructions": "Ver instrucciones",
+  "removePreset": "Quitar preajuste",
+  "presetInputHint": "Introduce el contenido que quieras trabajar"
+});
+Object.assign(UI_TEXT["de-DE"], {
+  "viewPresetInstructions": "Anweisungen ansehen",
+  "removePreset": "Vorlage entfernen",
+  "presetInputHint": "Inhalt zur Bearbeitung eingeben"
+});
+
 const state = {
   settings: { ...DEFAULT_SETTINGS },
   conversations: [],
@@ -1949,6 +2014,7 @@ const els = {
   sidebar: document.querySelector(".sidebar"),
   panelSidebarBackdrop: document.querySelector("#panelSidebarBackdrop"),
   workspaceSurfaceToggle: document.querySelector("#workspaceSurfaceToggle"),
+  sidebarPromptPresets: document.querySelector("#sidebarPromptPresets"),
   chatTitle: document.querySelector("#chatTitle"),
   toolbarModelSelect: document.querySelector("#toolbarModelSelect"),
   healthStatus: document.querySelector("#healthStatus"),
@@ -2009,6 +2075,12 @@ const els = {
   scrollToBottom: document.querySelector("#scrollToBottom"),
   composerModeToggle: document.querySelector("#composerModeToggle"),
   promptTemplateSelect: document.querySelector("#promptTemplateSelect"),
+  presetContext: document.querySelector("#presetContext"),
+  presetDetails: document.querySelector("#presetDetails"),
+  presetName: document.querySelector("#presetName"),
+  presetViewLabel: document.querySelector("#presetViewLabel"),
+  presetInstructions: document.querySelector("#presetInstructions"),
+  removePreset: document.querySelector("#removePreset"),
   translationTargetSelect: document.querySelector("#translationTargetSelect"),
   promptTemplateManageSelect: document.querySelector("#promptTemplateManageSelect"),
   promptTemplateNameInput: document.querySelector("#promptTemplateNameInput"),
@@ -2105,6 +2177,10 @@ function syncSidebarActionTooltips() {
     [els.conversationSearchToggle, t("searchConversations")],
     [els.settingsToggle, t("settingsTitle")]
   ];
+
+  for (const button of els.sidebarPromptPresets.querySelectorAll("button")) {
+    actions.push([button, button.getAttribute("aria-label")]);
+  }
 
   for (const [button, label] of actions) {
     if (state.sidebarCollapsed) {
@@ -2461,7 +2537,7 @@ function defaultModelConfigForPreset(presetKey, useStateFallback = true) {
 
   return {
     ...base,
-    provider: state.settings.provider || "custom",
+    provider: useStateFallback ? state.settings.provider || "custom" : "custom",
     baseUrl: useStateFallback ? state.settings.customEndpoint || DEFAULT_SETTINGS.customEndpoint : DEFAULT_SETTINGS.customEndpoint,
     endpoint: useStateFallback ? state.settings.customEndpoint || DEFAULT_SETTINGS.customEndpoint : DEFAULT_SETTINGS.customEndpoint,
     modelName: useStateFallback ? state.settings.customModel || DEFAULT_SETTINGS.customModel : DEFAULT_SETTINGS.customModel,
@@ -2478,9 +2554,15 @@ function defaultModelConfigForPreset(presetKey, useStateFallback = true) {
 
 function getModelConfigForPreset(presetKey) {
   const configs = ensureModelConfigs();
+  const defaults = defaultModelConfigForPreset(presetKey, presetKey === (state.settings.preset || "custom"));
+  const saved = configs[presetKey] || {};
   return {
-    ...defaultModelConfigForPreset(presetKey),
-    ...(configs[presetKey] || {})
+    ...defaults,
+    ...saved,
+    baseUrl: saved.baseUrl || saved.endpoint || defaults.baseUrl,
+    endpoint: saved.endpoint || saved.baseUrl || defaults.endpoint,
+    modelName: saved.modelName || saved.model || defaults.modelName,
+    model: saved.model || saved.modelName || defaults.model
   };
 }
 
@@ -2622,7 +2704,7 @@ function applyLanguage() {
   syncThinkingToggle();
   setButtonContent(els.sendButton, t("send"), "send");
   setButtonContent(els.stopButton, t("stop"), "square");
-  els.promptInput.placeholder = t("promptPlaceholder");
+  syncPromptPreset();
   els.promptTemplateSelect?.setAttribute("aria-label", t("promptPresetAria"));
   els.translationTargetSelect?.setAttribute("aria-label", t("targetLanguageAria"));
   els.toolbarModelSelect?.setAttribute("aria-label", t("currentModelAria"));
@@ -2965,6 +3047,37 @@ function syncComposerMode() {
   els.promptTemplateSelect?.classList.toggle("hidden", mode !== "chat");
   els.translationTargetSelect?.classList.toggle("hidden", mode !== "translate");
   closeCustomSelects();
+  syncPromptPreset();
+}
+
+function syncPromptPreset() {
+  const template = state.composerMode === "translate" ? null : getPromptTemplate(els.promptTemplateSelect.value);
+  els.presetContext.classList.toggle("hidden", !template);
+  els.promptInput.placeholder = template
+    ? BUILT_IN_PROMPT_TEMPLATE_LOCALES[template.id]?.[uiLanguage()]?.hint
+      || (uiLanguage() === "en-US" ? template.hintEn : template.hint)
+      || t("presetInputHint")
+    : t("promptPlaceholder");
+  els.presetName.textContent = template ? localizedTemplateName(template) : "";
+  els.presetViewLabel.textContent = t("viewPresetInstructions");
+  els.presetInstructions.textContent = template
+    ? resolvePromptTemplateVariables(localizedTemplateContent(template)) : "";
+  setIconButtonContent(els.removePreset, t("removePreset"), "x");
+  updateComposerSafeSpace();
+}
+
+function selectedPromptPresetSnapshot() {
+  if (state.composerMode === "translate") return null;
+  const template = getPromptTemplate(els.promptTemplateSelect.value);
+  return template ? {
+    id: template.id,
+    name: localizedTemplateName(template),
+    content: resolvePromptTemplateVariables(localizedTemplateContent(template))
+  } : null;
+}
+
+function composePresetPrompt(content, preset) {
+  return preset ? `${preset.content}\n\n${content}` : content;
 }
 
 function syncThinkingToggle() {
@@ -3137,6 +3250,7 @@ function appendCustomSelectItems(select, menu, node) {
 }
 
 function renderPromptTemplates() {
+  renderSidebarPromptPresets();
   const currentValue = els.promptTemplateSelect.value;
   const currentManageValue = els.promptTemplateManageSelect.value;
   const currentDefaultValue = els.defaultPresetInput?.value || "";
@@ -3176,6 +3290,7 @@ function renderPromptTemplates() {
   if (!els.promptTemplateSelect.value) {
     els.promptTemplateSelect.value = "";
   }
+  syncPromptPreset();
   els.promptTemplateManageSelect.value = currentManageValue;
   if (!els.promptTemplateManageSelect.value) {
     els.promptTemplateManageSelect.value = "";
@@ -3186,6 +3301,28 @@ function renderPromptTemplates() {
       els.defaultPresetInput.value = "";
     }
   }
+}
+
+function renderSidebarPromptPresets() {
+  els.sidebarPromptPresets.replaceChildren();
+  for (const template of [...VISIBLE_BUILT_IN_PROMPT_TEMPLATES, ...state.promptTemplates]) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "sidebar-text-button sidebar-prompt-button";
+    const label = localizedTemplateName(template);
+    button.setAttribute("aria-label", label);
+    const icon = document.createElement("span");
+    icon.className = "icon-slot";
+    icon.setAttribute("aria-hidden", "true");
+    icon.append(createIcon(iconForSelectOption(els.promptTemplateSelect, { value: template.id })));
+    const text = document.createElement("span");
+    text.className = "menu-label";
+    text.textContent = label;
+    button.append(icon, text);
+    button.addEventListener("click", () => applyPromptPreset(template.id, { fromSidebar: true }));
+    els.sidebarPromptPresets.append(button);
+  }
+  syncSidebarActionTooltips();
 }
 
 function appendPromptTemplateGroup(label, templates, select = els.promptTemplateSelect) {
@@ -3683,6 +3820,12 @@ function renderMessages() {
     const meta = createMessageMeta(message);
     const reasoning = createMessageReasoning(message);
     if (reasoning) item.append(reasoning);
+    if (message.role === "user" && message.promptPreset) {
+      const presetLabel = document.createElement("div");
+      presetLabel.className = "message-preset-label";
+      presetLabel.textContent = message.promptPreset.name;
+      item.append(presetLabel);
+    }
     item.append(content);
     if (meta) {
       item.append(meta);
@@ -4059,8 +4202,8 @@ function appendInlineMarkdown(parent, text) {
 function applyPreset(presetKey) {
   saveCurrentModelConfig();
   const preset = MODEL_PRESETS[presetKey];
-  state.settings.preset = presetKey;
   const config = getModelConfigForPreset(presetKey);
+  state.settings.preset = presetKey;
   applyModelConfigToSettings(config);
   applyDefaultPromptSelection(config);
 
@@ -4077,6 +4220,7 @@ function applyDefaultPromptSelection(config) {
   const presetId = config.defaultPresetId || "";
   if (presetId && getPromptTemplate(presetId)) {
     els.promptTemplateSelect.value = presetId;
+    syncPromptPreset();
   }
 }
 
@@ -4159,15 +4303,20 @@ function renderToolbarModelOptions(config = getActiveConfig()) {
   const currentValue = toolbarModelValueFor(config);
   const presetGroup = document.createElement("optgroup");
   presetGroup.label = t("modelPreset");
-  const customConfig = getModelConfigForPreset("custom");
-  const customModel = customConfig.model || state.settings.customModel || "";
-  const customOption = document.createElement("option");
-  customOption.value = "preset:custom";
-  customOption.textContent = customModel
-    ? `${t("presetCustom")} · ${customModel}`
-    : t("presetCustom");
-  customOption.selected = customOption.value === currentValue;
-  presetGroup.append(customOption);
+  const customConfig = ensureModelConfigs().custom;
+  const activeCustom = state.settings.preset === "custom";
+  const customModel = activeCustom ? currentModel : customConfig?.modelName || customConfig?.model || "";
+  const hasCustomConfig = customConfig && customConfig.apiFormat !== "ollama"
+    && (customConfig.baseUrl || customConfig.endpoint) && customModel;
+  if (activeCustom || hasCustomConfig) {
+    const customOption = document.createElement("option");
+    customOption.value = "preset:custom";
+    customOption.textContent = customModel
+      ? `${t("presetCustom")} · ${customModel}`
+      : t("presetCustom");
+    customOption.selected = customOption.value === currentValue;
+    presetGroup.append(customOption);
+  }
 
   if (!currentValue && currentModel) {
     const option = document.createElement("option");
@@ -4182,7 +4331,9 @@ function renderToolbarModelOptions(config = getActiveConfig()) {
     }
     const option = document.createElement("option");
     option.value = `preset:${key}`;
-    option.textContent = `${presetLabel(key)} · ${preset.model}`;
+    const presetConfig = key === state.settings.preset ? config : getModelConfigForPreset(key);
+    const model = presetConfig.modelName || presetConfig.model || preset.model;
+    option.textContent = `${presetLabel(key)} · ${model}`;
     option.selected = option.value === currentValue;
     presetGroup.append(option);
   }
@@ -4220,8 +4371,7 @@ function toolbarModelValueFor(config) {
     return "preset:custom";
   }
 
-  const preset = MODEL_PRESETS[state.settings.preset];
-  if (preset && preset.model === config.model && preset.apiFormat === config.apiFormat) {
+  if (MODEL_PRESETS[state.settings.preset]) {
     return `preset:${state.settings.preset}`;
   }
 
@@ -4378,7 +4528,10 @@ async function submitPrompt(conversation, prompt, options = {}) {
 
   els.promptInput.value = "";
   resizePromptInput();
-  conversation.messages.push({ role: "user", content: prompt });
+  conversation.messages.push({
+    role: "user", content: prompt,
+    ...(options.promptPreset ? { promptPreset: options.promptPreset } : {})
+  });
   if (conversation === state.draftConversation) {
     conversation.mode = state.composerMode;
     state.conversations.unshift(conversation);
@@ -4597,7 +4750,9 @@ function serializeContextMessages(messages, limit) {
   return messages
     .filter((message) => message.role === "user" || message.role === "assistant")
     .slice(-limit)
-    .map(({ role, content }) => ({ role, content }));
+    .map(({ role, content, promptPreset }) => ({
+      role, content: role === "user" ? composePresetPrompt(content, promptPreset) : content
+    }));
 }
 
 function pushSystemMessage(content) {
@@ -4641,78 +4796,6 @@ els.toast?.addEventListener("animationend", () => {
   }
 });
 
-function confirmPromptReplacement() {
-  return new Promise((resolve) => {
-    const overlay = document.createElement("div");
-    overlay.className = "prompt-confirm-overlay";
-    overlay.setAttribute("role", "presentation");
-
-    const dialog = document.createElement("div");
-    dialog.className = "prompt-confirm-dialog";
-    dialog.setAttribute("role", "dialog");
-    dialog.setAttribute("aria-modal", "true");
-
-    const message = document.createElement("p");
-    message.textContent = t("promptReplaceConfirm");
-
-    const actions = document.createElement("div");
-    actions.className = "prompt-confirm-actions";
-
-    const cancel = document.createElement("button");
-    cancel.type = "button";
-    cancel.className = "secondary";
-    cancel.textContent = t("cancel");
-
-    const replace = document.createElement("button");
-    replace.type = "button";
-    replace.textContent = t("replace");
-
-    let settled = false;
-    const finish = (value) => {
-      if (settled) return;
-      settled = true;
-      document.removeEventListener("keydown", onKeyDown);
-      overlay.remove();
-      resolve(value);
-    };
-
-    const onKeyDown = (event) => {
-      if (event.key === "Escape") {
-        finish(false);
-      }
-    };
-
-    cancel.addEventListener("click", () => finish(false));
-    replace.addEventListener("click", () => finish(true));
-    overlay.addEventListener("click", (event) => {
-      if (event.target === overlay) {
-        finish(false);
-      }
-    });
-    document.addEventListener("keydown", onKeyDown);
-
-    actions.append(cancel, replace);
-    dialog.append(message, actions);
-    overlay.append(dialog);
-    document.body.append(overlay);
-    cancel.focus();
-  });
-}
-
-function focusPromptPlaceholder() {
-  const input = els.promptInput;
-  const value = input.value || "";
-  const match = /\{[^{}]+\}/.exec(value);
-  input.focus();
-
-  if (match) {
-    input.setSelectionRange(match.index, match.index + match[0].length);
-    return;
-  }
-
-  input.setSelectionRange(value.length, value.length);
-}
-
 function keepPromptCaretVisible() {
   const input = els.promptInput;
   if (!input) return;
@@ -4751,19 +4834,12 @@ function resizePromptInput({ keepCaretVisible = false } = {}) {
   }
 }
 
-function applyPromptTemplateToInput(content) {
-  els.promptInput.value = content;
-  resizePromptInput({ keepCaretVisible: true });
-  requestAnimationFrame(() => {
-    focusPromptPlaceholder();
-    resizePromptInput({ keepCaretVisible: true });
-  });
-}
-
 function clearComposerInput({ focus = false } = {}) {
   els.promptInput.value = "";
   resizePromptInput();
   els.promptTemplateSelect.value = "";
+  els.presetDetails.open = false;
+  syncPromptPreset();
   syncCustomSelects();
 
   if (focus) {
@@ -5166,25 +5242,23 @@ els.colorSchemeInput.addEventListener("change", () => {
   );
 });
 
-els.promptTemplateSelect.addEventListener("change", async () => {
-  const template = getPromptTemplate(els.promptTemplateSelect.value);
-  if (!template) {
-    return;
-  }
+function applyPromptPreset(id, { fromSidebar = false } = {}) {
+  if (id && !getPromptTemplate(id)) return;
+  if (fromSidebar && !requestCloseSettingsPage()) return;
+  if (fromSidebar) collapsePanelSidebar();
+  els.promptTemplateSelect.value = id;
+  els.presetDetails.open = false;
+  setComposerMode("chat");
+  syncCustomSelects();
+  resizePromptInput({ keepCaretVisible: true });
+}
 
-  const content = resolvePromptTemplateVariables(localizedTemplateContent(template));
-  if (els.promptInput.value.trim()) {
-    const shouldReplace = await confirmPromptReplacement();
-    if (!shouldReplace) {
-      els.promptTemplateSelect.value = "";
-      syncCustomSelects();
-      return;
-    }
-  }
-
-  applyPromptTemplateToInput(content);
-  pushSystemMessage(t("promptTemplateApplied"));
+els.promptTemplateSelect.addEventListener("change", () => {
+  applyPromptPreset(els.promptTemplateSelect.value);
 });
+
+els.removePreset.addEventListener("click", () => applyPromptPreset(""));
+els.presetDetails.addEventListener("toggle", updateComposerSafeSpace);
 
 els.translationTargetSelect?.addEventListener("change", async () => {
   state.settings.translationLanguage = normalizeLanguage(els.translationTargetSelect.value, DEFAULT_SETTINGS.translationLanguage);
@@ -5615,10 +5689,11 @@ els.chatForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const prompt = els.promptInput.value.trim();
   if (!prompt || state.sending) return;
+  const promptPreset = selectedPromptPresetSnapshot();
   const requestPrompt = state.composerMode === "translate"
     ? buildTranslationRequestPrompt(prompt)
-    : prompt;
-  await withConversationEdit((conversation) => submitPrompt(conversation, prompt, { requestPrompt }));
+    : composePresetPrompt(prompt, promptPreset);
+  await withConversationEdit((conversation) => submitPrompt(conversation, prompt, { requestPrompt, promptPreset }));
 });
 
 els.composerModeToggle?.addEventListener("click", toggleComposerMode);

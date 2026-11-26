@@ -28,6 +28,7 @@
             <span class="icon-slot" data-icon="languages" aria-hidden="true"></span>
             <span class="menu-label">翻译</span>
           </button>
+          <div id="sidebarPromptPresets" class="sidebar-prompt-presets"></div>
           <button id="conversationSearchToggle" type="button" class="sidebar-text-button conversation-search-button" aria-expanded="false" aria-controls="conversationSearchPanel">
             <span class="icon-slot" data-icon="search" aria-hidden="true"></span>
             <span class="menu-label">搜索对话</span>
@@ -282,6 +283,13 @@
 
         <form id="chatForm" class="composer">
           <div class="composer-box">
+            <div id="presetContext" class="preset-context hidden">
+              <details id="presetDetails">
+                <summary aria-controls="presetInstructions"><span class="icon-slot" data-icon="chevronRight" aria-hidden="true"></span><span id="presetName"></span><span id="presetViewLabel"></span></summary>
+              </details>
+              <button id="removePreset" class="icon-button" type="button" aria-label="取消预设"></button>
+              <p id="presetInstructions"></p>
+            </div>
             <button id="scrollToBottom" class="scroll-to-bottom hidden" type="button" aria-label="回到最新消息">
               <span class="icon-slot" data-icon="chevronDown" aria-hidden="true"></span>
             </button>
