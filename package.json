@@ -1,6 +1,6 @@
 {
   "name": "lemon-cha",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "private": true,
   "description": "Lightweight browser AI chat workspace with custom LLM APIs, local Ollama, translation, and chat history.",
   "scripts": {

@@ -1,6 +1,12 @@
 # Release Checklist
 
-## Chrome Web Store status
+## Version 0.2.7 — November 26, 2026
+
+- Release notes: [0.2.7.md](0.2.7.md).
+- No changes to permissions, host permissions, data destinations, or remote-code behavior.
+- Chrome submission is pending account reauthentication and upload.
+
+## Previous Chrome Web Store status
 
 - Version 0.2.5 was submitted for review on November 19, 2026.
 - The submission includes the v2 store icon, small promotional image, and marquee image, plus the `sidePanel` and `unlimitedStorage` permission justifications.
@@ -11,9 +17,9 @@
 - [x] `npm run typecheck`
 - [x] `npm test`
 - [x] `npm run build:chrome`
-- [ ] Load `dist/lemon-cha` in `chrome://extensions/`
-- [x] Package `dist/lemon-cha-extension-0.2.6.zip`
-- [x] Run `unzip -t dist/lemon-cha-extension-0.2.6.zip`
+- [x] Load the unpacked extension in an isolated Chrome profile and verify preset and model configuration flows.
+- [x] Package `dist/lemon-cha-extension-0.2.7.zip`
+- [x] Run `unzip -t dist/lemon-cha-extension-0.2.7.zip`
 
 ## Functional smoke test
 
@@ -25,7 +31,8 @@
 - [ ] Test granting, denying and revoking access to a custom API host in Chrome.
 - [ ] Configure and test a local Ollama model if available.
 - [ ] Send a prompt and verify streaming output.
-- [ ] Apply a prompt preset and verify wildcard selection behavior.
+- [x] Verify preset selection, switching, cancellation, instruction preview, multilingual hints, and stable composer height.
+- [x] Verify independent service/custom model configuration and model-list deduplication.
 - [ ] Create, rename, move, and delete a conversation.
 - [ ] Export a conversation to Markdown.
 
@@ -50,5 +57,5 @@
 
 ```bash
 npm run build:chrome
-(cd dist/lemon-cha && zip -r -X ../lemon-cha-extension-0.2.6.zip .)
+(cd dist/lemon-cha && zip -r -X ../lemon-cha-extension-0.2.7.zip .)
 ```

@@ -59,7 +59,7 @@ Choose the custom API workflow and configure:
 
 If the API format is OpenAI-compatible and the endpoint only contains the domain or `/v1`, lemon cha completes it to `/v1/chat/completions`. Provider-specific paths can still be entered manually.
 
-Built-in provider presets include DeepSeek, OpenAI, Qwen DashScope, Kimi, SiliconFlow, OpenRouter, Groq, and local Ollama.
+Built-in provider presets include DeepSeek, OpenAI, Qwen DashScope, Kimi, SiliconFlow, OpenRouter, Groq, and local Ollama. The composer shows each service with its configured model name. Adding an API key or changing that model updates the existing service entry. Independently configured custom endpoints appear as their own entries; settings always retain the Custom entry for adding one.
 
 When you save an endpoint outside the built-in hosts in Chrome, grant access to its site in the Chrome prompt. If you later remove the grant, save the endpoint again to restore access.
 
@@ -103,22 +103,15 @@ The connection checker supports:
 
 ## Prompt presets
 
-The composer includes reusable prompt presets:
-
-- Summarization
-- Translation and polishing
-- Code review
-- Troubleshooting
-- Writing revision
-- Task planning
+The sidebar and composer provide reusable presets for summarization, code review, troubleshooting, rewriting, and planning. Translation remains available through the dedicated translation mode.
 
 Built-in templates are localized for Simplified Chinese, Traditional Chinese, English, Japanese, Korean, French, Spanish, and German.
 
-When a preset is applied:
-
-- If the composer is empty, lemon cha replaces the input and selects the first `{placeholder}`.
-- If the composer already contains text, lemon cha asks before replacing it.
-- Translation presets can resolve the default translation target language selected in Settings.
+- Selecting or switching a preset preserves the text you have entered.
+- A compact preset tag inside the composer shows the selected action. Expand it to view its instructions, or use the adjacent × button to return to ordinary chat without clearing your text.
+- The input shows a short task hint instead of the full instructions. Selecting, switching, and removing presets preserves the composer height.
+- Instructions and user text are combined when sending. Each user message stores the preset name and resolved instructions used for that message, so context and regeneration retain the original preset even if it is later changed or removed.
+- Translation uses the target language selected in Settings or the composer.
 
 ## Ollama setup
 
